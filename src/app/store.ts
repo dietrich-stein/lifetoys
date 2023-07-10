@@ -1,9 +1,13 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import counterReducer from '../features/counter/counterSlice';
+import isEditorEnvironmentReadyReducer from '../features/environment/editor/isEditorEnvironmentReadySlice';
+import isWorldEnvironmentReadyReducer from '../features/environment/world/isWorldEnvironmentReadySlice';
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
+    isEditorEnvironmentReady: isEditorEnvironmentReadyReducer, 
+    isWorldEnvironmentReady: isWorldEnvironmentReadyReducer
   },
 });
 
