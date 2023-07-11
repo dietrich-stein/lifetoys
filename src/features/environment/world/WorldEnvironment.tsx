@@ -1,35 +1,19 @@
-import React, {
-  //useState,
-  useEffect,
-  useRef
-} from 'react';
-import { useAppDispatch } from '../../../app/hooks';
-import {
-  //WorldEnvironmentState,
-  setWorldStatus
-} from './worldEnvironmentSlice';
+import React, { useRef } from 'react';
+import { EnvironmentCanvas } from '../EnvironmentCanvas';
+import { withWorldCanvasEffects } from './withWorldCanvasEffects';
+
+const WorldEnvironmentCanvas = withWorldCanvasEffects(EnvironmentCanvas);
 
 export function WorldEnvironment() {
   const canvasId = 'world-canvas';
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const dispatch = useAppDispatch();
-  /*const [statusState, setStatusState] = useState<WorldEnvironmentState>({
-    status: 'loading',
-    canvasId: null
-  });*/
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      dispatch(setWorldStatus({
-        status: 'idle',
-        canvasId
-      }));
-    }
-  }, /*[]*/);
 
   return (
     <div>
-      <canvas id={canvasId} ref={canvasRef}></canvas>
+      <WorldEnvironmentCanvas
+        canvasId={canvasId}
+        canvasRef={canvasRef}
+      />
     </div>
   );
 }

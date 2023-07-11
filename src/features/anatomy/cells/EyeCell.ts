@@ -4,6 +4,7 @@ import Hyperparams from '../../../Hyperparams';
 import Directions from '../../organism/Directions';
 import Observation from '../../organism/perception/Observation';
 import Organism from '../../organism/Organism';
+import GridMap from '../../grid/GridMap';
 
 class EyeCell extends Cell {
   direction: number;
@@ -30,18 +31,18 @@ class EyeCell extends Cell {
     this.direction = Directions.cardinals.n;
   }
 
-  performFunction() {
+  performFunction(grid_map: GridMap) {
     // @todo: decide if there should be some eye-benefit without a brain
     if (this.org.anatomy.has_brain && this.org.brain !== null) {
-      var obs = this.look();
+      var obs = this.look(grid_map);
       if (obs !== null) {
         this.org.brain.observe(obs);
       }
     }
   }
 
-  look() {
-    var env = this.org.env;
+  look(grid_map: GridMap) {
+    var env = this.org.environment;
     if (env === null) {
       return null;
     }
@@ -86,7 +87,7 @@ class EyeCell extends Cell {
     for (var i = 0; i < Hyperparams.lookRange; i++) {
       col += addCol;
       row += addRow;
-      cell = env.grid_map.cellAt(col, row);
+      cell = grid_map.cellAt(col, row);
       if (cell === null) {
         continue;
         // @todo: if this break before to force the final return then why?

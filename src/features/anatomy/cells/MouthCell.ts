@@ -3,6 +3,7 @@ import Cell from '../Cell';
 import Hyperparams from '../../../Hyperparams';
 import Organism from '../../organism/Organism';
 import GridCell from '../../grid/GridCell';
+import GridMap from '../../grid/GridMap';
 //import { isWorldEnvironment } from '../../Utils/TypeHelpers';
 
 class MouthCell extends Cell {
@@ -23,15 +24,15 @@ class MouthCell extends Cell {
     // initialize to default values
   }
 
-  performFunction() {
-    var env = this.org.env;
+  performFunction(grid_map: GridMap) {
+    var env = this.org.environment;
     /*if (env === null || !isWorldEnvironment(env)) {
       return;
     }*/
     var real_c = this.getRealCol();
     var real_r = this.getRealRow();
     for (var loc of Hyperparams.edibleNeighbors) {
-      var cell = env.grid_map.cellAt(real_c + loc[0], real_r + loc[1]);
+      var cell = grid_map.cellAt(real_c + loc[0], real_r + loc[1]);
       if (cell !== null) {
         this.eatNeighbor(cell, env);
       }

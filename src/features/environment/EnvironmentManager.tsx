@@ -4,6 +4,7 @@
 //editor: ReturnType<typeof EditorEnvironment
 //import React, { useEffect } from 'react'; // useRef
 import React from 'react'; // useRef
+
 type EnvironmentManagerProps = {
   children?: React.ReactNode
   //worldEl?: HTMLElement;

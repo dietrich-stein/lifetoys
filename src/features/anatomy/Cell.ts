@@ -1,7 +1,9 @@
 //import { isEditorEnvironment } from '../Utils/TypeHelpers';
 import GridCell from '../grid/GridCell';
+import GridMap from '../grid/GridMap';
 import Directions from '../organism/Directions';
 import Organism from '../organism/Organism';
+import FossilRecord from '../stats/FossilRecord';
 
 interface CellInterface {
   state: AnatomyCellStatesType;
@@ -11,7 +13,7 @@ interface CellInterface {
   initInherit: (parent: Cell) => void;
   initRandom: () => void;
   initDefault: () => void;
-  performFunction: () => void;
+  performFunction: (grid_map: GridMap, fossil_record: FossilRecord, ticks: number) => void;
   getRealCol: () => void;
   getRealRow: () => void;
   //getRealCell: () => GridCell | null;
@@ -55,7 +57,7 @@ class Cell implements CellInterface {
     // initialize to default values
   }
 
-  performFunction() {
+  performFunction(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
     // default behavior: none
   }
 

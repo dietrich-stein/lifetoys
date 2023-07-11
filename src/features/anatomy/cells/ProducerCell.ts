@@ -2,6 +2,8 @@ import CellStates from '../CellStates';
 import Cell from '../Cell';
 import Hyperparams from '../../../Hyperparams';
 import Organism from '../../organism/Organism';
+import GridMap from '../../grid/GridMap';
+import FossilRecord from '../../stats/FossilRecord';
 //import { isWorldEnvironment } from '../../Utils/TypeHelpers';
 
 class ProducerCell extends Cell {
@@ -23,8 +25,8 @@ class ProducerCell extends Cell {
     // initialize to default values
   }
 
-  performFunction() {
-    var env = this.org.env;
+  performFunction(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
+    var env = this.org.environment;
     /*if (env === null || !isWorldEnvironment(env)) {
       return;
     }*/
@@ -42,9 +44,10 @@ class ProducerCell extends Cell {
         ];
       var loc_c = loc[0];
       var loc_r = loc[1];
-      var cell = env.grid_map.cellAt(real_c + loc_c, real_r + loc_r);
+      var cell = grid_map.cellAt(real_c + loc_c, real_r + loc_r);
       if (cell !== null && cell.state == CellStates.empty) {
-        env.changeWorldCell(real_c + loc_c, real_r + loc_r, CellStates.food, env.grid_map, null);
+        // TODO: dispatch
+        //env.changeWorldCell(real_c + loc_c, real_r + loc_r, CellStates.food, env.grid_map, null);
         return;
       }
     }

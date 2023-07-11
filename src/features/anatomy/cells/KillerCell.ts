@@ -3,6 +3,8 @@ import Cell from '../Cell';
 import Hyperparams from '../../../Hyperparams';
 import GridCell from '../../grid/GridCell';
 import Organism from '../../organism/Organism';
+import GridMap from '../../grid/GridMap';
+import FossilRecord from '../../stats/FossilRecord';
 //import { isWorldEnvironment } from '../../Utils/TypeHelpers';
 
 class KillerCell extends Cell {
@@ -23,35 +25,35 @@ class KillerCell extends Cell {
     // initialize to default values
   }
 
-  performFunction() {
-    var env = this.org.env;
+  performFunction(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
+    var env = this.org.environment;
     /*if (env === null || !isWorldEnvironment(env)) {
       return;
     }*/
     var c = this.getRealCol();
     var r = this.getRealRow();
     for (var loc of Hyperparams.killableNeighbors) {
-      var cell = env.grid_map.cellAt(c + loc[0], r + loc[1]);
+      var cell = grid_map.cellAt(c + loc[0], r + loc[1]);
       if (cell !== null) {
-        this.killNeighbor(cell);
+        this.killNeighbor(grid_map, fossil_record, ticks, cell);
       }
     }
   }
 
-  killNeighbor(n_cell: GridCell) {
+  killNeighbor(grid_map: GridMap, fossil_record: FossilRecord, ticks: number, neighbor_cell: GridCell) {
     if (
-      n_cell == null ||
-      n_cell.owner_org == null ||
-      n_cell.owner_org == this.org ||
-      !n_cell.owner_org.living ||
-      n_cell.state == CellStates.armor
+      neighbor_cell == null ||
+      neighbor_cell.owner_org == null ||
+      neighbor_cell.owner_org == this.org ||
+      !neighbor_cell.owner_org.living ||
+      neighbor_cell.state == CellStates.armor
     ) {
       return;
     }
-    var is_hit = n_cell.state == CellStates.killer; // has to be calculated before death
-    n_cell.owner_org.harm();
+    var is_hit = neighbor_cell.state == CellStates.killer; // has to be calculated before death
+    neighbor_cell.owner_org.harm(grid_map, fossil_record, ticks);
     if (Hyperparams.instaKill && is_hit) {
-      this.org.harm();
+      this.org.harm(grid_map, fossil_record, ticks);
     }
   }
 }

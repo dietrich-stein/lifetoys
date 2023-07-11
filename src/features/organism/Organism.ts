@@ -482,7 +482,7 @@ class Organism implements OrganismInterface {
       this.reproduce(grid_map);
     }
     for (var cell of this.anatomy.cells) {
-      cell.performFunction();
+      cell.performFunction(grid_map, fossil_record, ticks);
       if (!this.living) {
         return this.living;
       }
@@ -497,7 +497,7 @@ class Organism implements OrganismInterface {
         this.ignore_brain_for == 0 &&
         this.brain !== null
       ) {
-        changed_dir = this.brain.decide();
+        changed_dir = this.brain.decide(grid_map);
       } else if (this.ignore_brain_for > 0) {
         this.ignore_brain_for--;
       }

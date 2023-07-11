@@ -4,6 +4,7 @@ import CellStates from '../../anatomy/CellStates';
 import Organism from '../Organism';
 import Observation from './Observation';
 import Decision from './Decision';
+import GridMap from '../../grid/GridMap';
 
 interface DecisionsMapInterface {
   [key: string]: number;
@@ -59,7 +60,7 @@ class BrainController implements BrainControllerInterface {
     this.observations.push(observation);
   }
 
-  decide() {
+  decide(grid_map: GridMap) {
     var decision = Decision.neutral;
     var closest = Hyperparams.lookRange + 1;
     var move_direction = 0;
@@ -75,10 +76,10 @@ class BrainController implements BrainControllerInterface {
     }
     this.observations = [];
     if (decision == Decision.chase) {
-      this.owner_org.changeRotationDirection(move_direction); //this.owner_org.changeMovementDirection(move_direction);
+      this.owner_org.changeRotationDirection(grid_map, move_direction); //this.owner_org.changeMovementDirection(move_direction);
       return true;
     } else if (decision == Decision.retreat) {
-      this.owner_org.changeRotationDirection(Directions.getOppositeDirection(move_direction));
+      this.owner_org.changeRotationDirection(grid_map, Directions.getOppositeDirection(move_direction));
       /*this.owner_org.changeMovementDirection(
         Directions.getOppositeDirection(move_direction),
       );*/
