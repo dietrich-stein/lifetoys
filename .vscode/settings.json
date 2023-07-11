@@ -1,4 +1,5 @@
 {
+  "editor.tabSize": 2,
   "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#1f6fd0",
     "activityBar.background": "#1f6fd0",
@@ -20,6 +21,8 @@
   },
   "peacock.remoteColor": "#1857a4",
   "cSpell.words": [
+    "Hyperparams",
+    "killable",
     "lifetoys",
     "middlewares",
     "reduxjs"
