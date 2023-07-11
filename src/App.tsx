@@ -1,7 +1,7 @@
 import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
+//import logo from './logo.svg';
 import './App.css';
+import { EnvironmentManager } from './features/environment/EnvironmentManager';
 import { EditorEnvironment } from './features/environment/editor/EditorEnvironment';
 import { WorldEnvironment } from './features/environment/world/WorldEnvironment';
 
@@ -9,10 +9,10 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <EditorEnvironment />
-        <WorldEnvironment />
+        <EnvironmentManager>
+          <EditorEnvironment />
+          <WorldEnvironment />
+        </EnvironmentManager>
       </header>
     </div>
   );

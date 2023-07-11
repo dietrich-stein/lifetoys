@@ -1,18 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+  //useState,
+  useEffect,
+  useRef
+} from 'react';
 import { useAppDispatch } from '../../../app/hooks';
-import { EditorEnvironmentState, setStatus } from './isEditorEnvironmentReadySlice';
+import {
+  //EditorEnvironmentState,
+  setEditorStatus
+} from './editorEnvironmentSlice';
 
 export function EditorEnvironment() {
+  const canvasId = 'editor-canvas';
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const dispatch = useAppDispatch();
-  const [statusState, setStatusState] = useState<EditorEnvironmentState>({ status: 'idle' });
-  const statusValue: EditorEnvironmentState = statusState || 'loading';
+  /*const [statusState, setStatusState] = useState<EditorEnvironmentState>({
+    status: 'loading',
+    canvasId: null
+  });*/
 
   useEffect(() => {
-    console.log('WE', statusValue);
-    dispatch(setStatus(statusValue))
-  }, []);
+    if (canvasRef.current) {
+      dispatch(setEditorStatus({
+        status: 'idle',
+        canvasId
+      }));
+    }
+  }, /*[]*/);
 
   return (
-    <div>EditorEnvironment</div>
+    <div>
+      <canvas id={canvasId} ref={canvasRef}></canvas>
+    </div>
   );
 }
