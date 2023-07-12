@@ -100,20 +100,25 @@ export const worldEnvironmentSlice = createSlice({
   initialState,
   reducers: {
     setWorldStatus: (
-      state,
-      action: PayloadAction<WorldEnvironmentState>
+      state, action: PayloadAction<WorldEnvironmentState>
     ) => {
       state.status = action.payload.status;
       state.canvasId = action.payload.canvasId;
-      //console.log('setWorldStatus, state:', state);
     },
+    setWorldColors: (
+      state,
+      action: PayloadAction<WorldEnvironmentState>
+    ) => {
+      //
+    }
   },
 });
 
 export const selectWorldEnvironment = (state: RootState) => state.worldEnvironment;
 
 export const {
-  setWorldStatus
+  setWorldStatus,
+  setWorldColors,
 } = worldEnvironmentSlice.actions;
 
 export default worldEnvironmentSlice.reducer;
