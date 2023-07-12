@@ -1,31 +1,9 @@
 import { RootState } from '../../../app/store';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import Neighbors from '../../grid/Neighbors';
 
 interface WorldEnvironmentColorSchemeInterface {
   [key: string]: string;
 }
-
-type WorldEnvironmentHyperParamsState = {
-  lifespanMultiplier: number;
-  foodProdProb: number;
-  killableNeighbors: number[][];
-  edibleNeighbors: number[][];
-  growableNeighbors: number[][];
-  useGlobalMutability: boolean;
-  globalMutability: number;
-  addProb: number;
-  changeProb: number;
-  removeProb: number;
-  rotationEnabled: boolean;
-  foodBlocksReproduction: boolean;
-  moversCanProduce: boolean;
-  instaKill: boolean;
-  lookRange: number;
-  seeThroughSelf: boolean;
-  foodDropProb: number;
-  extraMoverFoodCost: number;
-};
 
 // Underscores are used for JSON-serializable objects
 export interface WorldEnvironmentConfigState {
@@ -38,7 +16,6 @@ export interface WorldEnvironmentConfigState {
   auto_reset: boolean;
   brush_size: number;
   color_scheme: WorldEnvironmentColorSchemeInterface;
-  hyperparams: WorldEnvironmentHyperParamsState;
 }
 
 export interface WorldEnvironmentState {
@@ -71,26 +48,6 @@ const initialState: WorldEnvironmentState = {
       armor: '#6600CC',
       eye: '#EEEEEE',
       'eye-slit': '#000000',
-    },
-    hyperparams: {
-      lifespanMultiplier: 100,
-      foodProdProb: 5,
-      killableNeighbors: Neighbors.adjacent,
-      edibleNeighbors: Neighbors.adjacent,
-      growableNeighbors: Neighbors.adjacent,
-      useGlobalMutability: false,
-      globalMutability: 5,
-      addProb: 33,
-      changeProb: 33,
-      removeProb: 33,
-      rotationEnabled: true,
-      foodBlocksReproduction: true,
-      moversCanProduce: false,
-      instaKill: false,
-      lookRange: 20,
-      seeThroughSelf: false,
-      foodDropProb: 0,
-      extraMoverFoodCost: 0,
     },
   },
 };

@@ -30,7 +30,7 @@ class MouthCell extends Cell {
     var real_c = this.getRealCol();
     var real_r = this.getRealRow();
 
-    const edibleNeighbors = this.store.worldEnvironment.config.hyperparams.edibleNeighbors;
+    const edibleNeighbors = this.store.engine.hyperparams.edibleNeighbors;
 
     for (var loc of edibleNeighbors) {
       var cell = grid_map.cellAt(real_c + loc[0], real_r + loc[1]);

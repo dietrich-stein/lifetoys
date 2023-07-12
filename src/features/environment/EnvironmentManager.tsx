@@ -1,3 +1,4 @@
+// KEEPING FOR NOW, BUT PROBABLY WILL WANT TO REMOVE THIS WRAPPER ENTIRELY
 //import { EditorEnvironment } from "./editor/EditorEnvironment";
 //import { WorldEnvironment } from "./world/WorldEnvironment";
 //world: ReturnType<typeof WorldEnvironment>,

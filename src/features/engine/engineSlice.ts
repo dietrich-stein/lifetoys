@@ -1,7 +1,30 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
+import Neighbors from '../grid/Neighbors';
+
+type HyperparamsState = {
+  lifespanMultiplier: number;
+  foodProdProb: number;
+  killableNeighbors: number[][];
+  edibleNeighbors: number[][];
+  growableNeighbors: number[][];
+  useGlobalMutability: boolean;
+  globalMutability: number;
+  addProb: number;
+  changeProb: number;
+  removeProb: number;
+  rotationEnabled: boolean;
+  foodBlocksReproduction: boolean;
+  moversCanProduce: boolean;
+  instaKill: boolean;
+  lookRange: number;
+  seeThroughSelf: boolean;
+  foodDropProb: number;
+  extraMoverFoodCost: number;
+};
 
 export interface EngineState {
+  hyperparams: HyperparamsState;
   renderingStartTime: number | null;
   renderingStopTime: number | null;
   simulationStartTime: number | null;
@@ -9,6 +32,26 @@ export interface EngineState {
 }
 
 const initialState: EngineState = {
+  hyperparams: {
+    lifespanMultiplier: 100,
+    foodProdProb: 5,
+    killableNeighbors: Neighbors.adjacent,
+    edibleNeighbors: Neighbors.adjacent,
+    growableNeighbors: Neighbors.adjacent,
+    useGlobalMutability: false,
+    globalMutability: 5,
+    addProb: 33,
+    changeProb: 33,
+    removeProb: 33,
+    rotationEnabled: true,
+    foodBlocksReproduction: true,
+    moversCanProduce: false,
+    instaKill: false,
+    lookRange: 20,
+    seeThroughSelf: false,
+    foodDropProb: 0,
+    extraMoverFoodCost: 0,
+  },
   renderingStartTime: 0,
   renderingStopTime: 0,
   simulationStartTime: 0,
