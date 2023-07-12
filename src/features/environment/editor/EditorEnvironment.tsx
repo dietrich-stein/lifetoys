@@ -11,8 +11,8 @@ export function EditorEnvironment() {
   return (
     <div>
       <EditorEnvironmentCanvas
-        canvasId={canvasId}
-        canvasRef={canvasRef}
+        canvasId={ canvasId }
+        canvasRef={ canvasRef }
       />
     </div>
   );

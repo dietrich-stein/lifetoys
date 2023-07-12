@@ -21,7 +21,7 @@ export const engineSlice = createSlice({
   reducers: {
     startRendering: (
       state,
-      action: PayloadAction<EngineState>
+      action: PayloadAction<EngineState>,
     ) => {
       //console.log('engine.startRendering, payload:', action.payload);
       state.renderingStartTime = action.payload.renderingStartTime;
@@ -29,7 +29,7 @@ export const engineSlice = createSlice({
     },
     stopRendering: (
       state,
-      action: PayloadAction<EngineState>
+      action: PayloadAction<EngineState>,
     ) => {
       //console.log('engine.stopRendering, payload:', action.payload);
       state.renderingStartTime = action.payload.renderingStartTime;
@@ -37,7 +37,7 @@ export const engineSlice = createSlice({
     },
     startSimulation: (
       state,
-      action: PayloadAction<EngineState>
+      action: PayloadAction<EngineState>,
     ) => {
       //console.log('engine.startSimulation, payload:', action.payload);
       state.simulationStartTime = action.payload.simulationStartTime;
@@ -45,7 +45,7 @@ export const engineSlice = createSlice({
     },
     stopSimulation: (
       state,
-      action: PayloadAction<EngineState>
+      action: PayloadAction<EngineState>,
     ) => {
       //console.log('engine.stopSimulation, payload:', action.payload);
       state.simulationStartTime = action.payload.simulationStartTime;

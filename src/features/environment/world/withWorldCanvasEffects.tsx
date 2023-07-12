@@ -1,5 +1,4 @@
 import React, {
-  useState,
   useEffect,
 } from 'react';
 import { selectWorldEnvironment, setWorldStatus } from './worldEnvironmentSlice';
@@ -15,7 +14,7 @@ interface InjectedProps {
 }
 
 export function withWorldCanvasEffects<T extends InjectedProps>(
-  Component: React.ComponentType<T>
+  Component: React.ComponentType<T>,
 ) {
   return (hocProps: T) => {
   //return (hocProps: Omit<T, "count">) => {
@@ -32,11 +31,12 @@ export function withWorldCanvasEffects<T extends InjectedProps>(
       //) {
       const canvasRef = hocProps.canvasRef;// as React.RefObject<HTMLCanvasElement>;
       const canvasId = hocProps.canvasId;// as string | null;
+
       if (canvasRef.current) {
         dispatch(setWorldStatus({
           ...worldEnvironmentState,
           status: 'idle',
-          canvasId
+          canvasId,
         }));
       }
       //}
@@ -44,7 +44,7 @@ export function withWorldCanvasEffects<T extends InjectedProps>(
 
     return (
       <Component
-        {...(hocProps as T)}
+        { ...(hocProps as T) }
         //count={count}
       />
     );

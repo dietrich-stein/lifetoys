@@ -1,5 +1,5 @@
 import { RootState } from '../../../app/store';
-import { CaseReducer, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import Neighbors from '../../grid/Neighbors';
 
 interface WorldEnvironmentColorSchemeInterface {
@@ -91,7 +91,7 @@ const initialState: WorldEnvironmentState = {
       seeThroughSelf: false,
       foodDropProb: 0,
       extraMoverFoodCost: 0,
-    }
+    },
   },
 };
 
@@ -100,17 +100,16 @@ export const worldEnvironmentSlice = createSlice({
   initialState,
   reducers: {
     setWorldStatus: (
-      state, action: PayloadAction<WorldEnvironmentState>
+      state, action: PayloadAction<WorldEnvironmentState>,
     ) => {
       state.status = action.payload.status;
       state.canvasId = action.payload.canvasId;
     },
     setWorldColors: (
-      state,
-      action: PayloadAction<WorldEnvironmentState>
+      state, action: PayloadAction<WorldEnvironmentState>,
     ) => {
       //
-    }
+    },
   },
 });
 

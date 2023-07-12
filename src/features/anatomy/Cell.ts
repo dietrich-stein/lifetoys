@@ -1,11 +1,12 @@
-//import { isEditorEnvironment } from '../Utils/TypeHelpers';
-import GridCell from '../grid/GridCell';
+//import GridCell from '../grid/GridCell';
 import GridMap from '../grid/GridMap';
 import Directions from '../organism/Directions';
 import Organism from '../organism/Organism';
 import FossilRecord from '../stats/FossilRecord';
+import { store, RootState } from '../../app/store';
 
 interface CellInterface {
+  store: RootState;
   state: AnatomyCellStatesType;
   org: Organism;
   loc_c: number;
@@ -23,12 +24,14 @@ interface CellInterface {
 }
 
 class Cell implements CellInterface {
+  store: RootState;
   state: AnatomyCellStatesType;
   org: Organism;
   loc_c: number;
   loc_r: number;
 
   constructor(state: AnatomyCellStatesType, org: Organism, loc_col: number, loc_row: number) {
+    this.store = store.getState();
     this.state = state;
     this.org = org;
     this.loc_c = loc_col;
@@ -38,6 +41,7 @@ class Cell implements CellInterface {
       Math.abs(loc_row) * 2 + 2,
       Math.abs(loc_col) * 2 + 2,
     );
+
     if (this.org.anatomy.birth_distance < distance) {
       this.org.anatomy.birth_distance = distance;
     }
@@ -64,11 +68,13 @@ class Cell implements CellInterface {
   // @TODO: Consolidate as "getRealColRow()"
   getRealCol() {
     var real_colrow = this.rotatedColRow(this.org.rotation_direction);
+
     return this.org.c + real_colrow[0]; //this.rotatedCol(this.org.rotation_direction);
   }
 
   getRealRow() {
     var real_colrow = this.rotatedColRow(this.org.rotation_direction);
+
     return this.org.r + real_colrow[1]; //this.rotatedRow(this.org.rotation_direction);
   }
 
@@ -140,9 +146,11 @@ class Cell implements CellInterface {
         r = this.loc_r;
         break;*/
     }
-    /*if (isEditorEnvironment(this.org.env)) {
+
+    if (this.org.environment === 'editor') {
       console.log('rotatedColRow', [c, r]);
-    }*/
+    }
+
     return [c, r];
   }
 }

@@ -1,29 +1,33 @@
-import Anatomy from "../features/anatomy/Anatomy";
-//import WorldEnvironment from "../features/environments/World/WorldEnvironment.svelte";
-import Organism from "../features/organism/Organism";
-//import FossilRecord from "../stats/FossilRecord";
-//import Species from "../stats/Species";
+import Anatomy from '../features/anatomy/Anatomy';
+import Cell from '../features/anatomy/Cell';
+import Organism from '../features/organism/Organism';
+import FossilRecord from '../features/stats/FossilRecord';
+import Species from '../features/stats/Species';
 
-type SerializableType = any; //Anatomy | WorldEnvironment | Organism | FossilRecord | Species;
+type SerializableType = Anatomy | Organism | FossilRecord | Species | Cell;
 
-// @todo: fix me
 class SerializeHelper {
-  public static copyNonObjects(obj: SerializableType) {
-    let newObject = {};
-    /*for (let key in obj) {
-      if (typeof obj[key] !== 'object') newobj[key] = obj[key];
-    }*/
+  public static copyNonObjects(object: SerializableType) {
+    let newObject: any = {};
+
+    for (let key in object) {
+      if (typeof object[key as keyof SerializableType] !== 'object') {
+        newObject[key] = object[key as keyof SerializableType];
+      }
+    }
+
     return newObject;
   }
+
   public static overwriteNonObjects(copyFrom: SerializableType, copyTo: SerializableType) {
     for (let key in copyFrom) {
-      /*if (
-        typeof copyFrom[key] !== 'object' &&
-        typeof copyTo[key] !== 'object'
+      if (
+        typeof copyFrom[key as keyof SerializableType] !== 'object' &&
+        typeof copyTo[key as keyof SerializableType] !== 'object'
       ) {
         // only overwrite if neither are objects
-        copyTo[key] = copyFrom[key];
-      }*/
+        copyTo[key as keyof SerializableType] = copyFrom[key as keyof SerializableType];
+      }
     }
   }
 };

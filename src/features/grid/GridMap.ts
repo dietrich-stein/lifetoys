@@ -50,6 +50,7 @@ class GridMap implements GridMapInterface {
     this.cell_size = cell_size;
     for (var c = 0; c < cols; c++) {
       var row = [];
+
       for (var r = 0; r < rows; r++) {
         var cell = new GridCell(
           CellStates.empty,
@@ -58,8 +59,10 @@ class GridMap implements GridMapInterface {
           c * cell_size,
           r * cell_size,
         );
+
         row.push(cell);
       }
+
       this.grid.push(row);
     }
   }
@@ -70,6 +73,7 @@ class GridMap implements GridMapInterface {
         if (ignore_walls && cell.state === CellStates.wall) {
           continue;
         }
+
         cell.setState(state);
         cell.owner_org = null;
         cell.owner_cell = null;
@@ -81,6 +85,7 @@ class GridMap implements GridMapInterface {
     if (!this.isValidLoc(col, row)) {
       return null;
     }
+
     return this.grid[col][row];
   }
 
@@ -88,6 +93,7 @@ class GridMap implements GridMapInterface {
     if (!this.isValidLoc(col, row)) {
       return;
     }
+
     this.grid[col][row].setState(state);
   }
 
@@ -95,7 +101,9 @@ class GridMap implements GridMapInterface {
     if (!this.isValidLoc(col, row)) {
       return;
     }
+
     this.grid[col][row].owner_cell = owner_cell;
+
     if (owner_cell !== null) {
       this.grid[col][row].owner_org = owner_cell.org;
     } else {
@@ -138,8 +146,9 @@ class GridMap implements GridMapInterface {
       cols: this.cols,
       rows: this.rows,
       food: [],
-      walls: []
+      walls: [],
     };
+
     for (let col of this.grid) {
       for (let cell of col) {
         if (
@@ -149,8 +158,9 @@ class GridMap implements GridMapInterface {
           // no need to store state
           let c: SerializedCell = {
             c: cell.col,
-            r: cell.row
+            r: cell.row,
           };
+
           if (cell.state === CellStates.food) {
             grid.food.push(c);
           } else {
@@ -159,6 +169,7 @@ class GridMap implements GridMapInterface {
         }
       }
     }
+
     return grid;
   }
 
@@ -167,6 +178,7 @@ class GridMap implements GridMapInterface {
     for (let f of grid.food) {
       this.setCellState(f.c, f.r, CellStates.food);
     }
+
     for (let w of grid.walls) {
       this.setCellState(w.c, w.r, CellStates.wall);
     }

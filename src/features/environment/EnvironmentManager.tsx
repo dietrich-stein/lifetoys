@@ -23,7 +23,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
     //setWorldEl,
     //editorEl,
     //setEditorEl,
-    children
+    children,
   } = props;
 
   /*function initReadyEnvironments(
@@ -70,7 +70,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
 
   return (
     <>
-      {children}
+      { children }
     </>
   );
 }

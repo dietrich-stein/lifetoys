@@ -11,8 +11,8 @@ export function WorldEnvironment() {
   return (
     <div>
       <WorldEnvironmentCanvas
-        canvasId={canvasId}
-        canvasRef={canvasRef}
+        canvasId={ canvasId }
+        canvasRef={ canvasRef }
       />
     </div>
   );

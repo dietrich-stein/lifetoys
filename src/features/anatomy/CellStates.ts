@@ -1,4 +1,3 @@
-import GridCell from '../grid/GridCell';
 import GridCellState from '../grid/GridCellState';
 
 export class EmptyState extends GridCellState {
@@ -85,7 +84,7 @@ abstract class CellStates {
     CellStates.mover,
     CellStates.killer,
     CellStates.armor,
-    CellStates.eye
+    CellStates.eye,
   ];
 
   public static living: Array<LivingCellStatesType> = [
@@ -95,7 +94,7 @@ abstract class CellStates {
     CellStates.mover,
     CellStates.killer,
     CellStates.armor,
-    CellStates.eye
+    CellStates.eye,
   ];
 
   public static getRandomName(): string {

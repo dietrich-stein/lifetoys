@@ -1,4 +1,4 @@
-import GridCell from "../../grid/GridCell";
+import GridCell from '../../grid/GridCell';
 
 class Observation {
   cell: GridCell;

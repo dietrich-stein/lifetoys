@@ -1,6 +1,5 @@
 import CellStates from '../CellStates';
 import Cell from '../Cell';
-import Hyperparams from '../../../Hyperparams';
 import Directions from '../../organism/Directions';
 import Observation from '../../organism/perception/Observation';
 import Organism from '../../organism/Organism';
@@ -35,6 +34,7 @@ class EyeCell extends Cell {
     // @todo: decide if there should be some eye-benefit without a brain
     if (this.org.anatomy.has_brain && this.org.brain !== null) {
       var obs = this.look(grid_map);
+
       if (obs !== null) {
         this.org.brain.observe(obs);
       }
@@ -43,65 +43,87 @@ class EyeCell extends Cell {
 
   look(grid_map: GridMap) {
     var env = this.org.environment;
+
     if (env === null) {
       return null;
     }
+
     var lookDirection = this.org.rotation_direction;//this.org.getAbsoluteDirection();
     var addCol = 0;
     var addRow = 0;
+
     switch (lookDirection) {
       case Directions.cardinals.n:
         addRow = -1;
         break;
+
       case Directions.cardinals.ne:
         addRow = -1;
         addCol = 1;
         break;
+
       case Directions.cardinals.e:
         addCol = 1;
         break;
+
       case Directions.cardinals.se:
         addRow = 1;
         addCol = 1;
         break;
+
       case Directions.cardinals.s:
         addRow = 1;
         break;
+
       case Directions.cardinals.sw:
         addRow = 1;
         addCol = -1;
         break;
+
       case Directions.cardinals.w:
         addCol = -1;
         break;
+
       case Directions.cardinals.nw:
         addRow = -1;
         addCol = -1;
         break;
     }
+
     var start_col = this.getRealCol();
     var start_row = this.getRealRow();
     var col = start_col;
     var row = start_row;
     var cell = null;
-    for (var i = 0; i < Hyperparams.lookRange; i++) {
+
+    const {
+      lookRange,
+      seeThroughSelf,
+    } = this.store.worldEnvironment.config.hyperparams;
+
+    for (var i = 0; i < lookRange; i++) {
       col += addCol;
       row += addRow;
       cell = grid_map.cellAt(col, row);
+
       if (cell === null) {
         continue;
         // @todo: if this break before to force the final return then why?
         // a null cell is kinda pointless isn't it?
         // it would need last_cell for that purpose to be effective
       }
-      if (cell.owner_org === this.org && Hyperparams.seeThroughSelf) {
+
+      if (cell.owner_org === this.org && seeThroughSelf) {
         continue;
       }
+
       if (cell.state !== CellStates.empty) {
         var distance = Math.abs(start_col - col) + Math.abs(start_row - row);
+
         return new Observation(cell, distance, lookDirection);
       }
     }
+
     return null; //return new Observation(cell, Hyperparams.lookRange, lookDirection);
   }
 }

@@ -13,19 +13,17 @@ const initialState: EnvironmentManagerState = {
   editorCanvasId: null,
   editorCanvas: null,
   worldCanvasId: null,
-  worldCanvas: null
+  worldCanvas: null,
 };
 
 export const environmentManagerSlice = createSlice({
   name: 'environmentManager',
   initialState,
   reducers: {
-    init: (
-      state,
-      action: PayloadAction<EnvironmentManagerState>
-    ) => {
+    init: (state, action: PayloadAction<EnvironmentManagerState>) => {
       //console.log('environmentManager.init', action.payload);
       state.ready = action.payload.ready;
+
       if (
         state.ready &&
         typeof action.payload.editorCanvasId === 'string' &&
@@ -48,7 +46,7 @@ export const environmentManagerSlice = createSlice({
 });
 
 export const {
-  init
+  init,
 } = environmentManagerSlice.actions;
 
 export default environmentManagerSlice.reducer;

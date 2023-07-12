@@ -74,16 +74,20 @@ class FossilRecord implements FossilRecordInterface {
 
   addSpecies(org: Organism, ancestor: Species | null, total_ticks: number) {
     var new_species = new Species(org.anatomy, ancestor, total_ticks);
+
     this.extant_species[new_species.name] = new_species;
     org.species = new_species;
+
     return new_species;
   }
 
   addSpeciesObj(species: Species) {
     if (this.extant_species[species.name]) {
       console.warn('Tried to add already existing species. Add failed.');
+
       return;
     }
+
     this.extant_species[species.name] = species;
   }
 
@@ -111,15 +115,20 @@ class FossilRecord implements FossilRecordInterface {
   fossilize(species: Species, total_ticks: number) {
     if (!this.extant_species[species.name]) {
       console.warn('Tried to fossilize non existing species.');
+
       return false;
     }
+
     species.end_tick = total_ticks;//this.env.total_ticks;
     species.ancestor = null; // garbage collect ancestors
     delete this.extant_species[species.name];
+
     if (species.cumulative_pop >= this.min_discard) {
       // TODO: store as extinct species
+
       return true;
     }
+
     return false;
   }
 
@@ -151,10 +160,13 @@ class FossilRecord implements FossilRecordInterface {
     var total_org = 0;
     var cell_counts: CountArrayInterface = {};
     var living = CellStates.getLiving();
+
     for (let c of living) {
       cell_counts[c.name] = 0;
     }
+
     var first = true;
+
     for (let s of Object.values(this.extant_species)) {
       if (
         !first &&
@@ -163,25 +175,33 @@ class FossilRecord implements FossilRecordInterface {
       ) {
         continue;
       }
+
       for (let name in s.cell_counts) {
         let s_count = s.cell_counts[name];
+
         cell_counts[name] += s_count * s.population;
       }
+
       total_org += s.population;
       first = false;
     }
-    if (total_org == 0) {
+
+    if (total_org === 0) {
       this.av_cells.push(0);
+
       // @todo: figure out what happened here and fix it
       //this.av_cell_counts.push(cell_counts);
+
       return;
     }
 
     var total_cells = 0;
+
     for (let c in cell_counts) {
       total_cells += cell_counts[c];
       cell_counts[c] /= total_org;
     }
+
     this.av_cells.push(total_cells / total_org);
     // @todo: figure out what happened here and fix it
     //this.av_cell_counts.push(cell_counts);
@@ -218,6 +238,7 @@ class FossilRecord implements FossilRecordInterface {
     }
     record.species = species;
     */
+
     return record;
   }
 

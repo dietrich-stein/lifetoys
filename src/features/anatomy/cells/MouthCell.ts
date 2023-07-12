@@ -1,10 +1,8 @@
 import CellStates from '../CellStates';
 import Cell from '../Cell';
-import Hyperparams from '../../../Hyperparams';
 import Organism from '../../organism/Organism';
 import GridCell from '../../grid/GridCell';
 import GridMap from '../../grid/GridMap';
-//import { isWorldEnvironment } from '../../Utils/TypeHelpers';
 
 class MouthCell extends Cell {
   constructor(org: Organism, loc_col: number, loc_row: number) {
@@ -25,24 +23,29 @@ class MouthCell extends Cell {
   }
 
   performFunction(grid_map: GridMap) {
-    var env = this.org.environment;
-    /*if (env === null || !isWorldEnvironment(env)) {
+    if (this.org.environment !== 'world') {
       return;
-    }*/
+    }
+
     var real_c = this.getRealCol();
     var real_r = this.getRealRow();
-    for (var loc of Hyperparams.edibleNeighbors) {
+
+    const edibleNeighbors = this.store.worldEnvironment.config.hyperparams.edibleNeighbors;
+
+    for (var loc of edibleNeighbors) {
       var cell = grid_map.cellAt(real_c + loc[0], real_r + loc[1]);
+
       if (cell !== null) {
-        this.eatNeighbor(cell, env);
+        this.eatNeighbor(grid_map, cell);
       }
     }
   }
 
-  eatNeighbor(n_cell: GridCell, env: AnyEnvironmentType) {
-    if (n_cell == null) return;
-    if (n_cell.state == CellStates.food) {
-      env.changeWorldCell(n_cell.col, n_cell.row, CellStates.empty, env.grid_map, null);
+  eatNeighbor(grid_map: GridMap, n_cell: GridCell) {
+    if (n_cell === null) return;
+
+    if (n_cell.state === CellStates.food) {
+      //env.changeWorldCell(n_cell.col, n_cell.row, CellStates.empty, env.grid_map, null);
       this.org.food_collected++;
     }
   }

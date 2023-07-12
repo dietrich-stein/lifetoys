@@ -13,11 +13,18 @@ import {
   MoverState,
   KillerState,
   ArmorState,
-  EyeState
+  EyeState,
 } from './CellStates';
 
 interface CellClassesInterface {
-  [key: string]: typeof MouthCell | typeof BrainCell | typeof ProducerCell | typeof MoverCell | typeof KillerCell | typeof ArmorCell | typeof EyeCell;
+  [key: string]:
+    | typeof MouthCell
+    | typeof BrainCell
+    | typeof ProducerCell
+    | typeof MoverCell
+    | typeof KillerCell
+    | typeof ArmorCell
+    | typeof EyeCell;
 }
 
 type CellStatesType =
@@ -37,31 +44,35 @@ abstract class CellFactory {
     'mover': MoverCell,
     'killer': KillerCell,
     'armor': ArmorCell,
-    'eye': EyeCell
-  }
+    'eye': EyeCell,
+  };
 
   public static createInherited(org: Organism, to_copy: AnatomyCellClassType) {
     var cellClass = CellFactory.CellClasses[to_copy.state.name];
     var cell = new cellClass(org, to_copy.loc_c, to_copy.loc_r);
+
     cell.initInherit(to_copy);
+
     return cell;
   }
 
   public static createRandom(org: Organism, state: CellStatesType, loc_col: number, loc_row: number) {
     var cellClass = CellFactory.CellClasses[state.name];
     var cell = new cellClass(org, loc_col, loc_row);
+
     cell.initRandom();
+
     return cell;
   }
 
   public static createDefault(org: Organism, state: CellStatesType, loc_col: number, loc_row: number) {
     var cellClass = CellFactory.CellClasses[state.name];
     var cell = new cellClass(org, loc_col, loc_row);
+
     cell.initDefault();
+
     return cell;
   }
 }
-
-
 
 export default CellFactory;

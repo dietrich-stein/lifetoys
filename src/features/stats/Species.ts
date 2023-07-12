@@ -1,6 +1,5 @@
 import CellStates from '../anatomy/CellStates';
 import Anatomy from '../anatomy/Anatomy';
-import Organism from '../organism/Organism';
 
 interface CountArrayInterface {
   [key: string]: number;
@@ -49,12 +48,15 @@ class Species implements SpeciesInterface {
     if (!this.anatomy) return;
     var new_cell_counts: CountArrayInterface = {};
     var living = CellStates.getLiving();
+
     for (let c of living) {
       new_cell_counts[c.name] = 0;
     }
+
     for (let cell of this.anatomy.cells) {
       new_cell_counts[cell.state.name] += 1;
     }
+
     this.cell_counts = new_cell_counts;
   }
 

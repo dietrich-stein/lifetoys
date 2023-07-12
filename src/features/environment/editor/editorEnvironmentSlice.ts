@@ -7,7 +7,7 @@ export interface EditorEnvironmentState {
 
 const initialState: EditorEnvironmentState = {
   status: 'loading',
-  canvasId: null
+  canvasId: null,
 };
 
 export const editorEnvironmentSlice = createSlice({
@@ -23,7 +23,7 @@ export const editorEnvironmentSlice = createSlice({
 });
 
 export const {
-  setEditorStatus
+  setEditorStatus,
 } = editorEnvironmentSlice.actions;
 
 export default editorEnvironmentSlice.reducer;

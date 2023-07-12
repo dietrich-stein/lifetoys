@@ -3,12 +3,12 @@ import {
   ThunkAction,
   Action,
   createListenerMiddleware,
-  isAnyOf
+  isAnyOf,
 } from '@reduxjs/toolkit';
-//import counterReducer from '../features/counter/counterSlice';
+import counterReducer from '../features/counter/counterSlice';
 import engineReducer, {
-  startRendering,
-  stopRendering,
+  //startRendering,
+  //stopRendering,
 } from '../features/engine/engineSlice';
 import editorEnvironmentReducer, { setEditorStatus } from '../features/environment/editor/editorEnvironmentSlice';
 import worldEnvironmentReducer, { setWorldStatus } from '../features/environment/world/worldEnvironmentSlice';
@@ -16,11 +16,11 @@ import environmentManagerReducer, { init } from '../features/environment/environ
 //import { debounce } from 'lodash';
 
 const reducer = {
-  //counter: counterReducer,
+  counter: counterReducer,
   engine: engineReducer,
   environmentManager: environmentManagerReducer,
   editorEnvironment: editorEnvironmentReducer,
-  worldEnvironment: worldEnvironmentReducer
+  worldEnvironment: worldEnvironmentReducer,
 };
 
 export type RootState = ReturnType<typeof store.getState>;
@@ -32,16 +32,17 @@ listenerMiddleware.startListening({
   effect: async (action, listenerApi) => {
     const state: any = listenerApi.getState();
     //console.log('state:', state);
+
     if (
-      state.worldEnvironment.status === "idle" &&
-      state.editorEnvironment.status === "idle"
+      state.worldEnvironment.status === 'idle' &&
+      state.editorEnvironment.status === 'idle'
     ) {
       listenerApi.cancelActiveListeners();
       await listenerApi.delay(250);
       listenerApi.dispatch(init({
         ready: true,
         editorCanvasId: state.worldEnvironment.canvasId,
-        worldCanvasId: state.editorEnvironment.canvasId
+        worldCanvasId: state.editorEnvironment.canvasId,
       }));
       /*listenerApi.dispatch(start({
         ...state.engine,
@@ -53,26 +54,25 @@ listenerMiddleware.startListening({
 
 export const store = configureStore({
   reducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore these action types
-        ignoredActions: [
-          //'environmentManager/init'
-          //'editorEnvironment/setWorldStatus',
-          //'editorEnvironment/setEditorStatus'
-        ],
+  middleware: getDefaultMiddleware => getDefaultMiddleware({
+    serializableCheck: {
+      // Ignore these action types
+      ignoredActions: [
+        //'environmentManager/init'
+        //'editorEnvironment/setWorldStatus',
+        //'editorEnvironment/setEditorStatus'
+      ],
 
-        // Ignore these field paths in all actions
-        //ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
+      // Ignore these field paths in all actions
+      //ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
 
-        // Ignore these paths in the state
-        ignoredPaths: [
-          'environmentManager.editorCanvas',
-          'environmentManager.worldCanvas'
-        ],
-      },
-    }).prepend(listenerMiddleware.middleware)
+      // Ignore these paths in the state
+      ignoredPaths: [
+        'environmentManager.editorCanvas',
+        'environmentManager.worldCanvas',
+      ],
+    },
+  }).prepend(listenerMiddleware.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

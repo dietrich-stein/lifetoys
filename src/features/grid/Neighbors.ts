@@ -12,6 +12,7 @@ abstract class Neighbors {
     [-1, 1],
     [1, -1],
   ];
+
   //adjacent   .
   //          .x.
   //           .
@@ -21,6 +22,7 @@ abstract class Neighbors {
     [1, 0],
     [-1, 0],
   ];
+
   //corners   . .
   //           x
   //          . .
@@ -30,6 +32,7 @@ abstract class Neighbors {
     [-1, 1],
     [1, -1],
   ];
+
   //allSelf   ...
   //          ...
   //          ...
@@ -47,11 +50,13 @@ abstract class Neighbors {
 
   public static inRange(range: number) {
     var neighbors = [];
+
     for (var i = -range; i <= range; i++) {
       for (var j = -range; j <= range; j++) {
         neighbors.push([i, j]);
       }
     }
+
     return neighbors;
   }
 };

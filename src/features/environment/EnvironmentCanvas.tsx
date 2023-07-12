@@ -37,6 +37,6 @@ export function EnvironmentCanvas(props: EnvironmentCanvasProps) {
   });*/
 
   return (
-    <canvas id={canvasId} ref={canvasRef} />
+    <canvas id={ canvasId } ref={ canvasRef } />
   );
 }

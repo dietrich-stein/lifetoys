@@ -56,7 +56,7 @@ abstract class Directions {
         return Directions.cardinals.w;
 
       case Directions.cardinals.se:
-        return Directions.cardinals.nw
+        return Directions.cardinals.nw;
 
       case Directions.cardinals.s:
         return Directions.cardinals.n;
@@ -77,17 +77,21 @@ abstract class Directions {
 
   public static rotateRight(dir: number): number {
     dir++;
+
     if (dir > MAX_DIR_INDEX) {
       dir = 0;
     }
+
     return dir;
   }
 
   public static rotateLeft(dir: number): number {
     dir--;
+
     if (dir < 0) {
       dir = MAX_DIR_INDEX;
     }
+
     return dir;
   }
 }

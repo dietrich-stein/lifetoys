@@ -1,6 +1,5 @@
-//import { isEditorEnvironment } from "../Utils/TypeHelpers";
-import CellStates from "../anatomy/CellStates";
-import GridCell from "./GridCell";
+import CellStates from '../anatomy/CellStates';
+import GridCell from './GridCell';
 
 interface GridCellStateInterface {
   name: string;
@@ -34,22 +33,25 @@ class GridCellState implements GridCellStateInterface {
     // Render the eye slit
     ctx.fillStyle = this.color;
     ctx.fillRect(cell.x, cell.y, size, size);
-    if (size == 1) return;
+
+    if (size === 1) {
+      return;
+    }
+
     var half = size / 2;
     var x = -size / 8;
     var y = -half;
     var h = size / 2 + size / 4;
     var w = size / 4;
+
     ctx.translate(cell.x + half, cell.y + half);
     var abs_dir = cell.owner_cell.org.rotation_direction; //cell.owner_cell.org.getAbsoluteDirection();
-    /*
-    if (isEditorEnvironment(cell.owner_cell.org.env)) {
+
+    if (cell.owner_cell.org.environment === 'editor') {
       console.log('GridCellState.render: abs_dir = ', abs_dir);
-    };
-    */
-    ctx.rotate(
-      (abs_dir * 45 * Math.PI) / 180
-    );
+    }
+
+    ctx.rotate((abs_dir * 45 * Math.PI) / 180);
     ctx.fillStyle = CellStates.eye.slit_color;
     ctx.fillRect(x, y, w, h);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
