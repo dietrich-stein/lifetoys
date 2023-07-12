@@ -1,6 +1,6 @@
 import React from 'react';
-//import logo from './logo.svg';
 import './App.css';
+import { Engine } from './features/engine/Engine';
 import { EnvironmentManager } from './features/environment/EnvironmentManager';
 import { EditorEnvironment } from './features/environment/editor/EditorEnvironment';
 import { WorldEnvironment } from './features/environment/world/WorldEnvironment';
@@ -8,12 +8,12 @@ import { WorldEnvironment } from './features/environment/world/WorldEnvironment'
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
+      <Engine>
         <EnvironmentManager>
           <EditorEnvironment />
           <WorldEnvironment />
         </EnvironmentManager>
-      </header>
+      </Engine>
     </div>
   );
 }

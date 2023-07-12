@@ -2,9 +2,9 @@ import React, {
   useState,
   useEffect,
 } from 'react';
-import { setWorldStatus } from './worldEnvironmentSlice';
+import { selectWorldEnvironment, setWorldStatus } from './worldEnvironmentSlice';
 //import { Diff } from 'utility-types';
-import { useAppDispatch } from '../../../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 //import { EnvironmentCanvasProps, EnvironmentCanvas } from '../EnvironmentCanvas';
 
 interface InjectedProps {
@@ -21,6 +21,7 @@ export function withWorldCanvasEffects<T extends InjectedProps>(
   //return (hocProps: Omit<T, "count">) => {
     const dispatch = useAppDispatch();
     //const [count, setCount] = useState(0);
+    const worldEnvironmentState = useAppSelector(selectWorldEnvironment);
 
     useEffect(() => {
       //if (
@@ -33,6 +34,7 @@ export function withWorldCanvasEffects<T extends InjectedProps>(
       const canvasId = hocProps.canvasId;// as string | null;
       if (canvasRef.current) {
         dispatch(setWorldStatus({
+          ...worldEnvironmentState,
           status: 'idle',
           canvasId
         }));

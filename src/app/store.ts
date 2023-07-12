@@ -6,6 +6,10 @@ import {
   isAnyOf
 } from '@reduxjs/toolkit';
 //import counterReducer from '../features/counter/counterSlice';
+import engineReducer, {
+  startRendering,
+  stopRendering,
+} from '../features/engine/engineSlice';
 import editorEnvironmentReducer, { setEditorStatus } from '../features/environment/editor/editorEnvironmentSlice';
 import worldEnvironmentReducer, { setWorldStatus } from '../features/environment/world/worldEnvironmentSlice';
 import environmentManagerReducer, { init } from '../features/environment/environmentManagerSlice';
@@ -13,6 +17,7 @@ import environmentManagerReducer, { init } from '../features/environment/environ
 
 const reducer = {
   //counter: counterReducer,
+  engine: engineReducer,
   environmentManager: environmentManagerReducer,
   editorEnvironment: editorEnvironmentReducer,
   worldEnvironment: worldEnvironmentReducer
@@ -38,6 +43,10 @@ listenerMiddleware.startListening({
         editorCanvasId: state.worldEnvironment.canvasId,
         worldCanvasId: state.editorEnvironment.canvasId
       }));
+      /*listenerApi.dispatch(start({
+        ...state.engine,
+        renderingStarted: true
+      }));*/
     }
   },
 });
