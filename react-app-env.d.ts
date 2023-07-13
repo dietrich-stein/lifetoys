@@ -148,7 +148,9 @@ type AverageCellCountsType = Array<CellCountsType>;
   performModeAction?: () => void;
   dragScreen?: () => void;
   dropOrganism?: (organism: Organism, col: number, row: number) => boolean;
-  dropCellType?: (col: number, row: number, state: AllCellStatesType, killBlocking: boolean, ignoreState: AnatomyCellStatesType | null) => void;
+  dropCellType?: (
+    col: number, row: number, state: AllCellStatesType, killBlocking: boolean, ignoreState: AnatomyCellStatesType | null
+  ) => void;
   findNearOrganism?: () => Organism | null;
   killNearOrganisms?: () => void;
 
@@ -172,6 +174,7 @@ type AverageCellCountsType = Array<CellCountsType>;
 }*/
 
 interface EnvironmentRendererProps {
+  /*
   // Common Properties
   cell_size: number;
   canvasId: string; //canvas: HTMLCanvasElement | null;
@@ -187,7 +190,7 @@ interface EnvironmentRendererProps {
   //canvas_container?: HTMLElement | null;
   height?: number;
   width?: number;
-
+  */
   // Editor Renderer Properties
   /*
   // Common Functions

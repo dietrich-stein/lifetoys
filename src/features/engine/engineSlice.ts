@@ -25,8 +25,6 @@ type HyperparamsState = {
 
 export interface EngineState {
   hyperparams: HyperparamsState;
-  //renderingStartTime: number | null;
-  //renderingStopTime: number | null;
   renderingRunning: boolean;
   simulationRunning: boolean;
 }
@@ -52,8 +50,6 @@ const initialState: EngineState = {
     foodDropProb: 0,
     extraMoverFoodCost: 0,
   },
-  //renderingStartTime: null,
-  //renderingStopTime: 0,
   renderingRunning: false,
   simulationRunning: false,
 };
@@ -64,14 +60,10 @@ export const engineSlice = createSlice({
   reducers: {
     startRendering: (state, action: PayloadAction<EngineState>) => {
       //console.log('engine.startRendering, payload:', action.payload);
-      //state.renderingStartTime = action.payload.renderingStartTime;
-      //state.renderingStopTime = action.payload.renderingStopTime;
       state.renderingRunning = action.payload.renderingRunning;
     },
     stopRendering: (state, action: PayloadAction<EngineState>) => {
       //console.log('engine.stopRendering, payload:', action.payload);
-      //state.renderingStartTime = action.payload.renderingStartTime;
-      //state.renderingStopTime = action.payload.renderingStopTime;
       state.renderingRunning = action.payload.renderingRunning;
     },
     startSimulation: (state, action: PayloadAction<EngineState>) => {

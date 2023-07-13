@@ -21,12 +21,14 @@ export interface WorldEnvironmentConfigState {
 export interface WorldEnvironmentState {
   status: 'idle' | 'loading';
   canvasId: string | null;
+  canvasContainerId: string | null;
   config: WorldEnvironmentConfigState;
 }
 
 const initialState: WorldEnvironmentState = {
   status: 'loading',
   canvasId: null,
+  canvasContainerId: null,
   config: {
     fill_window: true,
     cell_size: 5,
@@ -61,6 +63,7 @@ export const worldEnvironmentSlice = createSlice({
     ) => {
       state.status = action.payload.status;
       state.canvasId = action.payload.canvasId;
+      state.canvasContainerId = action.payload.canvasContainerId;
     },
     setWorldColors: (
       state, action: PayloadAction<WorldEnvironmentState>,

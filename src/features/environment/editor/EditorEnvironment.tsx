@@ -1,18 +1,16 @@
-import React, { useRef } from 'react';
-import { EnvironmentCanvas } from '../EnvironmentCanvas';
-import { withEditorCanvasEffects } from './withEditorCanvasEffects';
-
-const EditorEnvironmentCanvas = withEditorCanvasEffects(EnvironmentCanvas);
+import React from 'react';
+import { EditorEnvironmentCanvas } from '../editor/EditorEnvironmentCanvas';
+import styles from './EditorEnvironment.module.css';
 
 export function EditorEnvironment() {
+  const canvasContainerId = 'editor-canvas-container';
   const canvasId = 'editor-canvas';
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   return (
-    <div>
+    <div id={ canvasContainerId } className={ styles.editorCanvasContainer }>
       <EditorEnvironmentCanvas
         canvasId={ canvasId }
-        canvasRef={ canvasRef }
+        canvasContainerId={ canvasContainerId }
       />
     </div>
   );

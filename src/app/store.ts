@@ -79,20 +79,20 @@ startAppListening({
           // Effectively debounces the dispatches that follow it
           await listenerApi.delay(250);
 
-          // Stores DOM ref vars to the canvas elements into environmentManager as "editorCanvas" and "worldCanvas"
           listenerApi.dispatch(init({
             ready: true,
-            editorCanvasId: state.worldEnvironment.canvasId,
-            worldCanvasId: state.editorEnvironment.canvasId,
+            editorCanvasId: state.editorEnvironment.canvasId,
+            editorCanvasContainerId: state.editorEnvironment.canvasContainerId,
+            worldCanvasId: state.worldEnvironment.canvasId,
+            worldCanvasContainerId: state.worldEnvironment.canvasContainerId,
           }));
 
           // Refresh the state
-          state = listenerApi.getState();
-
-          if (
-            state.environmentManager.editorCanvas !== null &&
-            state.environmentManager.worldCanvas !== null
-          ) {
+          //state = listenerApi.getState();
+          //if (
+            //state.environmentManager.editorCanvas !== null &&
+            //state.environmentManager.worldCanvas !== null
+          //) {
             /*const simulationStopTimeValue = (state.engine.simulationStopTime !== null)
               ? state.engine.simulationStopTime
               : 0;
@@ -102,7 +102,7 @@ startAppListening({
               simulationStartTime: simulationStopTimeValue,
               simulationStopTime: null,
             }));*/
-          }
+          //}
         }
 
         break;
@@ -125,10 +125,10 @@ export const store = configureStore({
       //ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
 
       // Ignore these paths in the state
-      ignoredPaths: [
+      /*ignoredPaths: [
         'environmentManager.editorCanvas',
         'environmentManager.worldCanvas',
-      ],
+      ],*/
     },
   }).prepend(listenerMiddleware.middleware),
 });

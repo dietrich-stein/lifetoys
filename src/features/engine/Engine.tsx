@@ -57,8 +57,6 @@ export function Engine(props: EngineProps) {
   const handleResetSimulationClick = () => {
     dispatch(stopRendering({
       ...engineState,
-      //renderingStartTime: null,
-      //renderingStopTime: 0,
       renderingRunning: false,
     }));
     dispatch(resetSimulation({
@@ -84,6 +82,7 @@ export function Engine(props: EngineProps) {
 
   return (
     <>
+      { /*
       <button disabled={ !simulationRunning } onClick={ handleResetSimulationClick }>
         { 'Reset Simulation' }
       </button>
@@ -101,6 +100,7 @@ export function Engine(props: EngineProps) {
         { renderingRunning ? 'Stop Rendering' : 'Start Rendering' }
       </button>
       <hr />
+      */ }
       { children }
     </>
   );

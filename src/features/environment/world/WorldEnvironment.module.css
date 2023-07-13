@@ -1,0 +1,12 @@
+.worldCanvasContainer {
+  position: fixed;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  transform: scale(1);
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
