@@ -25,10 +25,10 @@ type HyperparamsState = {
 
 export interface EngineState {
   hyperparams: HyperparamsState;
-  renderingStartTime: number | null;
-  renderingStopTime: number | null;
-  simulationStartTime: number | null;
-  simulationStopTime: number | null;
+  //renderingStartTime: number | null;
+  //renderingStopTime: number | null;
+  renderingRunning: boolean;
+  simulationRunning: boolean;
 }
 
 const initialState: EngineState = {
@@ -52,47 +52,39 @@ const initialState: EngineState = {
     foodDropProb: 0,
     extraMoverFoodCost: 0,
   },
-  renderingStartTime: 0,
-  renderingStopTime: 0,
-  simulationStartTime: 0,
-  simulationStopTime: 0,
+  //renderingStartTime: null,
+  //renderingStopTime: 0,
+  renderingRunning: false,
+  simulationRunning: false,
 };
 
 export const engineSlice = createSlice({
   name: 'engine',
   initialState,
   reducers: {
-    startRendering: (
-      state,
-      action: PayloadAction<EngineState>,
-    ) => {
+    startRendering: (state, action: PayloadAction<EngineState>) => {
       //console.log('engine.startRendering, payload:', action.payload);
-      state.renderingStartTime = action.payload.renderingStartTime;
-      state.renderingStopTime = action.payload.renderingStopTime;
+      //state.renderingStartTime = action.payload.renderingStartTime;
+      //state.renderingStopTime = action.payload.renderingStopTime;
+      state.renderingRunning = action.payload.renderingRunning;
     },
-    stopRendering: (
-      state,
-      action: PayloadAction<EngineState>,
-    ) => {
+    stopRendering: (state, action: PayloadAction<EngineState>) => {
       //console.log('engine.stopRendering, payload:', action.payload);
-      state.renderingStartTime = action.payload.renderingStartTime;
-      state.renderingStopTime = action.payload.renderingStopTime;
+      //state.renderingStartTime = action.payload.renderingStartTime;
+      //state.renderingStopTime = action.payload.renderingStopTime;
+      state.renderingRunning = action.payload.renderingRunning;
     },
-    startSimulation: (
-      state,
-      action: PayloadAction<EngineState>,
-    ) => {
+    startSimulation: (state, action: PayloadAction<EngineState>) => {
       //console.log('engine.startSimulation, payload:', action.payload);
-      state.simulationStartTime = action.payload.simulationStartTime;
-      state.simulationStopTime = action.payload.simulationStopTime;
+      state.simulationRunning = action.payload.simulationRunning;
     },
-    stopSimulation: (
-      state,
-      action: PayloadAction<EngineState>,
-    ) => {
+    stopSimulation: (state, action: PayloadAction<EngineState>) => {
       //console.log('engine.stopSimulation, payload:', action.payload);
-      state.simulationStartTime = action.payload.simulationStartTime;
-      state.simulationStopTime = action.payload.simulationStopTime;
+      state.simulationRunning = action.payload.simulationRunning;
+    },
+    resetSimulation: (state, action: PayloadAction<EngineState>) => {
+      //console.log('engine.stopSimulation, payload:', action.payload);
+      state.simulationRunning = action.payload.simulationRunning;
     },
   },
 });
@@ -104,6 +96,7 @@ export const {
   stopRendering,
   startSimulation,
   stopSimulation,
+  resetSimulation,
 } = engineSlice.actions;
 
 export default engineSlice.reducer;

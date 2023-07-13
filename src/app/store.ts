@@ -2,18 +2,23 @@ import {
   configureStore,
   ThunkAction,
   Action,
-  createListenerMiddleware,
   isAnyOf,
 } from '@reduxjs/toolkit';
 import counterReducer from '../features/counter/counterSlice';
 import engineReducer, {
-  //startRendering,
-  //stopRendering,
+  startSimulation,
+  stopSimulation,
+  resetSimulation,
+  startRendering,
+  stopRendering,
 } from '../features/engine/engineSlice';
 import editorEnvironmentReducer, { setEditorStatus } from '../features/environment/editor/editorEnvironmentSlice';
 import worldEnvironmentReducer, { setWorldStatus } from '../features/environment/world/worldEnvironmentSlice';
 import environmentManagerReducer, { init } from '../features/environment/environmentManagerSlice';
 //import { debounce } from 'lodash';
+import { startAppListening, listenerMiddleware } from './listenerMiddleware';
+import EngineSimulation from '../features/engine/EngineSimulation';
+import EngineRendering from '../features/engine/EngineRendering';
 
 const reducer = {
   counter: counterReducer,
@@ -25,29 +30,82 @@ const reducer = {
 
 export type RootState = ReturnType<typeof store.getState>;
 
-const listenerMiddleware = createListenerMiddleware();
-
-listenerMiddleware.startListening({
-  matcher: isAnyOf(setWorldStatus, setEditorStatus),
+startAppListening({
+  matcher: isAnyOf(
+    setWorldStatus,
+    setEditorStatus,
+    startRendering,
+    stopRendering,
+    startSimulation,
+    stopSimulation,
+    resetSimulation,
+  ),
   effect: async (action, listenerApi) => {
-    const state: any = listenerApi.getState();
-    //console.log('state:', state);
+    let state: RootState = listenerApi.getState();
 
-    if (
-      state.worldEnvironment.status === 'idle' &&
-      state.editorEnvironment.status === 'idle'
-    ) {
-      listenerApi.cancelActiveListeners();
-      await listenerApi.delay(250);
-      listenerApi.dispatch(init({
-        ready: true,
-        editorCanvasId: state.worldEnvironment.canvasId,
-        worldCanvasId: state.editorEnvironment.canvasId,
-      }));
-      /*listenerApi.dispatch(start({
-        ...state.engine,
-        renderingStarted: true
-      }));*/
+    //console.log(action.type);
+    const engineSimulation = EngineSimulation.getInstance();
+    const engineRendering = EngineRendering.getInstance();
+
+    switch (action.type) {
+      case 'engine/startRendering':
+        engineRendering.start();
+        break;
+
+      case 'engine/stopRendering':
+        engineRendering.stop();
+        break;
+
+      case 'engine/startSimulation':
+        engineSimulation.start();
+        break;
+
+      case 'engine/stopSimulation':
+        engineSimulation.stop();
+        break;
+
+      case 'engine/resetSimulation':
+        engineSimulation.reset();
+        break;
+
+      case 'editorEnvironment/setEditorStatus':
+      case 'worldEnvironment/setEditorStatus':
+        if (
+          state.worldEnvironment.status === 'idle' &&
+          state.editorEnvironment.status === 'idle'
+        ) {
+          listenerApi.cancelActiveListeners();
+
+          // Effectively debounces the dispatches that follow it
+          await listenerApi.delay(250);
+
+          // Stores DOM ref vars to the canvas elements into environmentManager as "editorCanvas" and "worldCanvas"
+          listenerApi.dispatch(init({
+            ready: true,
+            editorCanvasId: state.worldEnvironment.canvasId,
+            worldCanvasId: state.editorEnvironment.canvasId,
+          }));
+
+          // Refresh the state
+          state = listenerApi.getState();
+
+          if (
+            state.environmentManager.editorCanvas !== null &&
+            state.environmentManager.worldCanvas !== null
+          ) {
+            /*const simulationStopTimeValue = (state.engine.simulationStopTime !== null)
+              ? state.engine.simulationStopTime
+              : 0;
+
+            listenerApi.dispatch(startSimulation({
+              ...state.engine,
+              simulationStartTime: simulationStopTimeValue,
+              simulationStopTime: null,
+            }));*/
+          }
+        }
+
+        break;
     }
   },
 });

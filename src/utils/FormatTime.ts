@@ -7,6 +7,7 @@ const leftPad = (value: string, length: number) => {
 };
 
 export const formatTime = (time: number) => {
+  //console.log('ft', time);
   const duration = Math.floor(time);
   const hours = Math.floor(duration / 360000);
   const minutes = Math.floor((duration - (hours * 360000)) / 60000);

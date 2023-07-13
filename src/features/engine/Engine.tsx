@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import {
   selectEngine,
@@ -6,47 +6,14 @@ import {
   stopRendering,
   startSimulation,
   stopSimulation,
+  resetSimulation,
 } from './engineSlice';
 import { formatTime } from '../../utils/FormatTime';
+import EngineSimulation from '../../features/engine/EngineSimulation';
+import EngineRendering from './EngineRendering';
 
 type EngineProps = {
   children?: React.ReactNode;
-};
-
-const useAnimate = () => {
-  const [animateTime, setAnimateTime] = React.useState(performance.now());
-
-  useEffect(() => {
-    let animateId: number;
-
-    const animate = (time: DOMHighResTimeStamp) => {
-      setAnimateTime(time);
-      animateId = requestAnimationFrame(animate);
-    };
-
-    requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animateId);
-  }, []);
-
-  return animateTime;
-};
-
-const useInterval = () => {
-  const tickMs = 1000 / 60; // 16.67
-  const [intervalTime, setIntervalTime] = React.useState(performance.now());
-
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
-
-    intervalId = setInterval(() => {
-      setIntervalTime(intervalTime => intervalTime + tickMs);
-    }, tickMs);
-
-    return () => clearInterval(intervalId);
-  });
-
-  return intervalTime;
 };
 
 export function Engine(props: EngineProps) {
@@ -56,29 +23,25 @@ export function Engine(props: EngineProps) {
   const engineState = useAppSelector(selectEngine);
   const dispatch = useAppDispatch();
   const {
-    renderingStartTime,
-    renderingStopTime,
-    simulationStartTime,
-    simulationStopTime,
+    renderingRunning,
+    simulationRunning,
   } = engineState;
+  /*
+   * NOTE: We use non-react classes for `setInterval()` and
+   * `requestAnimationFrame()` because this gets better performance with less
+   * complexity than hooks or useEffect/useReducer approaches.
+   */
   // Simulation
-  const simulationStopped = simulationStopTime !== null;
-  const intervalTime = useInterval();
-  const simulationStartTimeValue = (simulationStartTime !== null) ? simulationStartTime : 0;
-  const simulationTime = simulationStopped ? simulationStopTime : intervalTime - simulationStartTimeValue;
+  const engineSimulation = EngineSimulation.getInstance();
+  const simulationTime = engineSimulation.getTimeElapsed();
   // Rendering
-  const renderingStopped = renderingStopTime !== null;
-  const animateTime = useAnimate();
-  const renderingStartTimeValue = (renderingStartTime !== null) ? renderingStartTime : 0;
-  const renderingTime = renderingStopped ? renderingStopTime : animateTime - renderingStartTimeValue;
+  const engineRendering = EngineRendering.getInstance();
+  const renderingTime = engineRendering.getTimeElapsed();
 
   const handleStartSimulationClick = () => {
-    const simulationStopTimeValue = (simulationStopTime !== null) ? simulationStopTime : 0;
-
     dispatch(startSimulation({
       ...engineState,
-      simulationStartTime: performance.now() - simulationStopTimeValue,
-      simulationStopTime: null,
+      simulationRunning: true,
     }));
     handleStartRenderingClick();
   };
@@ -86,43 +49,56 @@ export function Engine(props: EngineProps) {
   const handleStopSimulationClick = () => {
     dispatch(stopSimulation({
       ...engineState,
-      simulationStartTime: null,
-      simulationStopTime: simulationTime,
+      simulationRunning: false,
     }));
     handleStopRenderingClick();
   };
 
-  const handleStartRenderingClick = () => {
-    const renderingStopTimeValue = (renderingStopTime !== null) ? renderingStopTime : 0;
+  const handleResetSimulationClick = () => {
+    dispatch(stopRendering({
+      ...engineState,
+      //renderingStartTime: null,
+      //renderingStopTime: 0,
+      renderingRunning: false,
+    }));
+    dispatch(resetSimulation({
+      ...engineState,
+      simulationRunning: false,
+    }));
+    handleStartSimulationClick();
+  };
 
+  const handleStartRenderingClick = () => {
     dispatch(startRendering({
       ...engineState,
-      renderingStartTime: performance.now() - renderingStopTimeValue,
-      renderingStopTime: null,
+      renderingRunning: true,
     }));
   };
 
   const handleStopRenderingClick = () => {
     dispatch(stopRendering({
       ...engineState,
-      renderingStartTime: null,
-      renderingStopTime: renderingTime,
+      renderingRunning: false,
     }));
   };
 
   return (
     <>
+      <button disabled={ !simulationRunning } onClick={ handleResetSimulationClick }>
+        { 'Reset Simulation' }
+      </button>
+      <hr />
       <div>Simulation Time: { formatTime(simulationTime) }</div>
-      <button onClick={ simulationStopped ? handleStartSimulationClick : handleStopSimulationClick }>
-        { simulationStopped ? 'Start Simulation' : 'Stop Simulation' }
+      <button onClick={ simulationRunning ? handleStopSimulationClick : handleStartSimulationClick }>
+        { simulationRunning ? 'Stop Simulation' : 'Start Simulation' }
       </button>
       <hr />
       <div>Rendering Time: { formatTime(renderingTime) }</div>
       <button
-        disabled={ simulationStopped }
-        onClick={ renderingStopped ? handleStartRenderingClick : handleStopRenderingClick }
+        disabled={ !simulationRunning }
+        onClick={ renderingRunning ? handleStopRenderingClick : handleStartRenderingClick }
       >
-        { renderingStopped ? 'Start Rendering' : 'Stop Rendering' }
+        { renderingRunning ? 'Stop Rendering' : 'Start Rendering' }
       </button>
       <hr />
       { children }
