@@ -11,7 +11,7 @@
   },
   "license": "GPL",
   "engines": {
-    "node": ">=14.21"
+    "node": ">=16.20.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.11",
@@ -39,6 +39,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "dis-gui-lifetoys": "^3.0.0",
     "lodash": "^4.17.21",
     "utility-types": "^3.10.0"
   },
@@ -92,13 +93,27 @@
         "error",
         {
           "blankLine": "always",
-          "prev": ["block", "block-like"],
+          "prev": [
+            "block",
+            "block-like"
+          ],
           "next": "*"
         },
         {
           "blankLine": "always",
-          "prev": ["import", "export"],
-          "next": ["class", "expression", "block", "block-like", "let", "var", "const"]
+          "prev": [
+            "import",
+            "export"
+          ],
+          "next": [
+            "class",
+            "expression",
+            "block",
+            "block-like",
+            "let",
+            "var",
+            "const"
+          ]
         },
         {
           "blankLine": "never",
@@ -108,7 +123,13 @@
         {
           "blankLine": "always",
           "prev": "const",
-          "next": ["expression", "block", "block-like", "let", "var"]
+          "next": [
+            "expression",
+            "block",
+            "block-like",
+            "let",
+            "var"
+          ]
         },
         {
           "blankLine": "never",
@@ -118,7 +139,13 @@
         {
           "blankLine": "always",
           "prev": "var",
-          "next": ["expression", "block", "block-like", "let", "const"]
+          "next": [
+            "expression",
+            "block",
+            "block-like",
+            "let",
+            "const"
+          ]
         },
         {
           "blankLine": "never",
@@ -128,7 +155,13 @@
         {
           "blankLine": "always",
           "prev": "let",
-          "next": ["expression", "block", "block-like", "var", "const"]
+          "next": [
+            "expression",
+            "block",
+            "block-like",
+            "var",
+            "const"
+          ]
         },
         {
           "blankLine": "always",

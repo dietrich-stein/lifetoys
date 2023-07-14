@@ -1,5 +1,7 @@
 /// <reference types="react-scripts" />
 
+declare module 'dis-gui-lifetoys';
+
 //declare module 'dat.gui';
 //declare module '@canvasjs/charts';
 //declare module 'svelte-grid/build/helper/index.mjs';
