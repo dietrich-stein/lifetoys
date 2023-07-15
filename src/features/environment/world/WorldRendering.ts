@@ -1,34 +1,42 @@
 import { store, RootState } from '../../../app/store';
+import { useAppDispatch } from '../../../app/hooks';
+import {
+  EnvironmentManagerState,
+  setWorldRenderingTime,
+} from '../environmentManagerSlice';
 
 interface WorldRenderingInterface {
-  store: RootState;
   running: boolean;
   animateId: number | null;
-  timeElapsed: number;
+  timeStartedLast: number;
+  timeStoppedElapsed: number;
+  timeStoppedLast: number;
   canvasWidth: number;
   canvasHeight: number;
-  setRunning: (value: boolean) => void;
-  getTimeElapsed: () => number;
-  start: () => void;
+  start: (state: EnvironmentManagerState) => void;
   stop: () => void;
   reset: () => void;
 }
 
 class WorldRendering implements WorldRenderingInterface {
-  store: RootState;
   running: boolean;
   animateId: number | null;
-  timeElapsed: number;
+  timeStartedElapsed: number;
+  timeStartedLast: number;
+  timeStoppedElapsed: number;
+  timeStoppedLast: number;
   canvasWidth: number;
   canvasHeight: number;
   private static instance: WorldRendering;
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
-    this.store = store.getState();
-    this.running = this.store.environmentManager.worldRenderingRunning;
+    this.running = false;
     this.animateId = null;
-    this.timeElapsed = 0;
+    this.timeStartedElapsed = 0;
+    this.timeStartedLast = 0;
+    this.timeStoppedElapsed = 0;
+    this.timeStoppedLast = 0;
     this.canvasHeight = 0;
     this.canvasWidth = 0;
     // Auto-start
@@ -57,40 +65,59 @@ class WorldRendering implements WorldRenderingInterface {
     return WorldRendering.instance;
   }
 
-  public setRunning(value: boolean) {
-    this.running = value;
-  }
+  public start(state: EnvironmentManagerState) {
+    //const dispatch = useAppDispatch();
+    if (this.running) {
+      return;
+    }
 
-  public getTimeElapsed() {
-    return this.timeElapsed;
-  }
-
-  public start() {
-    const animate = (time: DOMHighResTimeStamp) => {
-      this.timeElapsed = time;
+    const animate = (nowTime: DOMHighResTimeStamp) => {
+      this.timeStartedElapsed = nowTime - this.timeStoppedElapsed;
       this.render();
+      store.dispatch(setWorldRenderingTime({
+        ...state,
+        worldRenderingTime: this.timeStartedElapsed,
+      }));
       this.animateId = requestAnimationFrame(animate);
     };
+    const startTime = performance.now();
+
+    this.timeStoppedElapsed = this.timeStoppedElapsed + (startTime - this.timeStoppedLast);
+    this.timeStoppedLast = 0;
+
+    this.timeStartedLast = startTime;
 
     requestAnimationFrame(animate);
 
-    this.setRunning(true);
+    this.running = true;
   }
 
   public stop() {
+    if (!this.running) {
+      return;
+    }
+
     if (this.animateId !== null) {
       cancelAnimationFrame(this.animateId);
     }
 
-    this.setRunning(false);
+    const stopTime = performance.now();
+
+    this.timeStartedLast = 0;
+    this.timeStoppedLast = stopTime;
+    this.running = false;
   }
 
+  // Intended only for use in combination with WorldSimulation.reset()
   public reset() {
     this.stop();
-    this.timeElapsed = 0;
+    this.timeStartedElapsed = 0;
+    this.timeStartedLast = 0;
+    this.timeStoppedElapsed = 0;
+    this.timeStoppedLast = 0;
   }
 
-  render() {
+  private render() {
     console.log('RENDER');
   }
 

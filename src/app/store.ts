@@ -9,15 +9,8 @@ import editorEnvironmentReducer, { setEditorStatus } from '../features/environme
 import worldEnvironmentReducer, { setWorldStatus } from '../features/environment/world/worldEnvironmentSlice';
 import environmentManagerReducer, {
   init,
-  startWorldSimulation,
-  stopWorldSimulation,
-  resetWorldSimulation,
-  startWorldRendering,
-  stopWorldRendering,
 } from '../features/environment/environmentManagerSlice';
 import { startAppListening, listenerMiddleware } from './listenerMiddleware';
-import WorldSimulation from '../features/environment/world/WorldSimulation';
-import WorldRendering from '../features/environment/world/WorldRendering';
 
 const reducer = {
   counter: counterReducer,
@@ -32,39 +25,11 @@ startAppListening({
   matcher: isAnyOf(
     setWorldStatus,
     setEditorStatus,
-    startWorldRendering,
-    stopWorldRendering,
-    startWorldSimulation,
-    stopWorldSimulation,
-    resetWorldSimulation,
   ),
   effect: async (action, listenerApi) => {
     let state: RootState = listenerApi.getState();
 
-    const worldSimulation = WorldSimulation.getInstance();
-    const worldRendering = WorldRendering.getInstance();
-
     switch (action.type) {
-      case 'environmentManager/startWorldRendering':
-        worldRendering.start();
-        break;
-
-      case 'environmentManager/stopWorldRendering':
-        worldRendering.stop();
-        break;
-
-      case 'environmentManager/startWorldSimulation':
-        worldSimulation.start();
-        break;
-
-      case 'environmentManager/stopWorldSimulation':
-        worldSimulation.stop();
-        break;
-
-      case 'environmentManager/resetWorldSimulation':
-        worldSimulation.reset();
-        break;
-
       case 'editorEnvironment/setEditorStatus':
       case 'worldEnvironment/setWorldStatus':
         if (
@@ -84,23 +49,6 @@ startAppListening({
             worldCanvasId: state.worldEnvironment.canvasId,
             worldCanvasContainerId: state.worldEnvironment.canvasContainerId,
           }));
-
-          // Refresh the state
-          //state = listenerApi.getState();
-          //if (
-            //state.environmentManager.editorCanvas !== null &&
-            //state.environmentManager.worldCanvas !== null
-          //) {
-            /*const simulationStopTimeValue = (state.engine.simulationStopTime !== null)
-              ? state.engine.simulationStopTime
-              : 0;
-
-            listenerApi.dispatch(startSimulation({
-              ...state.engine,
-              simulationStartTime: simulationStopTimeValue,
-              simulationStopTime: null,
-            }));*/
-          //}
         }
 
         break;

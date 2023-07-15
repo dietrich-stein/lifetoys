@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
+import { RootState } from '../../app/store';
 import {
   selectEnvironmentManager,
   startWorldRendering,
@@ -7,10 +8,12 @@ import {
   startWorldSimulation,
   stopWorldSimulation,
   resetWorldSimulation,
+  resetWorldRendering,
 } from './environmentManagerSlice';
 import { formatTime } from '../../utils/FormatTime';
-import WorldSimulation from './world/WorldSimulation';
-import WorldRendering from './world/WorldRendering';
+//import WorldSimulation from './world/WorldSimulation';
+//import WorldRendering from './world/WorldRendering';
+import * as dg from 'dis-gui-lifetoys';
 
 type EnvironmentManagerProps = {
   children?: React.ReactNode
@@ -32,11 +35,11 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
    * complexity than hooks or useEffect/useReducer approaches.
    */
   // Simulation
-  const worldSimulation = WorldSimulation.getInstance();
-  const worldSimulationTime = worldSimulation.getTimeElapsed();
+  //const worldSimulation = WorldSimulation.getInstance();
+  //const worldSimulationTime = worldSimulation.getTimeElapsed();
   // Rendering
-  const worldRendering = WorldRendering.getInstance();
-  const worldRenderingTime = worldRendering.getTimeElapsed();
+  //const worldRendering = WorldRendering.getInstance();
+  //const worldRenderingTime = worldRendering.getTimeElapsed();
 
   const handleStartSimulationClick = () => {
     dispatch(startWorldSimulation({
@@ -55,7 +58,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
   };
 
   const handleResetSimulationClick = () => {
-    dispatch(stopWorldRendering({
+    dispatch(resetWorldRendering({
       ...environmentManagerState,
       worldRenderingRunning: false,
     }));
@@ -64,6 +67,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
       worldSimulationRunning: false,
     }));
     handleStartSimulationClick();
+    handleStartRenderingClick();
   };
 
   const handleStartRenderingClick = () => {
@@ -83,25 +87,32 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
   return (
     <>
       { children }
-      <div>
-        <button disabled={ !worldSimulationRunning } onClick={ handleResetSimulationClick }>
-          { 'Reset Simulation' }
-        </button>
-        <hr />
-        <div>Simulation Time: { formatTime(worldSimulationTime) }</div>
-        <button onClick={ worldSimulationRunning ? handleStopSimulationClick : handleStartSimulationClick }>
-          { worldSimulationRunning ? 'Stop Simulation' : 'Start Simulation' }
-        </button>
-        <hr />
-        <div>Rendering Time: { formatTime(worldRenderingTime) }</div>
-        <button
+      <dg.GUI>
+        <dg.Button
           disabled={ !worldSimulationRunning }
-          onClick={ worldRenderingRunning ? handleStopRenderingClick : handleStartRenderingClick }
-        >
-          { worldRenderingRunning ? 'Stop Rendering' : 'Start Rendering' }
-        </button>
-        <hr />
-      </div>
+          label='Reset Simulation & Rendering'
+          onClick={ handleResetSimulationClick }
+        />
+        <dg.Text
+          label='Simulation Time'
+          value={
+            formatTime(useAppSelector((state: RootState) => state.environmentManager.worldSimulationTime ))
+          }
+        />
+        <dg.Button
+          label={ worldSimulationRunning ? 'Stop Simulation' : 'Start Simulation' }
+          onClick={ worldSimulationRunning ? handleStopSimulationClick : handleStartSimulationClick }>
+        </dg.Button>
+        <dg.Text
+          label='Rendering Time'
+          value={ formatTime(useAppSelector((state: RootState) => state.environmentManager.worldRenderingTime )) }
+        />
+        <dg.Button
+          disabled={ !worldSimulationRunning }
+          label={ worldRenderingRunning ? 'Stop Rendering' : 'Start Rendering' }
+          onClick={ worldRenderingRunning ? handleStopRenderingClick : handleStartRenderingClick }>
+        </dg.Button>
+      </dg.GUI>
     </>
   );
 }

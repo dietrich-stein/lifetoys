@@ -1,19 +1,21 @@
 import { store, RootState } from '../../../app/store';
+import { useAppDispatch } from '../../../app/hooks';
+import {
+  EnvironmentManagerState,
+  setWorldSimulationTime,
+} from '../environmentManagerSlice';
 
 interface WorldSimulationInterface {
-  store: RootState;
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
   setRunning: (value: boolean) => void;
-  getTimeElapsed: () => number;
-  start: () => void;
+  start: (state: EnvironmentManagerState) => void;
   stop: () => void;
   reset: () => void;
 }
 
 class WorldSimulation implements WorldSimulationInterface {
-  store: RootState;
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
@@ -21,14 +23,9 @@ class WorldSimulation implements WorldSimulationInterface {
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
-    this.store = store.getState();
-    this.running = this.store.environmentManager.worldSimulationRunning;
+    this.running = false;//this.store.environmentManager.worldSimulationRunning;
     this.intervalId = null;
-    this.timeElapsed = 0;
-
-    if (this.running) {
-      this.start();
-    }
+    this.timeElapsed = 0;//this.store.environmentManager.worldSimulationTime;
   }
 
   public static getInstance(): WorldSimulation {
@@ -43,21 +40,31 @@ class WorldSimulation implements WorldSimulationInterface {
     this.running = value;
   }
 
-  public getTimeElapsed() {
-    return this.timeElapsed;
-  }
+  public start(state: EnvironmentManagerState) {
+    if (this.running) {
+      return;
+    }
 
-  public start() {
     const tickDuration = 1000 / 60; // ~16.67ms
+    //const dispatch = useAppDispatch();
 
     this.intervalId = setInterval(() => {
       this.timeElapsed += tickDuration;
+      this.simulate();
+      store.dispatch(setWorldSimulationTime({
+        ...state,
+        worldSimulationTime: this.timeElapsed,
+      }));
     }, tickDuration);
 
     this.setRunning(true);
   }
 
   public stop() {
+    if (!this.running) {
+      return;
+    }
+
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
     }
@@ -68,6 +75,10 @@ class WorldSimulation implements WorldSimulationInterface {
   public reset() {
     this.stop();
     this.timeElapsed = 0;
+  }
+
+  private simulate() {
+    console.log('SIMULATE');
   }
 }
 
