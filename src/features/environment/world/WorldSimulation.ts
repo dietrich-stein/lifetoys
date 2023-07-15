@@ -1,6 +1,6 @@
-import { store, RootState } from '../../app/store';
+import { store, RootState } from '../../../app/store';
 
-interface EngineSimulationInterface {
+interface WorldSimulationInterface {
   store: RootState;
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
@@ -12,17 +12,17 @@ interface EngineSimulationInterface {
   reset: () => void;
 }
 
-class EngineSimulation implements EngineSimulationInterface {
+class WorldSimulation implements WorldSimulationInterface {
   store: RootState;
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
-  private static instance: EngineSimulation;
+  private static instance: WorldSimulation;
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
     this.store = store.getState();
-    this.running = this.store.engine.simulationRunning;
+    this.running = this.store.environmentManager.worldSimulationRunning;
     this.intervalId = null;
     this.timeElapsed = 0;
 
@@ -31,12 +31,12 @@ class EngineSimulation implements EngineSimulationInterface {
     }
   }
 
-  public static getInstance(): EngineSimulation {
-    if (!EngineSimulation.instance) {
-      EngineSimulation.instance = new EngineSimulation();
+  public static getInstance(): WorldSimulation {
+    if (!WorldSimulation.instance) {
+      WorldSimulation.instance = new WorldSimulation();
     }
 
-    return EngineSimulation.instance;
+    return WorldSimulation.instance;
   }
 
   public setRunning(value: boolean) {
@@ -71,4 +71,4 @@ class EngineSimulation implements EngineSimulationInterface {
   }
 }
 
-export default EngineSimulation;
+export default WorldSimulation;

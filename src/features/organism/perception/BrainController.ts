@@ -67,7 +67,7 @@ class BrainController implements BrainControllerInterface {
   }
 
   decide(grid_map: GridMap) {
-    const lookRange = this.store.engine.hyperparams.lookRange;
+    const lookRange = this.store.environmentManager.hyperparams.lookRange;
 
     var decision = Decision.neutral;
     var closest = lookRange + 1;

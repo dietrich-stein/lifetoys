@@ -99,7 +99,7 @@ class EyeCell extends Cell {
     const {
       lookRange,
       seeThroughSelf,
-    } = this.store.engine.hyperparams;
+    } = this.store.environmentManager.hyperparams;
 
     for (var i = 0; i < lookRange; i++) {
       col += addCol;

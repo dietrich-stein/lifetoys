@@ -173,7 +173,6 @@ class GridMap implements GridMapInterface {
     return grid;
   }
 
-  // @todo: no any plz
   loadRaw(grid: SerializedGridMap) {
     for (let f of grid.food) {
       this.setCellState(f.c, f.r, CellStates.food);

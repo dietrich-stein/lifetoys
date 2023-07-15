@@ -1,35 +1,71 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 //import EngineSimulation from '../engine/EngineSimulation';
-import EngineRendering from '../engine/EngineRendering';
+import EngineRendering from './world/WorldRendering';
+import Neighbors from '../grid/Neighbors';
+import { RootState } from '../../app/store';
+
+type HyperparamsState = {
+  lifespanMultiplier: number;
+  foodProdProb: number;
+  killableNeighbors: number[][];
+  edibleNeighbors: number[][];
+  growableNeighbors: number[][];
+  useGlobalMutability: boolean;
+  globalMutability: number;
+  addProb: number;
+  changeProb: number;
+  removeProb: number;
+  rotationEnabled: boolean;
+  foodBlocksReproduction: boolean;
+  moversCanProduce: boolean;
+  instaKill: boolean;
+  lookRange: number;
+  seeThroughSelf: boolean;
+  foodDropProb: number;
+  extraMoverFoodCost: number;
+};
 
 // Optionality enables dispatch without including elements
 export interface EnvironmentManagerState {
   ready: boolean;
   editorCanvasId: string | null;
-  //editorCanvas?: any;//HTMLCanvasElement | null;
   editorCanvasContainerId: string | null;
-  //editorCanvasContainer?: any;
   worldCanvasId: string | null;
-  //worldCanvas?: any;//HTMLCanvasElement | null;
   worldCanvasContainerId: string | null;
-  //worldCanvasContainer?: any;
+  hyperparams: HyperparamsState;
+  worldRenderingRunning: boolean;
+  worldSimulationRunning: boolean;
 }
 
 const initialState: EnvironmentManagerState = {
   ready: false,
   editorCanvasId: null,
-  //editorCanvas: null,
   editorCanvasContainerId: null,
-  //editorCanvasContainer: null,
   worldCanvasId: null,
-  //worldCanvas: null,
   worldCanvasContainerId: null,
-  //worldCanvasContainer: null,
+  worldRenderingRunning: false,
+  worldSimulationRunning: false,
+  hyperparams: {
+    lifespanMultiplier: 100,
+    foodProdProb: 5,
+    killableNeighbors: Neighbors.adjacent,
+    edibleNeighbors: Neighbors.adjacent,
+    growableNeighbors: Neighbors.adjacent,
+    useGlobalMutability: false,
+    globalMutability: 5,
+    addProb: 33,
+    changeProb: 33,
+    removeProb: 33,
+    rotationEnabled: true,
+    foodBlocksReproduction: true,
+    moversCanProduce: false,
+    instaKill: false,
+    lookRange: 20,
+    seeThroughSelf: false,
+    foodDropProb: 0,
+    extraMoverFoodCost: 0,
+  },
 };
-
-/*function isObject(input: any) :input is Record<string,any> {
-  return (input !== null) && (typeof input === 'object');
-}*/
 
 function isHTMLDivElement(input: any): input is HTMLDivElement {
   return (input) && (input !== null) && (input.tagName === 'DIV');
@@ -84,11 +120,38 @@ export const environmentManagerSlice = createSlice({
         }
       }
     },
+    startWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      console.log('environmentManager.startWorldRendering, payload:', action.payload);
+      state.worldRenderingRunning = action.payload.worldRenderingRunning;
+    },
+    stopWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      console.log('environmentManager.stopWorldRendering, payload:', action.payload);
+      state.worldRenderingRunning = action.payload.worldRenderingRunning;
+    },
+    startWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      console.log('environmentManager.startWorldSimulation, payload:', action.payload);
+      state.worldSimulationRunning = action.payload.worldSimulationRunning;
+    },
+    stopWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      console.log('environmentManager.stopWorldSimulation, payload:', action.payload);
+      state.worldSimulationRunning = action.payload.worldSimulationRunning;
+    },
+    resetWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      console.log('environmentManager.stopWorldSimulation, payload:', action.payload);
+      state.worldSimulationRunning = action.payload.worldSimulationRunning;
+    },
   },
 });
 
+export const selectEnvironmentManager = (state: RootState) => state.environmentManager;
+
 export const {
   init,
+  startWorldRendering,
+  stopWorldRendering,
+  startWorldSimulation,
+  stopWorldSimulation,
+  resetWorldSimulation,
 } = environmentManagerSlice.actions;
 
 export default environmentManagerSlice.reducer;

@@ -93,7 +93,7 @@ class Organism implements OrganismInterface {
     //this.movement_direction = Directions.cardinals.s;
     this.rotation_direction = Directions.cardinals.n;
     this.can_rotate = (this.environment === 'world')
-      ? this.store.engine.hyperparams.rotationEnabled
+      ? this.store.environmentManager.hyperparams.rotationEnabled
       : false;
     this.move_count = 0;
     this.move_range = 4;
@@ -137,7 +137,7 @@ class Organism implements OrganismInterface {
 
   // amount of food required before it can reproduce
   foodNeeded() {
-    const extraMoverFoodCost = this.store.engine.hyperparams.extraMoverFoodCost;
+    const extraMoverFoodCost = this.store.environmentManager.hyperparams.extraMoverFoodCost;
 
     return this.anatomy.has_mover
       ? this.anatomy.cells.length +
@@ -146,7 +146,7 @@ class Organism implements OrganismInterface {
   }
 
   lifespan() {
-    const lifespanMultiplier = this.store.engine.hyperparams.lifespanMultiplier;
+    const lifespanMultiplier = this.store.environmentManager.hyperparams.lifespanMultiplier;
 
     return this.anatomy.cells.length * lifespanMultiplier;
   }
@@ -164,7 +164,7 @@ class Organism implements OrganismInterface {
       rotationEnabled,
       useGlobalMutability,
       globalMutability,
-    } = this.store.engine.hyperparams;
+    } = this.store.environmentManager.hyperparams;
 
     //produce mutated child
     //check nearby locations (is there room and a direct path)
@@ -252,7 +252,7 @@ class Organism implements OrganismInterface {
       addProb,
       changeProb,
       removeProb,
-    } = this.store.engine.hyperparams;
+    } = this.store.environmentManager.hyperparams;
 
     let added = false;
     let changed = false;
@@ -472,7 +472,7 @@ class Organism implements OrganismInterface {
   }
 
   isClear(grid_map: GridMap, col: number, row: number, rotation: number = this.rotation_direction) {
-    const foodBlocksReproduction = this.store.engine.hyperparams.foodBlocksReproduction;
+    const foodBlocksReproduction = this.store.environmentManager.hyperparams.foodBlocksReproduction;
 
     for (var loccell of this.anatomy.cells) {
       var cell = this.getRealCell(grid_map, loccell, col, row, rotation);
@@ -496,7 +496,7 @@ class Organism implements OrganismInterface {
   }
 
   harm(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
-    const instaKill = this.store.engine.hyperparams.instaKill;
+    const instaKill = this.store.environmentManager.hyperparams.instaKill;
 
     this.damage++;
 

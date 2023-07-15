@@ -31,7 +31,7 @@ class KillerCell extends Cell {
     var c = this.getRealCol();
     var r = this.getRealRow();
 
-    const killableNeighbors = this.store.engine.hyperparams.killableNeighbors;
+    const killableNeighbors = this.store.environmentManager.hyperparams.killableNeighbors;
 
     for (var loc of killableNeighbors) {
       var cell = grid_map.cellAt(c + loc[0], r + loc[1]);
@@ -57,7 +57,7 @@ class KillerCell extends Cell {
 
     neighbor_cell.owner_org.harm(grid_map, fossil_record, ticks);
 
-    const instaKill = this.store.engine.hyperparams.instaKill;
+    const instaKill = this.store.environmentManager.hyperparams.instaKill;
 
     if (instaKill && is_hit) {
       this.org.harm(grid_map, fossil_record, ticks);

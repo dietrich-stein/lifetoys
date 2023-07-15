@@ -9,19 +9,6 @@ declare module 'dis-gui-lifetoys';
 //declare module 'svelte-fa';
 //declare module 'svrollbar';
 
-//type GUI = import('./dat.gui').GUI;
-
-//type WorldEnvironment = import('./Environments/World/WorldEnvironment').default;
-//type EditorEnvironment = import('./Environments/Editor/EditorEnvironment.tsx').default;
-
-/*interface AppContextInterface {
-  world_environment: WorldEnvironment | null;
-  editor_environment: EditorEnvironment | null;
-}*/
-
-//type WorldRenderer = import('./Environments/World/WorldRenderer').default;
-//type EditorRenderer = import('./Environments/Editor/EditorRenderer').default;
-
 //type Perlin = import('./Utils/Perlin').default;
 //type ControlPanel = import('./Interaction/ControlPanel').default;
 type Organism = import('./Organism/Organism').default;

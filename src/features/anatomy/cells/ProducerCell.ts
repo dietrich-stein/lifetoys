@@ -32,7 +32,7 @@ class ProducerCell extends Cell {
       moversCanProduce,
       foodProdProb,
       growableNeighbors,
-    } = this.store.engine.hyperparams;
+    } = this.store.environmentManager.hyperparams;
 
     if (
       this.org.anatomy.has_mover && !moversCanProduce) {

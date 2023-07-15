@@ -1,6 +1,6 @@
-import { store, RootState } from '../../app/store';
+import { store, RootState } from '../../../app/store';
 
-interface EngineRenderingInterface {
+interface WorldRenderingInterface {
   store: RootState;
   running: boolean;
   animateId: number | null;
@@ -14,23 +14,19 @@ interface EngineRenderingInterface {
   reset: () => void;
 }
 
-/*function isHTMLCanvasElement(input: any) :input is HTMLCanvasElement {
-  return (input !== null) && (input.tagName === 'CANVAS');
-}*/
-
-class EngineRendering implements EngineRenderingInterface {
+class WorldRendering implements WorldRenderingInterface {
   store: RootState;
   running: boolean;
   animateId: number | null;
   timeElapsed: number;
   canvasWidth: number;
   canvasHeight: number;
-  private static instance: EngineRendering;
+  private static instance: WorldRendering;
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
     this.store = store.getState();
-    this.running = this.store.engine.renderingRunning;
+    this.running = this.store.environmentManager.worldRenderingRunning;
     this.animateId = null;
     this.timeElapsed = 0;
     this.canvasHeight = 0;
@@ -53,12 +49,12 @@ class EngineRendering implements EngineRenderingInterface {
     //}
   }
 
-  public static getInstance(): EngineRendering {
-    if (!EngineRendering.instance) {
-      EngineRendering.instance = new EngineRendering();
+  public static getInstance(): WorldRendering {
+    if (!WorldRendering.instance) {
+      WorldRendering.instance = new WorldRendering();
     }
 
-    return EngineRendering.instance;
+    return WorldRendering.instance;
   }
 
   public setRunning(value: boolean) {
@@ -72,6 +68,7 @@ class EngineRendering implements EngineRenderingInterface {
   public start() {
     const animate = (time: DOMHighResTimeStamp) => {
       this.timeElapsed = time;
+      this.render();
       this.animateId = requestAnimationFrame(animate);
     };
 
@@ -93,28 +90,23 @@ class EngineRendering implements EngineRenderingInterface {
     this.timeElapsed = 0;
   }
 
+  render() {
+    console.log('RENDER');
+  }
+
   public fillWindow(canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) {
-    /*if (this.canvas_container === null) {
-      return;
-    }*/
-    const height = canvasContainer.clientHeight;//getAttribute('height'));//$('#' + container_id).height();
-    const width = canvasContainer.clientWidth;//getAttribute('width'));//$('#' + container_id).width();
+    const height = canvasContainer.clientHeight;
+    const width = canvasContainer.clientWidth;
 
     this.fillShape(canvas, height, width);
   }
 
   public fillShape(canvas: HTMLCanvasElement, height: number, width: number) {
-    /*if (this.canvas === null) {
-      return;
-    }*/
     this.canvasWidth = canvas.width = width;
     this.canvasHeight = canvas.height = height;
   }
 
   public clear(canvas: HTMLCanvasElement) {
-    /*if (typeof this.ctx === 'undefined') {
-      return;
-    }*/
     const canvasContext = canvas.getContext('2d', {
       willReadFrequently: true,
     }) as CanvasRenderingContext2D;
@@ -124,4 +116,4 @@ class EngineRendering implements EngineRenderingInterface {
   }
 }
 
-export default EngineRendering;
+export default WorldRendering;

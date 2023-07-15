@@ -5,24 +5,22 @@ import {
   isAnyOf,
 } from '@reduxjs/toolkit';
 import counterReducer from '../features/counter/counterSlice';
-import engineReducer, {
-  startSimulation,
-  stopSimulation,
-  resetSimulation,
-  startRendering,
-  stopRendering,
-} from '../features/engine/engineSlice';
 import editorEnvironmentReducer, { setEditorStatus } from '../features/environment/editor/editorEnvironmentSlice';
 import worldEnvironmentReducer, { setWorldStatus } from '../features/environment/world/worldEnvironmentSlice';
-import environmentManagerReducer, { init } from '../features/environment/environmentManagerSlice';
-//import { debounce } from 'lodash';
+import environmentManagerReducer, {
+  init,
+  startWorldSimulation,
+  stopWorldSimulation,
+  resetWorldSimulation,
+  startWorldRendering,
+  stopWorldRendering,
+} from '../features/environment/environmentManagerSlice';
 import { startAppListening, listenerMiddleware } from './listenerMiddleware';
-import EngineSimulation from '../features/engine/EngineSimulation';
-import EngineRendering from '../features/engine/EngineRendering';
+import WorldSimulation from '../features/environment/world/WorldSimulation';
+import WorldRendering from '../features/environment/world/WorldRendering';
 
 const reducer = {
   counter: counterReducer,
-  engine: engineReducer,
   environmentManager: environmentManagerReducer,
   editorEnvironment: editorEnvironmentReducer,
   worldEnvironment: worldEnvironmentReducer,
@@ -34,42 +32,41 @@ startAppListening({
   matcher: isAnyOf(
     setWorldStatus,
     setEditorStatus,
-    startRendering,
-    stopRendering,
-    startSimulation,
-    stopSimulation,
-    resetSimulation,
+    startWorldRendering,
+    stopWorldRendering,
+    startWorldSimulation,
+    stopWorldSimulation,
+    resetWorldSimulation,
   ),
   effect: async (action, listenerApi) => {
     let state: RootState = listenerApi.getState();
 
-    //console.log(action.type);
-    const engineSimulation = EngineSimulation.getInstance();
-    const engineRendering = EngineRendering.getInstance();
+    const worldSimulation = WorldSimulation.getInstance();
+    const worldRendering = WorldRendering.getInstance();
 
     switch (action.type) {
-      case 'engine/startRendering':
-        engineRendering.start();
+      case 'environmentManager/startWorldRendering':
+        worldRendering.start();
         break;
 
-      case 'engine/stopRendering':
-        engineRendering.stop();
+      case 'environmentManager/stopWorldRendering':
+        worldRendering.stop();
         break;
 
-      case 'engine/startSimulation':
-        engineSimulation.start();
+      case 'environmentManager/startWorldSimulation':
+        worldSimulation.start();
         break;
 
-      case 'engine/stopSimulation':
-        engineSimulation.stop();
+      case 'environmentManager/stopWorldSimulation':
+        worldSimulation.stop();
         break;
 
-      case 'engine/resetSimulation':
-        engineSimulation.reset();
+      case 'environmentManager/resetWorldSimulation':
+        worldSimulation.reset();
         break;
 
       case 'editorEnvironment/setEditorStatus':
-      case 'worldEnvironment/setEditorStatus':
+      case 'worldEnvironment/setWorldStatus':
         if (
           state.worldEnvironment.status === 'idle' &&
           state.editorEnvironment.status === 'idle'
@@ -80,6 +77,7 @@ startAppListening({
           await listenerApi.delay(250);
 
           listenerApi.dispatch(init({
+            ...state.environmentManager,
             ready: true,
             editorCanvasId: state.editorEnvironment.canvasId,
             editorCanvasContainerId: state.editorEnvironment.canvasContainerId,
