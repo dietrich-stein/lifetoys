@@ -17,7 +17,7 @@ export const editorEnvironmentSlice = createSlice({
   name: 'editorEnvironment',
   initialState,
   reducers: {
-    setEditorStatus: (state, action: PayloadAction<EditorEnvironmentState>) => {
+    initEditorEnvironment: (state, action: PayloadAction<EditorEnvironmentState>) => {
       state.status = action.payload.status;
       state.canvasId = action.payload.canvasId;
       state.canvasContainerId = action.payload.canvasContainerId;
@@ -26,7 +26,7 @@ export const editorEnvironmentSlice = createSlice({
 });
 
 export const {
-  setEditorStatus,
+  initEditorEnvironment,
 } = editorEnvironmentSlice.actions;
 
 export const selectEditorEnvironment = (state: RootState) => state.editorEnvironment;

@@ -164,20 +164,11 @@ type AverageCellCountsType = Array<CellCountsType>;
 interface EnvironmentRendererProps {
   /*
   // Common Properties
-  cell_size: number;
-  canvasId: string; //canvas: HTMLCanvasElement | null;
   //ctx: CanvasRenderingContext2D | undefined;
   cells_to_render: Set<GridCell>;
   cells_to_highlight: Set<GridCell>;
   highlighted_cells: Set<GridCell>;
 
-  // World Renderer Properties
-  fill_window?: boolean;
-  num_cols?: number | null;
-  num_rows?: number | null;
-  //canvas_container?: HTMLElement | null;
-  height?: number;
-  width?: number;
   */
   // Editor Renderer Properties
   /*

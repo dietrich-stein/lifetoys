@@ -14,7 +14,7 @@ interface CellInterface {
   initInherit: (parent: Cell) => void;
   initRandom: () => void;
   initDefault: () => void;
-  performFunction: (grid_map: GridMap, fossil_record: FossilRecord, ticks: number) => void;
+  performFunction: (gridMap: GridMap, fossilRecord: FossilRecord, ticks: number) => void;
   getRealCol: () => void;
   getRealRow: () => void;
   //getRealCell: () => GridCell | null;
@@ -61,7 +61,7 @@ class Cell implements CellInterface {
     // initialize to default values
   }
 
-  performFunction(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
+  performFunction(gridMap: GridMap, fossilRecord: FossilRecord, ticks: number) {
     // default behavior: none
   }
 

@@ -10,7 +10,6 @@ interface WorldSimulationInterface {
   timeElapsed: number;
   ticksDelay: number;
   ticksElapsed: number;
-  setRunning: (value: boolean) => void;
   setTicksDelay: (state: EnvironmentManagerState, value: number) => void;
   start: (state: EnvironmentManagerState) => void;
   stop: () => void;
@@ -48,13 +47,21 @@ class WorldSimulation implements WorldSimulationInterface {
     this.ticksDelay = value;
 
     if (this.running) {
+      // Stop and start again for setInterval() to use the new value
       this.stop();
       this.start(state);
     }
   }
 
-  public setRunning(value: boolean) {
-    this.running = value;
+  private initDefaultOrganism() {
+    console.log('initDefaultOrganism');
+    //var center = grid_map.getCenter();
+    //var org = new Organism(center[0], center[1], this);
+    //org.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false);
+    //org.anatomy.addDefaultCell(CellStates.producer, 1, 1, false);
+    //org.anatomy.addDefaultCell(CellStates.producer, -1, -1, true);
+    //this.addOrganism(org);
+    //fossil_record.addSpecies(org, null);
   }
 
   public start(state: EnvironmentManagerState) {
@@ -77,7 +84,9 @@ class WorldSimulation implements WorldSimulationInterface {
       }));
     }, this.ticksDelay);
 
-    this.setRunning(true);
+    this.initDefaultOrganism();
+
+    this.running = true;
   }
 
   public stop() {
@@ -90,7 +99,7 @@ class WorldSimulation implements WorldSimulationInterface {
       this.intervalId = null;
     }
 
-    this.setRunning(false);
+    this.running = false;
   }
 
   public reset() {

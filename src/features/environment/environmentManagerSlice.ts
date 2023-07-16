@@ -3,6 +3,7 @@ import WorldSimulation, { DEFAULT_TICKS_DELAY } from './world/WorldSimulation';
 import WorldRendering from './world/WorldRendering';
 import Neighbors from '../grid/Neighbors';
 import { RootState } from '../../app/store';
+import { WorldEnvironmentState } from './world/worldEnvironmentSlice';
 
 type HyperparamsState = {
   lifespanMultiplier: number;
@@ -27,32 +28,46 @@ type HyperparamsState = {
 
 // Optionality enables dispatch without including elements
 export interface EnvironmentManagerState {
+  // Init
   ready: boolean;
   editorCanvasId: string | null;
   editorCanvasContainerId: string | null;
   worldCanvasId: string | null;
   worldCanvasContainerId: string | null;
-  hyperparams: HyperparamsState;
+  // Rendering
   worldRenderingRunning: boolean;
   worldRenderingTime: number;
+  // Simulation
   worldSimulationRunning: boolean;
   worldSimulationTicks: number;
   worldSimulationTicksDelay: number;
   worldSimulationTime: number;
+  // Other
+  hyperparams: HyperparamsState;
 }
 
+// Keeping this around awhile because it shows how to combine states on an action
+/*export interface EnvironmentManagerAndWorldEnvironmentStates {
+  environmentManager: EnvironmentManagerState,
+  worldEnvironment: WorldEnvironmentState
+}*/
+
 const initialState: EnvironmentManagerState = {
+  // Init
   ready: false,
   editorCanvasId: null,
   editorCanvasContainerId: null,
   worldCanvasId: null,
   worldCanvasContainerId: null,
+  // Rendering
   worldRenderingRunning: false,
   worldRenderingTime: 0,
+  // Simulation
   worldSimulationRunning: false,
   worldSimulationTicks: 0,
   worldSimulationTicksDelay: DEFAULT_TICKS_DELAY,
   worldSimulationTime: 0,
+  // Other
   hyperparams: {
     lifespanMultiplier: 100,
     foodProdProb: 5,
@@ -74,15 +89,14 @@ const initialState: EnvironmentManagerState = {
     extraMoverFoodCost: 0,
   },
 };
-
+/*
 function isHTMLDivElement(input: any): input is HTMLDivElement {
   return (input) && (input !== null) && (input.tagName === 'DIV');
 }
 
 function isHTMLCanvasElement(input: any): input is HTMLCanvasElement {
   return (input) && (input !== null) && (input.tagName === 'CANVAS');
-}
-
+}*/
 const worldRendering = WorldRendering.getInstance();
 const worldSimulation = WorldSimulation.getInstance();
 
@@ -90,23 +104,32 @@ export const environmentManagerSlice = createSlice({
   name: 'environmentManager',
   initialState,
   reducers: {
-    init: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      console.log('environmentManager.init', action.payload);
-      state.ready = action.payload.ready;
+    // NOTE: Most of this was recently lifted up into the listener within the store.
+    // Keeping this around awhile because it shows how to combine states on an action
+    /*initEnvironmentManager: (
+      state,
+      action: PayloadAction<EnvironmentManagerAndWorldEnvironmentStates>,
+    ) => {
+      state.ready = action.payload.environmentManager.ready;
 
       // Ensuring ready is how we know the DOM elements are mounted.
+      //debugger;
+
       if (
         state.ready &&
-        typeof action.payload.editorCanvasId === 'string' &&
-        typeof action.payload.editorCanvasContainerId === 'string' &&
-        typeof action.payload.worldCanvasId === 'string' &&
-        typeof action.payload.worldCanvasContainerId === 'string'
+        typeof action.payload.environmentManager.editorCanvasId === 'string' &&
+        typeof action.payload.environmentManager.editorCanvasContainerId === 'string' &&
+        typeof action.payload.environmentManager.worldCanvasId === 'string' &&
+        typeof action.payload.environmentManager.worldCanvasContainerId === 'string'
       ) {
-        state.editorCanvasId = action.payload.editorCanvasId;
-        state.editorCanvasContainerId = action.payload.editorCanvasContainerId;
-        state.worldCanvasId = action.payload.worldCanvasId;
-        state.worldCanvasContainerId = action.payload.worldCanvasContainerId;
+        console.log('environmentManager.initEnvironmentManager', action.payload);
 
+        state.editorCanvasId = action.payload.environmentManager.editorCanvasId;
+        state.editorCanvasContainerId = action.payload.environmentManager.editorCanvasContainerId;
+        state.worldCanvasId = action.payload.environmentManager.worldCanvasId;
+        state.worldCanvasContainerId = action.payload.environmentManager.worldCanvasContainerId;
+
+        /*
         let editorCanvasEl = document.getElementById(state.editorCanvasId);// as HTMLCanvasElement | null;
         let editorCanvasContainerEl = document.getElementById(state.editorCanvasContainerId);
         let worldCanvasEl = document.getElementById(state.worldCanvasId);// as HTMLCanvasElement | null;
@@ -118,13 +141,14 @@ export const environmentManagerSlice = createSlice({
           isHTMLCanvasElement(worldCanvasEl) &&
           isHTMLDivElement(worldCanvasContainerEl)
         ) {
-          //const engineSimulation = EngineSimulation.getInstance();
-          //const engineRendering = WorldRendering.getInstance();
-          worldRendering.init();
-          worldRendering.fillWindow(worldCanvasContainerEl, worldCanvasEl);
+          const cellSize = action.payload.worldEnvironment.config.cell_size;
+
+          worldRendering.initWorldRendering(worldCanvasContainerEl, worldCanvasEl, cellSize);
+
+          //worldSimulation.init();
         }
       }
-    },
+    },*/
 
     // Rendering
 
@@ -183,7 +207,7 @@ export const environmentManagerSlice = createSlice({
 export const selectEnvironmentManager = (state: RootState) => state.environmentManager;
 
 export const {
-  init,
+  //initEnvironmentManager,
   startWorldRendering,
   stopWorldRendering,
   resetWorldRendering,

@@ -1,5 +1,7 @@
 import { RootState } from '../../../app/store';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+//import WorldSimulation from './WorldSimulation';
+//import WorldRendering from './WorldRendering';
 
 interface WorldEnvironmentColorSchemeInterface {
   [key: string]: string;
@@ -8,9 +10,6 @@ interface WorldEnvironmentColorSchemeInterface {
 // Underscores are used for JSON-serializable objects
 export interface WorldEnvironmentConfigState {
   fill_window: boolean;
-  cell_size: number;
-  num_cols: number;
-  num_rows: number;
   num_random_orgs: number;
   clear_walls_on_reset: boolean;
   auto_reset: boolean;
@@ -22,6 +21,11 @@ export interface WorldEnvironmentState {
   status: 'idle' | 'loading';
   canvasId: string | null;
   canvasContainerId: string | null;
+  canvasWidth: number;
+  canvasHeight: number;
+  cellSize: number;
+  numCols: number;
+  numRows: number;
   config: WorldEnvironmentConfigState;
 }
 
@@ -29,11 +33,13 @@ const initialState: WorldEnvironmentState = {
   status: 'loading',
   canvasId: null,
   canvasContainerId: null,
+  canvasWidth: 0,
+  canvasHeight: 0,
+  cellSize: 5,
+  numCols: 0,
+  numRows: 0,
   config: {
     fill_window: true,
-    cell_size: 5,
-    num_cols: 100,
-    num_rows: 100,
     num_random_orgs: 100,
     clear_walls_on_reset: false,
     auto_reset: false,
@@ -53,21 +59,34 @@ const initialState: WorldEnvironmentState = {
     },
   },
 };
+//const worldRendering = WorldRendering.getInstance();
+//const worldSimulation = WorldSimulation.getInstance();
 
 export const worldEnvironmentSlice = createSlice({
   name: 'worldEnvironment',
   initialState,
   reducers: {
-    setWorldStatus: (
-      state, action: PayloadAction<WorldEnvironmentState>,
-    ) => {
+    initWorldEnvironment: (state, action: PayloadAction<WorldEnvironmentState>) => {
       state.status = action.payload.status;
       state.canvasId = action.payload.canvasId;
       state.canvasContainerId = action.payload.canvasContainerId;
     },
-    setWorldColors: (
-      state, action: PayloadAction<WorldEnvironmentState>,
-    ) => {
+    setWorldCellSize: (state, action: PayloadAction<number>) => {
+      state.cellSize = action.payload;
+    },
+    setWorldNumCols: (state, action: PayloadAction<number>) => {
+      state.numCols = action.payload;
+    },
+    setWorldNumRows: (state, action: PayloadAction<number>) => {
+      state.numRows = action.payload;
+    },
+    setWorldCanvasWidth: (state, action: PayloadAction<number>) => {
+      state.canvasWidth = action.payload;
+    },
+    setWorldCanvasHeight: (state, action: PayloadAction<number>) => {
+      state.canvasHeight = action.payload;
+    },
+    setWorldColors: (state, action: PayloadAction<WorldEnvironmentState>) => {
       //
     },
   },
@@ -76,8 +95,13 @@ export const worldEnvironmentSlice = createSlice({
 export const selectWorldEnvironment = (state: RootState) => state.worldEnvironment;
 
 export const {
-  setWorldStatus,
+  initWorldEnvironment,
+  setWorldCellSize,
+  setWorldNumCols,
+  setWorldNumRows,
   setWorldColors,
+  setWorldCanvasWidth,
+  setWorldCanvasHeight,
 } = worldEnvironmentSlice.actions;
 
 export default worldEnvironmentSlice.reducer;

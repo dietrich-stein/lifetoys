@@ -3,7 +3,7 @@ import React, {
   useRef,
 } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { selectEditorEnvironment, setEditorStatus } from './editorEnvironmentSlice';
+import { selectEditorEnvironment, initEditorEnvironment } from './editorEnvironmentSlice';
 import styles from './EditorEnvironmentCanvas.module.css';
 
 export type EditorEnvironmentCanvasProps = {
@@ -22,14 +22,14 @@ export function EditorEnvironmentCanvas(props: EditorEnvironmentCanvasProps) {
 
   useEffect(() => {
     if (canvasRef.current) {
-      dispatch(setEditorStatus({
+      dispatch(initEditorEnvironment({
         ...editorEnvironmentState,
         status: 'idle',
         canvasId,
         canvasContainerId,
       }));
     }
-  });
+  }, []);
 
   return (
     <canvas id={ canvasId } className={ styles.editorCanvas } ref={ canvasRef } />

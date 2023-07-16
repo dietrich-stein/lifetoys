@@ -3,7 +3,7 @@ import React, {
   useRef,
 } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { selectWorldEnvironment, setWorldStatus } from './worldEnvironmentSlice';
+import { selectWorldEnvironment, initWorldEnvironment } from './worldEnvironmentSlice';
 import styles from './WorldEnvironmentCanvas.module.css';
 
 export type EnvironmentCanvasProps = {
@@ -22,14 +22,14 @@ export function WorldEnvironmentCanvas(props: EnvironmentCanvasProps) {
 
   useEffect(() => {
     if (canvasRef.current) {
-      dispatch(setWorldStatus({
+      dispatch(initWorldEnvironment({
         ...worldEnvironmentState,
         status: 'idle',
         canvasId,
         canvasContainerId,
       }));
     }
-  });
+  }, []);
 
   return (
     <canvas id={ canvasId } className={ styles.worldCanvas } ref={ canvasRef } />
