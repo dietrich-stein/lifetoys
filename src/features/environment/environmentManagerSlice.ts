@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import WorldSimulation from './world/WorldSimulation';
+import WorldSimulation, { DEFAULT_TICKS_DELAY } from './world/WorldSimulation';
 import WorldRendering from './world/WorldRendering';
 import Neighbors from '../grid/Neighbors';
 import { RootState } from '../../app/store';
@@ -36,6 +36,8 @@ export interface EnvironmentManagerState {
   worldRenderingRunning: boolean;
   worldRenderingTime: number;
   worldSimulationRunning: boolean;
+  worldSimulationTicks: number;
+  worldSimulationTicksDelay: number;
   worldSimulationTime: number;
 }
 
@@ -48,6 +50,8 @@ const initialState: EnvironmentManagerState = {
   worldRenderingRunning: false,
   worldRenderingTime: 0,
   worldSimulationRunning: false,
+  worldSimulationTicks: 0,
+  worldSimulationTicksDelay: DEFAULT_TICKS_DELAY,
   worldSimulationTime: 0,
   hyperparams: {
     lifespanMultiplier: 100,
@@ -116,14 +120,8 @@ export const environmentManagerSlice = createSlice({
         ) {
           //const engineSimulation = EngineSimulation.getInstance();
           //const engineRendering = WorldRendering.getInstance();
-
+          worldRendering.init();
           worldRendering.fillWindow(worldCanvasContainerEl, worldCanvasEl);
-
-          // FIXME: Not using `any` in the interface results in errors like:
-          // Type 'HTMLCanvasElement' is not assignable to type 'WritableDraft<HTMLCanvasElement>'.
-          //state.editorCanvas = action.payload.editorCanvas;//editorCanvasEl;
-          //state.worldCanvas = action.payload.editorCanvas;//worldCanvasEl;
-          //state.editorCanvasContainer = editorCanvasEl.parentElement();
         }
       }
     },
@@ -142,8 +140,8 @@ export const environmentManagerSlice = createSlice({
 
       worldRendering.stop();
     },
-    setWorldRenderingTime: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.setWorldRenderingTime, payload:', action.payload);
+    setWorldRenderingStats: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      //console.log('environmentManager.setWorldRenderingStats, payload:', action.payload);
       state.worldRenderingTime = action.payload.worldRenderingTime;
     },
     resetWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
@@ -166,12 +164,18 @@ export const environmentManagerSlice = createSlice({
     },
     resetWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
       //console.log('environmentManager.stopWorldSimulation, payload:', action.payload);
+      state.worldSimulationTicksDelay = action.payload.worldSimulationTicksDelay;
       state.worldSimulationRunning = action.payload.worldSimulationRunning;
       worldSimulation.reset();
     },
-    setWorldSimulationTime: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.setWorldSimulationTime, payload:', action.payload);
+    setWorldSimulationStats: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      //console.log('environmentManager.setWorldSimulationStats, payload:', action.payload);
       state.worldSimulationTime = action.payload.worldSimulationTime;
+      state.worldSimulationTicks = action.payload.worldSimulationTicks;
+    },
+    setWorldSimulationTicksDelay: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      state.worldSimulationTicksDelay = action.payload.worldSimulationTicksDelay;
+      worldSimulation.setTicksDelay(action.payload, action.payload.worldSimulationTicksDelay);
     },
   },
 });
@@ -183,11 +187,12 @@ export const {
   startWorldRendering,
   stopWorldRendering,
   resetWorldRendering,
-  setWorldRenderingTime,
+  setWorldRenderingStats,
   startWorldSimulation,
   stopWorldSimulation,
   resetWorldSimulation,
-  setWorldSimulationTime,
+  setWorldSimulationStats,
+  setWorldSimulationTicksDelay,
 } = environmentManagerSlice.actions;
 
 export default environmentManagerSlice.reducer;

@@ -2,7 +2,7 @@ import { store, RootState } from '../../../app/store';
 import { useAppDispatch } from '../../../app/hooks';
 import {
   EnvironmentManagerState,
-  setWorldRenderingTime,
+  setWorldRenderingStats,
 } from '../environmentManagerSlice';
 
 interface WorldRenderingInterface {
@@ -13,6 +13,8 @@ interface WorldRenderingInterface {
   timeStoppedLast: number;
   canvasWidth: number;
   canvasHeight: number;
+  //stats: Stats | null;
+  init: () => void;
   start: (state: EnvironmentManagerState) => void;
   stop: () => void;
   reset: () => void;
@@ -27,6 +29,7 @@ class WorldRendering implements WorldRenderingInterface {
   timeStoppedLast: number;
   canvasWidth: number;
   canvasHeight: number;
+  //stats: Stats | null;
   private static instance: WorldRendering;
 
   // Private prevents direct construction calls with the `new` operator.
@@ -39,22 +42,7 @@ class WorldRendering implements WorldRenderingInterface {
     this.timeStoppedLast = 0;
     this.canvasHeight = 0;
     this.canvasWidth = 0;
-    // Auto-start
-    //if (this.running) {
-      //let canvasContainerEl: HTMLElement | null;
-      //let canvasEl: HTMLElement | null = this.store.environmentManager.editorCanvas as HTMLElement;
-
-      //console.log('editorCanvasContainerId', this.store.environmentManager.editorCanvasContainerId);
-      //console.log('worldCanvasContainerId', this.store.environmentManager.worldCanvasContainerId);
-
-      //if (isHTMLCanvasElement(this.store.environmentManager.worldCanvas)) {
-        //canvasContainerEl = this.store.environmentManager.worldCanvas.parentElement();
-        //let editorCanvasEl = document.getElementById(state.editorCanvasId);// as HTMLCanvasElement | null;
-        //let worldCanvasEl = document.getElementById(state.worldCanvasId);// as HTMLCanvasElement | null;
-      //}
-
-      //this.start();
-    //}
+    //this.stats = null;
   }
 
   public static getInstance(): WorldRendering {
@@ -63,6 +51,9 @@ class WorldRendering implements WorldRenderingInterface {
     }
 
     return WorldRendering.instance;
+  }
+
+  public init() {
   }
 
   public start(state: EnvironmentManagerState) {
@@ -74,7 +65,7 @@ class WorldRendering implements WorldRenderingInterface {
     const animate = (nowTime: DOMHighResTimeStamp) => {
       this.timeStartedElapsed = nowTime - this.timeStoppedElapsed;
       this.render();
-      store.dispatch(setWorldRenderingTime({
+      store.dispatch(setWorldRenderingStats({
         ...state,
         worldRenderingTime: this.timeStartedElapsed,
       }));
@@ -118,7 +109,18 @@ class WorldRendering implements WorldRenderingInterface {
   }
 
   private render() {
-    console.log('RENDER');
+    /*if (this.stats !== null) {
+      this.stats.begin();
+    }*/
+
+    //this.world_env.render();
+    //this.editor_env.update();
+
+    //console.log('RENDER');
+
+    /*if (this.stats !== null) {
+      this.stats.end();
+    }*/
   }
 
   public fillWindow(canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) {

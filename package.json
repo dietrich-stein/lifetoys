@@ -7,6 +7,7 @@
     "eject": "react-scripts eject",
     "format": "prettier --write ./template/src/**/*.{ts,tsx,css}",
     "lint": "eslint './src/**/*.{ts,tsx}'",
+    "lock": "npm i --package-lock-only",
     "type-check": "tsc"
   },
   "license": "GPL",
@@ -39,7 +40,8 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "dis-gui-lifetoys": "3.0.1",
+    "@dietrich-stein/dis-gui-lifetoys": "git+https://github.com/dietrich-stein/dis-gui-lifetoys.git#master",
+    "@dietrich-stein/stats.js": "git+https://github.com/dietrich-stein/stats.js.git",
     "lodash": "^4.17.21",
     "utility-types": "^3.10.0"
   },

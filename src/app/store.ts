@@ -9,6 +9,8 @@ import editorEnvironmentReducer, { setEditorStatus } from '../features/environme
 import worldEnvironmentReducer, { setWorldStatus } from '../features/environment/world/worldEnvironmentSlice';
 import environmentManagerReducer, {
   init,
+  startWorldSimulation,
+  startWorldRendering,
 } from '../features/environment/environmentManagerSlice';
 import { startAppListening, listenerMiddleware } from './listenerMiddleware';
 
@@ -48,6 +50,16 @@ startAppListening({
             editorCanvasContainerId: state.editorEnvironment.canvasContainerId,
             worldCanvasId: state.worldEnvironment.canvasId,
             worldCanvasContainerId: state.worldEnvironment.canvasContainerId,
+          }));
+
+          listenerApi.dispatch(startWorldSimulation({
+            ...state.environmentManager,
+            worldSimulationRunning: true,
+          }));
+
+          listenerApi.dispatch(startWorldRendering({
+            ...state.environmentManager,
+            worldRenderingRunning: true,
           }));
         }
 

@@ -1,19 +1,20 @@
 import React from 'react';
-import { useAppSelector, useAppDispatch } from '../../app/hooks';
+import { useAppSelector, useAppDispatch, useStats } from '../../app/hooks';
 import { RootState } from '../../app/store';
 import {
   selectEnvironmentManager,
   startWorldRendering,
   stopWorldRendering,
+  resetWorldRendering,
   startWorldSimulation,
   stopWorldSimulation,
   resetWorldSimulation,
-  resetWorldRendering,
+  setWorldSimulationTicksDelay,
 } from './environmentManagerSlice';
 import { formatTime } from '../../utils/FormatTime';
-//import WorldSimulation from './world/WorldSimulation';
+import { DEFAULT_TICKS_DELAY } from './world/WorldSimulation';
 //import WorldRendering from './world/WorldRendering';
-import * as dg from 'dis-gui-lifetoys';
+import * as dg from '@dietrich-stein/dis-gui-lifetoys';
 
 type EnvironmentManagerProps = {
   children?: React.ReactNode
@@ -29,6 +30,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
     worldRenderingRunning,
     worldSimulationRunning,
   } = environmentManagerState;
+  const { avgFps, maxFps, nowFps } = useStats();
   /*
    * NOTE: We use non-react classes for `setInterval()` and
    * `requestAnimationFrame()` because this gets better performance with less
@@ -36,10 +38,8 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
    */
   // Simulation
   //const worldSimulation = WorldSimulation.getInstance();
-  //const worldSimulationTime = worldSimulation.getTimeElapsed();
   // Rendering
   //const worldRendering = WorldRendering.getInstance();
-  //const worldRenderingTime = worldRendering.getTimeElapsed();
 
   const handleStartSimulationClick = () => {
     dispatch(startWorldSimulation({
@@ -65,6 +65,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
     dispatch(resetWorldSimulation({
       ...environmentManagerState,
       worldSimulationRunning: false,
+      worldSimulationTicksDelay: DEFAULT_TICKS_DELAY,
     }));
     handleStartSimulationClick();
     handleStartRenderingClick();
@@ -84,34 +85,70 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
     }));
   };
 
+  const handleSimulationTicksDelayChanged = (value: number) => {
+    dispatch(setWorldSimulationTicksDelay({
+      ...environmentManagerState,
+      //...environmentManagerState,
+      worldSimulationTicksDelay: value,
+    }));
+  };
+
   return (
     <>
       { children }
-      <dg.GUI>
-        <dg.Button
-          disabled={ !worldSimulationRunning }
-          label='Reset Simulation & Rendering'
-          onClick={ handleResetSimulationClick }
-        />
-        <dg.Text
-          label='Simulation Time'
-          value={
-            formatTime(useAppSelector((state: RootState) => state.environmentManager.worldSimulationTime ))
-          }
-        />
-        <dg.Button
-          label={ worldSimulationRunning ? 'Stop Simulation' : 'Start Simulation' }
-          onClick={ worldSimulationRunning ? handleStopSimulationClick : handleStartSimulationClick }>
-        </dg.Button>
-        <dg.Text
-          label='Rendering Time'
-          value={ formatTime(useAppSelector((state: RootState) => state.environmentManager.worldRenderingTime )) }
-        />
-        <dg.Button
-          disabled={ !worldSimulationRunning }
-          label={ worldRenderingRunning ? 'Stop Rendering' : 'Start Rendering' }
-          onClick={ worldRenderingRunning ? handleStopRenderingClick : handleStartRenderingClick }>
-        </dg.Button>
+      <dg.GUI style={{ labelWidth: 120, controlWidth: 200 }}>
+        <dg.Folder label='Simulation & Rendering' expanded={ true }>
+          <dg.Button
+            disabled={ !worldSimulationRunning }
+            label='Reset All'
+            onClick={ handleResetSimulationClick }
+          />
+          <dg.Button
+            label={ worldSimulationRunning ? 'Pause Simulation' : 'Resume Simulation' }
+            onClick={ worldSimulationRunning ? handleStopSimulationClick : handleStartSimulationClick }>
+          </dg.Button>
+          <dg.Number
+            label='Simulation Tick Delay'
+            value={ useAppSelector((state: RootState) => state.environmentManager.worldSimulationTicksDelay ) }
+            min={ 0 }
+            max={ 1000 }
+            step={ 1 }
+            onChange={ handleSimulationTicksDelayChanged }
+          />
+          <dg.Text
+            label='Simulation Ticks'
+            value={
+              useAppSelector((state: RootState) => state.environmentManager.worldSimulationTicks )
+            }
+            readOnly={ true }
+          />
+          <dg.Text
+            label='Simulation Time'
+            value={
+              formatTime(useAppSelector((state: RootState) => state.environmentManager.worldSimulationTime ))
+            }
+            readOnly={ true }
+          />
+          <dg.Button
+            disabled={ !worldSimulationRunning }
+            label={ worldRenderingRunning ? 'Pause Rendering' : 'Resume Rendering' }
+            onClick={ worldRenderingRunning ? handleStopRenderingClick : handleStartRenderingClick }>
+          </dg.Button>
+          <dg.Text
+              label='Rendering Stats'
+              value={
+                'FPS: ' + (worldRenderingRunning ? nowFps : 0) +
+                ' AVG: ' + (worldRenderingRunning ? avgFps : 0) +
+                ' MAX: ' + (worldRenderingRunning ? maxFps : 0)
+              }
+              readOnly={ true }
+          />
+          <dg.Text
+            label='Rendering Time'
+            value={ formatTime(useAppSelector((state: RootState) => state.environmentManager.worldRenderingTime )) }
+            readOnly={ true }
+          />
+        </dg.Folder>
       </dg.GUI>
     </>
   );

@@ -1,31 +1,39 @@
-import { store, RootState } from '../../../app/store';
-import { useAppDispatch } from '../../../app/hooks';
+import { store } from '../../../app/store';
 import {
   EnvironmentManagerState,
-  setWorldSimulationTime,
+  setWorldSimulationStats,
 } from '../environmentManagerSlice';
 
 interface WorldSimulationInterface {
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
+  ticksDelay: number;
+  ticksElapsed: number;
   setRunning: (value: boolean) => void;
+  setTicksDelay: (state: EnvironmentManagerState, value: number) => void;
   start: (state: EnvironmentManagerState) => void;
   stop: () => void;
   reset: () => void;
 }
 
+export const DEFAULT_TICKS_DELAY = 16.67;
+
 class WorldSimulation implements WorldSimulationInterface {
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
+  ticksDelay: number;
+  ticksElapsed: number;
   private static instance: WorldSimulation;
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
-    this.running = false;//this.store.environmentManager.worldSimulationRunning;
+    this.running = false;
     this.intervalId = null;
-    this.timeElapsed = 0;//this.store.environmentManager.worldSimulationTime;
+    this.timeElapsed = 0;
+    this.ticksDelay = DEFAULT_TICKS_DELAY;
+    this.ticksElapsed = 0;
   }
 
   public static getInstance(): WorldSimulation {
@@ -34,6 +42,15 @@ class WorldSimulation implements WorldSimulationInterface {
     }
 
     return WorldSimulation.instance;
+  }
+
+  public setTicksDelay(state: EnvironmentManagerState, value: number) {
+    this.ticksDelay = value;
+
+    if (this.running) {
+      this.stop();
+      this.start(state);
+    }
   }
 
   public setRunning(value: boolean) {
@@ -45,17 +62,20 @@ class WorldSimulation implements WorldSimulationInterface {
       return;
     }
 
-    const tickDuration = 1000 / 60; // ~16.67ms
-    //const dispatch = useAppDispatch();
-
     this.intervalId = setInterval(() => {
-      this.timeElapsed += tickDuration;
+      if (!this.running) { // not needed, but let's be certain
+        return;
+      }
+
+      this.timeElapsed += this.ticksDelay;
+      this.ticksElapsed += 1;
       this.simulate();
-      store.dispatch(setWorldSimulationTime({
+      store.dispatch(setWorldSimulationStats({
         ...state,
         worldSimulationTime: this.timeElapsed,
+        worldSimulationTicks: this.ticksElapsed,
       }));
-    }, tickDuration);
+    }, this.ticksDelay);
 
     this.setRunning(true);
   }
@@ -67,6 +87,7 @@ class WorldSimulation implements WorldSimulationInterface {
 
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
+      this.intervalId = null;
     }
 
     this.setRunning(false);
@@ -75,10 +96,12 @@ class WorldSimulation implements WorldSimulationInterface {
   public reset() {
     this.stop();
     this.timeElapsed = 0;
+    this.ticksDelay = DEFAULT_TICKS_DELAY;
+    this.ticksElapsed = 0;
   }
 
   private simulate() {
-    console.log('SIMULATE');
+    //console.log('SIMULATE', this.ticksDelay);
   }
 }
 
