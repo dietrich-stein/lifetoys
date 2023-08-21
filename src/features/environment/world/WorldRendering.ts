@@ -1,51 +1,97 @@
 import { store, RootState } from '../../../app/store';
-import { useAppDispatch } from '../../../app/hooks';
+//import { useAppDispatch } from '../../../app/hooks';
 import {
   EnvironmentManagerState,
   setWorldRenderingStats,
 } from '../environmentManagerSlice';
 
 interface WorldRenderingInterface {
-  running: boolean;
-  animateId: number | null;
-  timeStartedLast: number;
-  timeStoppedElapsed: number;
-  timeStoppedLast: number;
-  canvasWidth: number;
-  canvasHeight: number;
-  numCols: number;
-  numRows: number;
-  initWorldRendering: (canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) => void;
-  start: (state: EnvironmentManagerState) => void;
-  stop: () => void;
-  reset: () => void;
-}
-
-class WorldRendering implements WorldRenderingInterface {
+  // Control
   running: boolean;
   animateId: number | null;
   timeStartedElapsed: number;
   timeStartedLast: number;
   timeStoppedElapsed: number;
   timeStoppedLast: number;
+  // Settings
+  canvasContainer: HTMLDivElement | null;
+  canvas: HTMLCanvasElement | null;
+  ctx: CanvasRenderingContext2D | undefined;
   canvasWidth: number;
   canvasHeight: number;
   numCols: number;
   numRows: number;
+  cellSize: number;
+  // Cells
+  cells_to_render: Set<GridCell> | null;
+  cells_to_highlight: Set<GridCell> | null;
+  highlighted_cells: Set<GridCell> | null;
+  // Control
+  init: (canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) => void;
+  start: (state: EnvironmentManagerState) => void;
+  stop: () => void;
+  reset: () => void;
+  fillWindow: () => void;
+  fillShape: (height: number, width: number) => void;
+  clear: () => void;
+  // Cells
+  addToRender: (cell: GridCell) => void;
+  renderCell: (cell: GridCell) => void;
+  renderCells: () => void;
+  //renderFullGrid: (grid: GridCell[][]) => void;
+  //renderCellHighlight: (cell: GridCell, color: string) => void;
+  //renderHighlights: () => void;
+  //highlightCell: (cell: GridCell) => void;
+  //highlightOrganism: (org: Organism) => void;
+  //clearAllHighlights: (clear_to_highlight: boolean) => void; // = false
+}
+
+class WorldRendering implements WorldRenderingInterface {
+  // Control
+  running: boolean;
+  animateId: number | null;
+  timeStartedElapsed: number;
+  timeStartedLast: number;
+  timeStoppedElapsed: number;
+  timeStoppedLast: number;
+  // Settings
+  canvasContainer: HTMLDivElement | null;
+  canvas: HTMLCanvasElement | null;
+  ctx: CanvasRenderingContext2D | undefined;
+  canvasWidth: number;
+  canvasHeight: number;
+  numCols: number;
+  numRows: number;
+  cellSize: number;
+  // Cells
+  cells_to_render: Set<GridCell>; // cellsRenderable
+  cells_to_highlight: Set<GridCell>; // cellsHighlightable
+  highlighted_cells: Set<GridCell>; // cellsHighlighted
+
   private static instance: WorldRendering;
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
+    // Control
     this.running = false;
     this.animateId = null;
     this.timeStartedElapsed = 0;
     this.timeStartedLast = 0;
     this.timeStoppedElapsed = 0;
     this.timeStoppedLast = 0;
+    // Settings
+    this.canvasContainer = null;
+    this.canvas = null;
+    this.ctx = undefined;
     this.canvasHeight = 0;
     this.canvasWidth = 0;
     this.numCols = 0;
     this.numRows = 0;
+    this.cellSize = 0; // worldEnvironment.config.cell_size
+    // Cells
+    this.cells_to_render = new Set();
+    this.cells_to_highlight = new Set();
+    this.highlighted_cells = new Set();
   }
 
   public static getInstance(): WorldRendering {
@@ -56,9 +102,47 @@ class WorldRendering implements WorldRenderingInterface {
     return WorldRendering.instance;
   }
 
-  public initWorldRendering(canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) {
-    //console.log('initWorldRendering');
-    this.fillWindow(canvasContainer, canvas, cellSize);
+  public init(canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) {
+    console.log('WorldRendering, init');
+
+    this.cellSize = cellSize;
+    this.canvasContainer = canvasContainer;
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d', {
+      willReadFrequently: true,
+    }) as CanvasRenderingContext2D;
+
+    this.fillWindow();
+  }
+
+  private render() {
+    // In case just turned off rendering
+    if (!this.running) { // || headless
+      this.cells_to_render.clear();
+
+      return;
+    }
+
+    this.renderCells();
+    //this.renderHighlights();
+
+    //console.log('WorldRendering, RENDER');
+  }
+
+  renderCells() {
+    for (var cell of this.cells_to_render) {
+      this.renderCell(cell);
+    }
+
+    this.cells_to_render.clear();
+  }
+
+  renderCell(cell: GridCell) {
+    if (typeof this.ctx === 'undefined') {
+      return;
+    }
+
+    cell.state.render(this.ctx, cell, this.cellSize);
   }
 
   public start(state: EnvironmentManagerState) {
@@ -66,6 +150,8 @@ class WorldRendering implements WorldRenderingInterface {
     if (this.running) {
       return;
     }
+
+    console.log('WorldRendering, start');
 
     const animate = (nowTime: DOMHighResTimeStamp) => {
       this.timeStartedElapsed = nowTime - this.timeStoppedElapsed;
@@ -113,37 +199,49 @@ class WorldRendering implements WorldRenderingInterface {
     this.timeStoppedLast = 0;
   }
 
-  private render() {
-    //this.world_env.render();
-    //console.log('RENDER');
+  public fillWindow() {
+    if (this.canvasContainer === null) {
+      return;
+    }
+
+    const height = this.canvasContainer.clientHeight;
+    const width = this.canvasContainer.clientWidth;
+
+    this.fillShape(height, width);
   }
 
-  public fillWindow(canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) {
-    const height = canvasContainer.clientHeight;
-    const width = canvasContainer.clientWidth;
+  public fillShape(height: number, width: number) {
+    if (this.canvas === null) {
+      return;
+    }
 
-    this.fillShape(canvas, height, width, cellSize);
+    this.canvasWidth = this.canvas.width = width;
+    this.canvasHeight = this.canvas.height = height;
+
+    this.numCols = (this.cellSize > 0) ? Math.ceil(this.canvasWidth / this.cellSize) : 0;
+    this.numRows = (this.cellSize > 0) ? Math.ceil(this.canvasHeight / this.cellSize) : 0;
   }
 
-  public fillShape(canvas: HTMLCanvasElement, height: number, width: number, cellSize: number) {
-    this.canvasWidth = canvas.width = width;
-    this.canvasHeight = canvas.height = height;
+  public clear() {
+    if (this.ctx === undefined) {
+      return;
+    }
 
-    //const storeState: RootState = store.getState();
-    //const cellSize = storeState.worldEnvironment.config.cell_size;
-
-    this.numCols = (cellSize > 0) ? Math.ceil(this.canvasWidth / cellSize) : 0;
-    this.numRows = (cellSize > 0) ? Math.ceil(this.canvasHeight / cellSize) : 0;
+    this.ctx.fillStyle = 'white';
+    this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
-  public clear(canvas: HTMLCanvasElement) {
-    const canvasContext = canvas.getContext('2d', {
-      willReadFrequently: true,
-    }) as CanvasRenderingContext2D;
-
-    canvasContext.fillStyle = 'white';
-    canvasContext.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+  addToRender(cell: GridCell) {
+    this.cells_to_render.add(cell);
   }
+  /*
+  renderFullGrid: (grid: GridCell[][]) => void;
+  renderCellHighlight: (cell: GridCell, color: string) => void;
+  renderHighlights: () => void;
+  highlightCell: (cell: GridCell) => void;
+  highlightOrganism: (org: Organism) => void;
+  clearAllHighlights: (clear_to_highlight: boolean = false) => void; // = false
+  */
 }
 
 export default WorldRendering;

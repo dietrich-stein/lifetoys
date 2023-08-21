@@ -1,6 +1,7 @@
 import GridCell from './GridCell';
 import CellStates from '../anatomy/CellStates';
 import Cell from '../anatomy/Cell';
+import WorldRendering from '../environment/world/WorldRendering';
 
 type SerializedCell = {
   c: number;
@@ -15,9 +16,11 @@ type SerializedGridMap = {
 };
 
 interface GridMapInterface {
+  rendering: WorldRendering;
   grid: Array<Array<GridCell>>;
   cols: number;
   rows: number;
+  changeCell(c: number, r: number, state: AnyCellState, ownerCell: Cell | null): void
   resize: (cols: number, rows: number, cellSize: number) => void;
   fillGrid: (state: AnyCellState, ignore_walls: boolean) => void;
   cellAt: (col: number, row: number) => GridCell | null;
@@ -31,15 +34,54 @@ interface GridMapInterface {
 }
 
 class GridMap implements GridMapInterface {
+  rendering: WorldRendering;
   grid: Array<Array<GridCell>>;
   cols: number;
   rows: number;
 
-  constructor(cols: number, rows: number, cellSize: number) {
+  constructor(rendering: WorldRendering, cols: number, rows: number, cellSize: number) {
+    this.rendering = rendering;
     this.grid = [];
     this.cols = cols;
     this.rows = rows;
     this.resize(cols, rows, cellSize);
+  }
+
+  public changeCell(c: number, r: number, state: AnyCellState, ownerCell: Cell | null = null) {
+    this.setCellState(c, r, state);
+    const changedCell = this.cellAt(c, r);
+
+    if (changedCell === null) {
+      return;
+    }
+
+    this.rendering.addToRender(changedCell);
+
+    if (ownerCell !== null) {
+      this.setCellOwnerOrganism(c, r, ownerCell);
+    }
+  }
+
+  setCellState(col: number, row: number, state: AnyCellState) {
+    if (!this.isValidLoc(col, row)) {
+      return;
+    }
+
+    this.grid[col][row].setState(state);
+  }
+
+  setCellOwnerOrganism(col: number, row: number, owner_cell: Cell) {
+    if (!this.isValidLoc(col, row)) {
+      return;
+    }
+
+    this.grid[col][row].owner_cell = owner_cell;
+
+    if (owner_cell !== null) {
+      this.grid[col][row].owner_org = owner_cell.org;
+    } else {
+      this.grid[col][row].owner_org = null;
+    }
   }
 
   resize(cols: number, rows: number, cellSize: number) {
@@ -85,28 +127,6 @@ class GridMap implements GridMapInterface {
     }
 
     return this.grid[col][row];
-  }
-
-  setCellState(col: number, row: number, state: AnyCellState) {
-    if (!this.isValidLoc(col, row)) {
-      return;
-    }
-
-    this.grid[col][row].setState(state);
-  }
-
-  setCellOwnerOrganism(col: number, row: number, owner_cell: Cell) {
-    if (!this.isValidLoc(col, row)) {
-      return;
-    }
-
-    this.grid[col][row].owner_cell = owner_cell;
-
-    if (owner_cell !== null) {
-      this.grid[col][row].owner_org = owner_cell.org;
-    } else {
-      this.grid[col][row].owner_org = null;
-    }
   }
 
   isValidLoc(col: number, row: number) {

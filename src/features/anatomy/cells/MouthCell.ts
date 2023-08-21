@@ -42,11 +42,13 @@ class MouthCell extends Cell {
     }
   }
 
-  eatNeighbor(grid_map: GridMap, n_cell: GridCell) {
-    if (n_cell === null) return;
+  eatNeighbor(gridMap: GridMap, cell: GridCell) {
+    if (cell === null) {
+      return;
+    }
 
-    if (n_cell.state === CellStates.food) {
-      //env.changeWorldCell(n_cell.col, n_cell.row, CellStates.empty, env.grid_map, null);
+    if (cell.state === CellStates.food) {
+      gridMap.changeCell(cell.col, cell.row, CellStates.empty);
       this.org.food_collected++;
     }
   }

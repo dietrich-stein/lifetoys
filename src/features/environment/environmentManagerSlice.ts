@@ -28,12 +28,6 @@ export type HyperparamsState = {
 
 // Optionality enables dispatch without including elements
 export interface EnvironmentManagerState {
-  // Init
-  //ready: boolean;
-  //editorCanvasId: string | null;
-  //editorCanvasContainerId: string | null;
-  //worldCanvasId: string | null;
-  //worldCanvasContainerId: string | null;
   // Rendering
   worldRenderingRunning: boolean;
   worldRenderingTime: number;
@@ -53,12 +47,6 @@ export interface EnvironmentManagerState {
 }*/
 
 const initialState: EnvironmentManagerState = {
-  // Init
-  //ready: false,
-  //editorCanvasId: null,
-  //editorCanvasContainerId: null,
-  //worldCanvasId: null,
-  //worldCanvasContainerId: null,
   // Rendering
   worldRenderingRunning: false,
   worldRenderingTime: 0,
@@ -105,9 +93,8 @@ export const environmentManagerSlice = createSlice({
   initialState,
   reducers: {
     // Rendering
-
     startWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      console.log('environmentManager, startWorldRendering, payload:', action.payload);
+      //console.log('environmentManager, startWorldRendering, payload:', action.payload);
       state.worldRenderingRunning = action.payload.worldRenderingRunning;
       worldRendering.start(action.payload);
     },
@@ -128,9 +115,8 @@ export const environmentManagerSlice = createSlice({
     },
 
     // Simulation
-
     startWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      console.log('environmentManager, startWorldSimulation, payload:', action.payload);
+      //console.log('environmentManager, startWorldSimulation, payload:', action.payload);
       state.worldSimulationRunning = action.payload.worldSimulationRunning;
       worldSimulation.start(action.payload);
     },
@@ -151,6 +137,7 @@ export const environmentManagerSlice = createSlice({
       state.worldSimulationTicks = action.payload.worldSimulationTicks;
     },
     setWorldSimulationTicksDelay: (state, action: PayloadAction<EnvironmentManagerState>) => {
+      console.log('environmentManager.setWorldSimulationTicksDelay, payload:', action.payload);
       state.worldSimulationTicksDelay = action.payload.worldSimulationTicksDelay;
       worldSimulation.setTicksDelay(action.payload, action.payload.worldSimulationTicksDelay);
     },

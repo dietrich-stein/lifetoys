@@ -110,7 +110,9 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
             </dg.ButtonWidget>
             <dg.NumberWidget
               label='Simulation Tick Delay'
-              value={ useAppSelector((state: RootState) => state.environmentManager.worldSimulationTicksDelay ) }
+              value={ useAppSelector(
+                (state: RootState) => state.environmentManager.worldSimulationTicksDelay,
+              ) }
               min={ 0 }
               max={ 1000 }
               step={ 1 }
@@ -125,9 +127,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
             />
             <dg.TextWidget
               label='Simulation Time'
-              value={
-                formatTime(useAppSelector((state: RootState) => state.environmentManager.worldSimulationTime ))
-              }
+              value={ formatTime(useAppSelector((state: RootState) => state.environmentManager.worldSimulationTime)) }
               readOnly={ true }
             />
             <dg.ButtonWidget

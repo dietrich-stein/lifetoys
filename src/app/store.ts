@@ -61,7 +61,7 @@ startAppListening({
           // Effectively debounces the dispatches that follow it
           await listenerApi.delay(1000);
 
-          console.log('store, startAppListening, effect');
+          //console.log('store, startAppListening, effect');
 
           if (
             typeof state.editorEnvironment.canvasId === 'string' &&
@@ -80,16 +80,14 @@ startAppListening({
               isHTMLCanvasElement(worldCanvasEl) &&
               isHTMLDivElement(worldCanvasContainerEl)
             ) {
-              worldRendering.initWorldRendering(
+              // Triggers a call to WorldRendering.init() giving us valid values needed after
+              worldRendering.init(
                 worldCanvasContainerEl,
                 worldCanvasEl,
                 state.worldEnvironment.cellSize,
               );
 
-              // The previous action triggered a call to WorldRendering.init() giving us valid values for the following:
-              //   canvasHeight, canvasWidth, numCols, numRows
-
-              // Now we need to dispatch the store setter actions for those values
+              // Dispatch setter actions for canvasHeight, canvasWidth, numCols, numRows values
               listenerApi.dispatch(setWorldCanvasWidth(worldRendering.canvasWidth));
               listenerApi.dispatch(setWorldCanvasHeight(worldRendering.canvasHeight));
               listenerApi.dispatch(setWorldNumCols(worldRendering.numCols));

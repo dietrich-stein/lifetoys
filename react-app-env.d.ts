@@ -171,33 +171,7 @@ type AverageCellCountsType = Array<CellCountsType>;
   setRandomizePanel?: () => void;
 }*/
 
-interface EnvironmentRendererProps {
-  /*
-  // Common Properties
-  //ctx: CanvasRenderingContext2D | undefined;
-  cells_to_render: Set<GridCell>;
-  cells_to_highlight: Set<GridCell>;
-  highlighted_cells: Set<GridCell>;
-
-  */
-  // Editor Renderer Properties
-  /*
-  // Common Functions
-  addToRender: (cell: GridCell) => void;
-  renderCell: (cell: GridCell) => void;
-  renderCells: () => void;
-  renderFullGrid: (grid: GridCell[][]) => void;
-  renderCellHighlight: (cell: GridCell, color: string) => void;
-  renderHighlights: () => void;
-  highlightCell: (cell: GridCell) => void;
-  highlightOrganism: (org: Organism) => void;
-  clearAllHighlights: (clear_to_highlight: boolean = false) => void;
-
-  // World Renderer Functions
-  fillWindow?: () => void;
-  fillShape?: (height: number, width: number) => void;
-  clear?: () => void;
-
+/*
   // Editor Renderer Functions
-  renderOrganism?: (org: Organism) => void;*/
-}
+  renderOrganism?: (org: Organism) => void;
+*/

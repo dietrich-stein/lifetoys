@@ -82,7 +82,12 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   public init(storeState: RootState) {
     this.storeState = storeState;
 
-    this.gridMap = new GridMap(worldRendering.numCols, worldRendering.numRows, storeState.worldEnvironment.cellSize);
+    this.gridMap = new GridMap(
+      worldRendering,
+      worldRendering.numCols,
+      worldRendering.numRows,
+      storeState.worldEnvironment.cellSize,
+    );
 
     //this.fossil_record = new FossilRecord(this);
 
@@ -95,20 +100,32 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     }
 
     var center = this.gridMap.getCenter();
-    var organism = new Organism(center[0], center[1], 'world', this.storeState.environmentManager.hyperparams);
+    var organism = new Organism(
+      center[0],
+      center[1],
+      'world',
+      this.storeState.environmentManager.hyperparams,
+      WorldSimulation.instance,
+    );
 
-    console.log('initDefaultOrganism', organism);
+    console.log('WorldSimulation, initDefaultOrganism', organism);
 
     organism.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false, this.storeState.environmentManager.hyperparams);
     organism.anatomy.addDefaultCell(CellStates.producer, 1, 1, false, this.storeState.environmentManager.hyperparams);
     organism.anatomy.addDefaultCell(CellStates.producer, -1, -1, true, this.storeState.environmentManager.hyperparams);
 
     this.addOrganism(organism);
+
     //fossil_record.addSpecies(org, null);
   }
 
-  private addOrganism(organism: Organism) {
-    organism.updateGrid();
+  public addOrganism(organism: Organism) {
+    if (this.gridMap === null) {
+      return;
+    }
+
+    organism.updateGrid(this.gridMap);
+
     this.total_mutability += organism.mutability;
     this.organisms.push(organism);
 
@@ -163,7 +180,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private simulate() {
-    //console.log('SIMULATE', this.ticksDelay);
+    //console.log('WorldSimulation, SIMULATE', this.ticksDelay);
   }
 }
 

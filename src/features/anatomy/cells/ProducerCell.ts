@@ -25,7 +25,7 @@ class ProducerCell extends Cell {
     // initialize to default values
   }
 
-  performFunction(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
+  performFunction(gridMap: GridMap, fossil_record: FossilRecord, ticks: number) {
     if (this.org.environment !== 'world') {
       return;
     }
@@ -51,11 +51,11 @@ class ProducerCell extends Cell {
       ];
       var loc_c = loc[0];
       var loc_r = loc[1];
-      var cell = grid_map.cellAt(real_c + loc_c, real_r + loc_r);
+      var cell = gridMap.cellAt(real_c + loc_c, real_r + loc_r);
 
       if (cell !== null && cell.state === CellStates.empty) {
-        // TODO: dispatch
-        //env.changeWorldCell(real_c + loc_c, real_r + loc_r, CellStates.food, env.grid_map, null);
+        gridMap.changeCell(real_c + loc_c, real_r + loc_r, CellStates.food);
+
         return;
       }
     }

@@ -13,7 +13,7 @@ class GridCellState implements GridCellStateInterface {
 
   constructor(name: string) {
     this.name = name;
-    this.color = 'black';
+    this.color = 'white'; // black;
   }
 
   render(ctx: CanvasRenderingContext2D, cell: GridCell, size: number) {
@@ -21,11 +21,11 @@ class GridCellState implements GridCellStateInterface {
     ctx.fillRect(cell.x, cell.y, size, size);
 
     if (
-      cell.owner_cell === null /*||
+      cell.owner_cell === null ||
       (
-        cell.owner_cell.state !== CellStates.eye //&&
-        //cell.owner_cell.state !== CellStates.mouth
-      )*/
+        cell.owner_cell.state !== CellStates.eye &&
+        cell.owner_cell.state !== CellStates.mouth
+      )
     ) {
       return;
     }
