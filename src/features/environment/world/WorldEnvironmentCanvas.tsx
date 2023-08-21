@@ -16,7 +16,7 @@ export function WorldEnvironmentCanvas(props: EnvironmentCanvasProps) {
     canvasId,
     canvasContainerId,
   } = props;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dispatch = useAppDispatch();
   const worldEnvironmentState = useAppSelector(selectWorldEnvironment);
 

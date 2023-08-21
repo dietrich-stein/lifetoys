@@ -11,12 +11,14 @@ import GridCell from '../grid/GridCell';
 import GridMap from '../grid/GridMap';
 import FossilRecord from '../stats/FossilRecord';
 //import { getKeyByValue } from '../../utils/GetKeyByValue';
-import { store, RootState } from '../../app/store';
+//import { /*store,*/RootState } from '../../app/store';
+import { HyperparamsState } from '../environment/environmentManagerSlice';
 
 type OrganismEnvironment = 'editor' | 'world';
 
 interface OrganismInterface {
-  store: RootState;
+  //store: RootState;
+  hyperparams: HyperparamsState;
   c: number;
   r: number;
   environment: OrganismEnvironment | null;
@@ -62,7 +64,7 @@ interface OrganismInterface {
 }
 
 class Organism implements OrganismInterface {
-  store: RootState;
+  hyperparams: HyperparamsState;
   c: number;
   r: number;
   environment: OrganismEnvironment;
@@ -81,10 +83,17 @@ class Organism implements OrganismInterface {
   species: Species | null;
   brain: BrainController | null;
 
-  constructor(col: number, row: number, environment: OrganismEnvironment, parent?: Organism) {
-    this.store = store.getState();
-    this.c = col;
-    this.r = row;
+  constructor(
+    centerCol: number,
+    centerRow: number,
+    environment: OrganismEnvironment,
+    hyperparams: HyperparamsState,
+    parent?: Organism,
+  ) {
+    //this.store = store.getState();
+    this.hyperparams = hyperparams;
+    this.c = centerCol;
+    this.r = centerRow;
     this.environment = environment;
     this.lifetime = 0;
     this.food_collected = 0;
@@ -92,8 +101,9 @@ class Organism implements OrganismInterface {
     this.anatomy = new Anatomy(this);
     //this.movement_direction = Directions.cardinals.s;
     this.rotation_direction = Directions.cardinals.n;
+
     this.can_rotate = (this.environment === 'world')
-      ? this.store.environmentManager.hyperparams.rotationEnabled
+      ? this.hyperparams.rotationEnabled //this.store.environmentManager.
       : false;
     this.move_count = 0;
     this.move_range = 4;
@@ -115,7 +125,7 @@ class Organism implements OrganismInterface {
 
     for (var c of parent.anatomy.cells) {
       //deep copy parent cells
-      this.anatomy.addInheritCell(c, false);
+      this.anatomy.addInheritCell(c, false, this.hyperparams);
     }
 
     this.anatomy.checkTypeChange();
@@ -137,7 +147,7 @@ class Organism implements OrganismInterface {
 
   // amount of food required before it can reproduce
   foodNeeded() {
-    const extraMoverFoodCost = this.store.environmentManager.hyperparams.extraMoverFoodCost;
+    const extraMoverFoodCost = this.hyperparams.extraMoverFoodCost;
 
     return this.anatomy.has_mover
       ? this.anatomy.cells.length +
@@ -146,7 +156,7 @@ class Organism implements OrganismInterface {
   }
 
   lifespan() {
-    const lifespanMultiplier = this.store.environmentManager.hyperparams.lifespanMultiplier;
+    const lifespanMultiplier = this.hyperparams.lifespanMultiplier;
 
     return this.anatomy.cells.length * lifespanMultiplier;
   }
@@ -164,11 +174,11 @@ class Organism implements OrganismInterface {
       rotationEnabled,
       useGlobalMutability,
       globalMutability,
-    } = this.store.environmentManager.hyperparams;
+    } = this.hyperparams;
 
     //produce mutated child
     //check nearby locations (is there room and a direct path)
-    var org: Organism = new Organism(0, 0, this.environment, this);
+    var org: Organism = new Organism(0, 0, this.environment, this.hyperparams);
 
     if (rotationEnabled) {
       org.rotation_direction = Directions.getRandomDirection();
@@ -252,7 +262,7 @@ class Organism implements OrganismInterface {
       addProb,
       changeProb,
       removeProb,
-    } = this.store.environmentManager.hyperparams;
+    } = this.hyperparams;
 
     let added = false;
     let changed = false;
@@ -262,7 +272,7 @@ class Organism implements OrganismInterface {
     // @todo: a way to define max # of cell type; or make this a param?!
     if (this.calcRandomChance(addProb)) {
       let branch = this.anatomy.getRandomCell();
-      let state = CellStates.getRandomLivingType(); //branch.state;
+      let state = CellStates.getRandomAnatomyCellState(); //branch.state;
       let growth_direction =
         Neighbors.all[Math.floor(Math.random() * Neighbors.all.length)];
       let c = branch.loc_c + growth_direction[0];
@@ -270,7 +280,7 @@ class Organism implements OrganismInterface {
 
       if (this.anatomy.canAddCellAt(c, r)) {
         added = true;
-        this.anatomy.addRandomizedCell(state, c, r);
+        this.anatomy.addRandomizedCell(state, c, r, false, this.hyperparams);
       }
     }
 
@@ -278,9 +288,9 @@ class Organism implements OrganismInterface {
     // @todo: a way to define max # of cell type; or make this a param?!
     if (this.calcRandomChance(changeProb)) {
       let cell = this.anatomy.getRandomCell();
-      let state = CellStates.getRandomLivingType();
+      let state = CellStates.getRandomAnatomyCellState();
 
-      this.anatomy.replaceCell(state, cell.loc_c, cell.loc_r, false, true);
+      this.anatomy.replaceCell(state, cell.loc_c, cell.loc_r, false, true, this.hyperparams);
       changed = true;
     }
 
@@ -472,7 +482,7 @@ class Organism implements OrganismInterface {
   }
 
   isClear(grid_map: GridMap, col: number, row: number, rotation: number = this.rotation_direction) {
-    const foodBlocksReproduction = this.store.environmentManager.hyperparams.foodBlocksReproduction;
+    const foodBlocksReproduction = this.hyperparams.foodBlocksReproduction;
 
     for (var loccell of this.anatomy.cells) {
       var cell = this.getRealCell(grid_map, loccell, col, row, rotation);
@@ -496,7 +506,7 @@ class Organism implements OrganismInterface {
   }
 
   harm(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
-    const instaKill = this.store.environmentManager.hyperparams.instaKill;
+    const instaKill = this.hyperparams.instaKill;
 
     this.damage++;
 
@@ -669,7 +679,7 @@ class Organism implements OrganismInterface {
 
   loadRaw(org: Organism) {
     SerializeHelper.overwriteNonObjects(org, this);
-    this.anatomy.loadRaw(org.anatomy);
+    this.anatomy.loadRaw(org.anatomy, this.hyperparams);
 
     if (org.brain && org.brain !== null) {
       if (this.brain === null) {

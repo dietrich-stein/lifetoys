@@ -3,10 +3,11 @@ import Cell from '../Cell';
 import Organism from '../../organism/Organism';
 import GridCell from '../../grid/GridCell';
 import GridMap from '../../grid/GridMap';
+import { HyperparamsState } from '../../environment/environmentManagerSlice';
 
 class MouthCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number) {
-    super(CellStates.mouth, org, loc_col, loc_row);
+  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
+    super(CellStates.mouth, org, loc_col, loc_row, hyperparams);
   }
 
   initInherit(parent: Cell) {
@@ -30,7 +31,7 @@ class MouthCell extends Cell {
     var real_c = this.getRealCol();
     var real_r = this.getRealRow();
 
-    const edibleNeighbors = this.store.environmentManager.hyperparams.edibleNeighbors;
+    const edibleNeighbors = this.hyperparams.edibleNeighbors;
 
     for (var loc of edibleNeighbors) {
       var cell = grid_map.cellAt(real_c + loc[0], real_r + loc[1]);

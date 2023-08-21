@@ -1,29 +1,47 @@
-import { store } from '../../../app/store';
+import { store, RootState } from '../../../app/store';
+import CellStates from '../../anatomy/CellStates';
+import GridCell from '../../grid/GridCell';
+import GridMap from '../../grid/GridMap';
+import Organism from '../../organism/Organism';
 import {
   EnvironmentManagerState,
   setWorldSimulationStats,
 } from '../environmentManagerSlice';
+import WorldRendering from './WorldRendering';
 
-interface WorldSimulationInterface {
+/*interface WorldSimulationInterface {
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
   ticksDelay: number;
   ticksElapsed: number;
+  gridMap: GridMap | null,
+  storeState: RootState | null,
   setTicksDelay: (state: EnvironmentManagerState, value: number) => void;
   start: (state: EnvironmentManagerState) => void;
   stop: () => void;
   reset: () => void;
-}
+}*/
 
 export const DEFAULT_TICKS_DELAY = 16.67;
 
-class WorldSimulation implements WorldSimulationInterface {
+const worldRendering = WorldRendering.getInstance();
+
+class WorldSimulation /*implements WorldSimulationInterface*/ {
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
   ticksDelay: number;
   ticksElapsed: number;
+  //
+  gridMap: GridMap | null;
+  storeState: RootState | null;
+  //
+  organisms: Array<Organism>;
+  walls: Array<GridCell>;
+  largest_cell_count: number;
+  total_mutability: number;
+
   private static instance: WorldSimulation;
 
   // Private prevents direct construction calls with the `new` operator.
@@ -33,6 +51,14 @@ class WorldSimulation implements WorldSimulationInterface {
     this.timeElapsed = 0;
     this.ticksDelay = DEFAULT_TICKS_DELAY;
     this.ticksElapsed = 0;
+    //
+    this.gridMap = null;
+    this.storeState = null;
+    //
+    this.organisms = [];
+    this.walls = [];
+    this.largest_cell_count = 0;
+    this.total_mutability = 0;
   }
 
   public static getInstance(): WorldSimulation {
@@ -53,15 +79,42 @@ class WorldSimulation implements WorldSimulationInterface {
     }
   }
 
+  public init(storeState: RootState) {
+    this.storeState = storeState;
+
+    this.gridMap = new GridMap(worldRendering.numCols, worldRendering.numRows, storeState.worldEnvironment.cellSize);
+
+    //this.fossil_record = new FossilRecord(this);
+
+    console.log('WorldSimulation, init, gridmap:', this.gridMap, 'storeState:', this.storeState);
+  }
+
   private initDefaultOrganism() {
-    console.log('initDefaultOrganism');
-    //var center = grid_map.getCenter();
-    //var org = new Organism(center[0], center[1], this);
-    //org.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false);
-    //org.anatomy.addDefaultCell(CellStates.producer, 1, 1, false);
-    //org.anatomy.addDefaultCell(CellStates.producer, -1, -1, true);
-    //this.addOrganism(org);
+    if (this.gridMap === null || this.storeState === null) {
+      return;
+    }
+
+    var center = this.gridMap.getCenter();
+    var organism = new Organism(center[0], center[1], 'world', this.storeState.environmentManager.hyperparams);
+
+    console.log('initDefaultOrganism', organism);
+
+    organism.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false, this.storeState.environmentManager.hyperparams);
+    organism.anatomy.addDefaultCell(CellStates.producer, 1, 1, false, this.storeState.environmentManager.hyperparams);
+    organism.anatomy.addDefaultCell(CellStates.producer, -1, -1, true, this.storeState.environmentManager.hyperparams);
+
+    this.addOrganism(organism);
     //fossil_record.addSpecies(org, null);
+  }
+
+  private addOrganism(organism: Organism) {
+    organism.updateGrid();
+    this.total_mutability += organism.mutability;
+    this.organisms.push(organism);
+
+    if (organism.anatomy.cells.length > this.largest_cell_count) {
+      this.largest_cell_count = organism.anatomy.cells.length;
+    }
   }
 
   public start(state: EnvironmentManagerState) {

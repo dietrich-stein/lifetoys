@@ -1,10 +1,11 @@
 import CellStates from '../CellStates';
 import Cell from '../Cell';
 import Organism from '../../organism/Organism';
+import { HyperparamsState } from '../../environment/environmentManagerSlice';
 
 class BrainCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number) {
-    super(CellStates.brain, org, loc_col, loc_row);
+  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
+    super(CellStates.brain, org, loc_col, loc_row, hyperparams);
     this.org.anatomy.has_brain = true;
   }
 

@@ -3,11 +3,13 @@ import GridMap from '../grid/GridMap';
 import Directions from '../organism/Directions';
 import Organism from '../organism/Organism';
 import FossilRecord from '../stats/FossilRecord';
-import { store, RootState } from '../../app/store';
+//import { store, RootState } from '../../app/store';
+import { HyperparamsState } from '../environment/environmentManagerSlice';
 
 interface CellInterface {
-  store: RootState;
-  state: AnatomyCellStatesType;
+  //store: RootState;
+  hyperparams: HyperparamsState,
+  state: AnyCellState;
   org: Organism;
   loc_c: number;
   loc_r: number;
@@ -24,14 +26,16 @@ interface CellInterface {
 }
 
 class Cell implements CellInterface {
-  store: RootState;
-  state: AnatomyCellStatesType;
+  //store: RootState;
+  hyperparams: HyperparamsState;
+  state: AnyCellState;
   org: Organism;
   loc_c: number;
   loc_r: number;
 
-  constructor(state: AnatomyCellStatesType, org: Organism, loc_col: number, loc_row: number) {
-    this.store = store.getState();
+  constructor(state: AnyCellState, org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
+    //this.store = store.getState();
+    this.hyperparams = hyperparams;
     this.state = state;
     this.org = org;
     this.loc_c = loc_col;

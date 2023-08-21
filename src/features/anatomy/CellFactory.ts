@@ -6,7 +6,7 @@ import MoverCell from './cells/MoverCell';
 import KillerCell from './cells/KillerCell';
 import ArmorCell from './cells/ArmorCell';
 import EyeCell from './cells/EyeCell';
-import {
+/*import {
   MouthState,
   BrainState,
   ProducerState,
@@ -14,7 +14,8 @@ import {
   KillerState,
   ArmorState,
   EyeState,
-} from './CellStates';
+} from './CellStates';*/
+import { HyperparamsState } from '../environment/environmentManagerSlice';
 
 interface CellClassesInterface {
   [key: string]:
@@ -27,15 +28,6 @@ interface CellClassesInterface {
     | typeof EyeCell;
 }
 
-type CellStatesType =
-  | MouthState
-  | BrainState
-  | ProducerState
-  | MoverState
-  | KillerState
-  | ArmorState
-  | EyeState;
-
 abstract class CellFactory {
   private static CellClasses: CellClassesInterface = {
     'mouth': MouthCell,
@@ -47,27 +39,39 @@ abstract class CellFactory {
     'eye': EyeCell,
   };
 
-  public static createInherited(org: Organism, to_copy: AnatomyCellClassType) {
+  public static createInherited(org: Organism, to_copy: AnyAnatomyCellClass, hyperparams: HyperparamsState) {
     var cellClass = CellFactory.CellClasses[to_copy.state.name];
-    var cell = new cellClass(org, to_copy.loc_c, to_copy.loc_r);
+    var cell = new cellClass(org, to_copy.loc_c, to_copy.loc_r, hyperparams);
 
     cell.initInherit(to_copy);
 
     return cell;
   }
 
-  public static createRandom(org: Organism, state: CellStatesType, loc_col: number, loc_row: number) {
+  public static createRandom(
+    org: Organism,
+    state: AnyCellState,
+    loc_col: number,
+    loc_row: number,
+    hyperparams: HyperparamsState,
+  ) {
     var cellClass = CellFactory.CellClasses[state.name];
-    var cell = new cellClass(org, loc_col, loc_row);
+    var cell = new cellClass(org, loc_col, loc_row, hyperparams);
 
     cell.initRandom();
 
     return cell;
   }
 
-  public static createDefault(org: Organism, state: CellStatesType, loc_col: number, loc_row: number) {
+  public static createDefault(
+    org: Organism,
+    state: AnyCellState,
+    loc_col: number,
+    loc_row: number,
+    hyperparams: HyperparamsState,
+  ) {
     var cellClass = CellFactory.CellClasses[state.name];
-    var cell = new cellClass(org, loc_col, loc_row);
+    var cell = new cellClass(org, loc_col, loc_row, hyperparams);
 
     cell.initDefault();
 

@@ -1,7 +1,9 @@
 /// <reference types="react-scripts" />
 
-declare module '@dietrich-stein/dis-gui-lifetoys';
+//import CellStates from './src/features/anatomy/CellStates';
 
+//declare module 'react-d3-library';
+declare module '@dietrich-stein/dis-gui-lifetoys';
 //declare module '@canvasjs/charts';
 //declare module 'svelte-grid/build/helper/index.mjs';
 //declare module 'svelte-grid';
@@ -10,76 +12,84 @@ declare module '@dietrich-stein/dis-gui-lifetoys';
 
 //type Perlin = import('./Utils/Perlin').default;
 //type ControlPanel = import('./Interaction/ControlPanel').default;
-type Organism = import('./Organism/Organism').default;
-type GridCell = import('./Grid/GridCell').default;
+type Organism = import('./src/features/organism/Organism').default;
+type GridCell = import('./src/features/grid/GridCell').default;
 //type LoadController = import('./Interaction/LoadController').default;
 
-type CellStates = import('./Anatomy/CellStates').default;
-type EmptyState = import('./Anatomy/CellStates').EmptyState;
-type FoodState = import('./Anatomy/CellStates').FoodState;
-type WallState = import('./Anatomy/CellStates').WallState;
-type MouthState = import('./Anatomy/CellStates').MouthState;
-type BrainState = import('./Anatomy/CellStates').BrainState;
-type ProducerState = import('./Anatomy/CellStates').ProducerState;
-type MoverState = import('./Anatomy/CellStates').MoverState;
-type KillerState = import('./Anatomy/CellStates').KillerState;
-type ArmorState = import('./Anatomy/CellStates').ArmorState;
-type EyeState = import('./Anatomy/CellStates').EyeState;
+// Cell States
 
-type MouthCellClassType = import('./Anatomy/Cells/MouthCell').default;
-type BrainCellClassType = import('./Anatomy/Cells/BrainCell').default;
-type ProducerCellClassType = import('./Anatomy/Cells/ProducerCell').default;
-type MoverCellClassType = import('./Anatomy/Cells/MoverCell').default;
-type KillerCellClassType = import('./Anatomy/Cells/KillerCell').default;
-type ArmorCellClassType = import('./Anatomy/Cells/ArmorCell').default;
-type EyeCellClassType = import('./Anatomy/Cells/EyeCell').default;
+type CellStatesClass = import('./src/features/anatomy/CellStates').default;
 
-type AnyEnvironmentType =
-  | WorldEnvironment
-  | EditorEnvironment;
+type EmptyStateClass = import('./src/features/anatomy/CellStates').EmptyState;
+type FoodStateClass = import('./src/features/anatomy/CellStates').FoodState;
+type WallStateClass = import('./src/features/anatomy/CellStates').WallState;
 
-type AnyRendererType =
-  | WorldRenderer
-  | EditorRenderer;
+type MouthStateClass = import('./src/features/anatomy/CellStates').MouthState;
+type BrainStateClass = import('./src/features/anatomy/CellStates').BrainState;
+type ProducerStateClass = import('./src/features/anatomy/CellStates').ProducerState;
+type MoverStateClass = import('./src/features/anatomy/CellStates').MoverState;
+type KillerStateClass = import('./src/features/anatomy/CellStates').KillerState;
+type ArmorStateClass = import('./src/features/anatomy/CellStates').ArmorState;
+type EyeStateClass = import('./src/features/anatomy/CellStates').EyeState;
 
-type AllCellStatesType =
-  | EmptyState
-  | FoodState
-  | WallState
-  | MouthState
-  | BrainState
-  | ProducerState
-  | MoverState
-  | KillerState
-  | ArmorState
-  | EyeState;
+type AnyCellState =
+  | EmptyStateClass
+  | FoodStateClass
+  | WallStateClass
+  | MouthStateClass
+  | BrainStateClass
+  | ProducerStateClass
+  | MoverStateClass
+  | KillerStateClass
+  | ArmorStateClass
+  | EyeStateClass;
 
-type LivingCellStatesType =
-  | MouthState
-  | BrainState
-  | ProducerState
-  | MoverState
-  | KillerState
-  | ArmorState
-  | EyeState;
+type AnatomyCellState =
+  | MouthStateClass
+  | BrainStateClass
+  | ProducerStateClass
+  | MoverStateClass
+  | KillerStateClass
+  | ArmorStateClass
+  | EyeStateClass;
 
-type AnatomyCellStatesType =
+/*type AnyAnatomyCellClassObject =
   | CellStates.mouth
   | CellStates.brain
   | CellStates.producer
   | CellStates.mover
   | CellStates.killer
   | CellStates.armor
-  | CellStates.eye;
+  | CellStates.eye;*/
 
-type AnatomyCellClassType =
-  | MouthCellClassType
-  | BrainCellClassType
-  | ProducerCellClassType
-  | MoverCellClassType
-  | KillerCellClassType
-  | ArmorCellClassType
-  | EyeCellClassType;
+// Cell Classes
+
+type MouthCellClass = import('./src/features/anatomy/cells/MouthCell').default;
+type BrainCellClass = import('./src/features/anatomy/cells/BrainCell').default;
+type ProducerCellClass = import('./src/features/anatomy/cells/ProducerCell').default;
+type MoverCellClass = import('./src/features/anatomy/cells/MoverCell').default;
+type KillerCellClass = import('./src/features/anatomy/cells/KillerCell').default;
+type ArmorCellClass = import('./src/features/anatomy/cells/ArmorCell').default;
+type EyeCellClass = import('./src/features/anatomy/cells/EyeCell').default;
+
+type AnyAnatomyCellClass =
+  | MouthCellClass
+  | BrainCellClass
+  | ProducerCellClass
+  | MoverCellClass
+  | KillerCellClass
+  | ArmorCellClass
+  | EyeCellClass;
+
+/*type AnyEnvironmentType =
+  | WorldEnvironment
+  | EditorEnvironment;*/
+
+/*type AnyRendererType =
+  | WorldRenderer
+  | EditorRenderer;*/
+
+// Metrics
 
 type CellCountsType = {
   mouth: number;

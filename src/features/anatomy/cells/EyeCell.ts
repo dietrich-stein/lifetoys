@@ -4,12 +4,13 @@ import Directions from '../../organism/Directions';
 import Observation from '../../organism/perception/Observation';
 import Organism from '../../organism/Organism';
 import GridMap from '../../grid/GridMap';
+import { HyperparamsState } from '../../environment/environmentManagerSlice';
 
 class EyeCell extends Cell {
   direction: number;
 
-  constructor(org: Organism, loc_col: number, loc_row: number) {
-    super(CellStates.eye, org, loc_col, loc_row);
+  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
+    super(CellStates.eye, org, loc_col, loc_row, hyperparams);
     this.org.anatomy.has_eye = true;
     this.direction = Directions.cardinals.n;
   }
@@ -99,7 +100,7 @@ class EyeCell extends Cell {
     const {
       lookRange,
       seeThroughSelf,
-    } = this.store.environmentManager.hyperparams;
+    } = this.hyperparams;
 
     for (var i = 0; i < lookRange; i++) {
       col += addCol;

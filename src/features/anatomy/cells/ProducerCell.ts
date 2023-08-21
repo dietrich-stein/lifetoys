@@ -3,10 +3,12 @@ import Cell from '../Cell';
 import Organism from '../../organism/Organism';
 import GridMap from '../../grid/GridMap';
 import FossilRecord from '../../stats/FossilRecord';
+import { HyperparamsState } from '../../environment/environmentManagerSlice';
 
 class ProducerCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number) {
-    super(CellStates.producer, org, loc_col, loc_row);
+  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
+    super(CellStates.producer, org, loc_col, loc_row, hyperparams);
+    this.hyperparams = hyperparams;
     this.org.anatomy.has_producer = true;
   }
 
@@ -32,7 +34,7 @@ class ProducerCell extends Cell {
       moversCanProduce,
       foodProdProb,
       growableNeighbors,
-    } = this.store.environmentManager.hyperparams;
+    } = this.hyperparams;
 
     if (
       this.org.anatomy.has_mover && !moversCanProduce) {

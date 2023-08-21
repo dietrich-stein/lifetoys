@@ -57,7 +57,7 @@ class WorldRendering implements WorldRenderingInterface {
   }
 
   public initWorldRendering(canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) {
-    console.log('initWorldRendering');
+    //console.log('initWorldRendering');
     this.fillWindow(canvasContainer, canvas, cellSize);
   }
 

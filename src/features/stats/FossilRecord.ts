@@ -159,9 +159,9 @@ class FossilRecord implements FossilRecordInterface {
   calcCellCountAverages() {
     var total_org = 0;
     var cell_counts: CountArrayInterface = {};
-    var living = CellStates.getLiving();
+    var anatomyStates = CellStates.getAnatomyCellStates();
 
-    for (let c of living) {
+    for (let c of anatomyStates) {
       cell_counts[c.name] = 0;
     }
 

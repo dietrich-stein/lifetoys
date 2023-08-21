@@ -4,10 +4,11 @@ import GridCell from '../../grid/GridCell';
 import Organism from '../../organism/Organism';
 import GridMap from '../../grid/GridMap';
 import FossilRecord from '../../stats/FossilRecord';
+import { HyperparamsState } from '../../environment/environmentManagerSlice';
 
 class KillerCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number) {
-    super(CellStates.killer, org, loc_col, loc_row);
+  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
+    super(CellStates.killer, org, loc_col, loc_row, hyperparams);
   }
 
   initInherit(parent: Cell) {
@@ -31,7 +32,7 @@ class KillerCell extends Cell {
     var c = this.getRealCol();
     var r = this.getRealRow();
 
-    const killableNeighbors = this.store.environmentManager.hyperparams.killableNeighbors;
+    const killableNeighbors = this.hyperparams.killableNeighbors;
 
     for (var loc of killableNeighbors) {
       var cell = grid_map.cellAt(c + loc[0], r + loc[1]);
@@ -57,7 +58,7 @@ class KillerCell extends Cell {
 
     neighbor_cell.owner_org.harm(grid_map, fossil_record, ticks);
 
-    const instaKill = this.store.environmentManager.hyperparams.instaKill;
+    const instaKill = this.hyperparams.instaKill;
 
     if (instaKill && is_hit) {
       this.org.harm(grid_map, fossil_record, ticks);

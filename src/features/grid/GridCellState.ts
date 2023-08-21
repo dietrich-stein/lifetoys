@@ -3,8 +3,8 @@ import GridCell from './GridCell';
 
 interface GridCellStateInterface {
   name: string;
-  color: string;
-  render: (ctx: CanvasRenderingContext2D, cell: GridCell, size: number) => void;
+  color: null | string;
+  render: null | ((ctx: CanvasRenderingContext2D, cell: GridCell, size: number) => void);
 }
 
 class GridCellState implements GridCellStateInterface {

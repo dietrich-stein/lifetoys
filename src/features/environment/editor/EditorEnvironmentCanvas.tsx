@@ -16,7 +16,7 @@ export function EditorEnvironmentCanvas(props: EditorEnvironmentCanvasProps) {
     canvasId,
     canvasContainerId,
   } = props;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dispatch = useAppDispatch();
   const editorEnvironmentState = useAppSelector(selectEditorEnvironment);
 

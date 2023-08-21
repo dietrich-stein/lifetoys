@@ -2,19 +2,19 @@ import Cell from '../anatomy/Cell';
 import Organism from '../organism/Organism';
 
 interface GridCellInterface {
-  state: AllCellStatesType;
+  state: AnyCellState;
   owner_org: Organism | null;
   owner_cell: Cell | null;
   col: number;
   row: number;
   x: number;
   y: number;
-  setState: (state: AllCellStatesType) => void;
+  setState: (state: AnyCellState) => void;
 }
 
 // A cell exists in a grid map.
 class GridCell implements GridCellInterface {
-  state: AllCellStatesType;
+  state: AnyCellState;
   owner_org: Organism | null;
   owner_cell: Cell | null;
   col: number;
@@ -22,7 +22,7 @@ class GridCell implements GridCellInterface {
   x: number;
   y: number;
 
-  constructor(state: AllCellStatesType, col: number, row: number, x: number, y: number) {
+  constructor(state: AnyCellState, col: number, row: number, x: number, y: number) {
     this.state = state;
     this.owner_org = null;
     this.owner_cell = null;
@@ -32,7 +32,7 @@ class GridCell implements GridCellInterface {
     this.y = y;
   }
 
-  setState(state: AllCellStatesType) {
+  setState(state: AnyCellState) {
     this.state = state;
   }
 }

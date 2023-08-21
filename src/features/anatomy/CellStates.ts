@@ -74,7 +74,7 @@ abstract class CellStates {
   public static armor: ArmorState = new ArmorState();
   public static eye: EyeState = new EyeState();
 
-  public static all: Array<AllCellStatesType> = [
+  public static all: Array<AnyCellState> = [
     CellStates.empty,
     CellStates.food,
     CellStates.wall,
@@ -87,7 +87,7 @@ abstract class CellStates {
     CellStates.eye,
   ];
 
-  public static living: Array<LivingCellStatesType> = [
+  public static anatomy: Array<AnatomyCellState> = [
     CellStates.mouth,
     CellStates.brain,
     CellStates.producer,
@@ -101,16 +101,16 @@ abstract class CellStates {
     return CellStates.all[Math.floor(Math.random() * CellStates.all.length)].name;
   }
 
-  public static getRandomLivingType(): LivingCellStatesType {
-    return CellStates.living[Math.floor(Math.random() * CellStates.living.length)];
+  public static getRandomAnatomyCellState(): AnatomyCellState {
+    return CellStates.anatomy[Math.floor(Math.random() * CellStates.anatomy.length)];
   }
 
-  public static getAll(): Array<AllCellStatesType> {
+  public static getAll(): Array<AnyCellState> {
     return CellStates.all;
   }
 
-  public static getLiving(): Array<LivingCellStatesType> {
-    return CellStates.living;
+  public static getAnatomyCellStates(): Array<AnatomyCellState> {
+    return CellStates.anatomy;
   }
 };
 

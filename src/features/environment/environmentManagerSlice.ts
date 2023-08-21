@@ -5,7 +5,7 @@ import Neighbors from '../grid/Neighbors';
 import { RootState } from '../../app/store';
 import { WorldEnvironmentState } from './world/worldEnvironmentSlice';
 
-type HyperparamsState = {
+export type HyperparamsState = {
   lifespanMultiplier: number;
   foodProdProb: number;
   killableNeighbors: number[][];
@@ -29,11 +29,11 @@ type HyperparamsState = {
 // Optionality enables dispatch without including elements
 export interface EnvironmentManagerState {
   // Init
-  ready: boolean;
-  editorCanvasId: string | null;
-  editorCanvasContainerId: string | null;
-  worldCanvasId: string | null;
-  worldCanvasContainerId: string | null;
+  //ready: boolean;
+  //editorCanvasId: string | null;
+  //editorCanvasContainerId: string | null;
+  //worldCanvasId: string | null;
+  //worldCanvasContainerId: string | null;
   // Rendering
   worldRenderingRunning: boolean;
   worldRenderingTime: number;
@@ -54,11 +54,11 @@ export interface EnvironmentManagerState {
 
 const initialState: EnvironmentManagerState = {
   // Init
-  ready: false,
-  editorCanvasId: null,
-  editorCanvasContainerId: null,
-  worldCanvasId: null,
-  worldCanvasContainerId: null,
+  //ready: false,
+  //editorCanvasId: null,
+  //editorCanvasContainerId: null,
+  //worldCanvasId: null,
+  //worldCanvasContainerId: null,
   // Rendering
   worldRenderingRunning: false,
   worldRenderingTime: 0,
@@ -104,58 +104,11 @@ export const environmentManagerSlice = createSlice({
   name: 'environmentManager',
   initialState,
   reducers: {
-    // NOTE: Most of this was recently lifted up into the listener within the store.
-    // Keeping this around awhile because it shows how to combine states on an action
-    /*initEnvironmentManager: (
-      state,
-      action: PayloadAction<EnvironmentManagerAndWorldEnvironmentStates>,
-    ) => {
-      state.ready = action.payload.environmentManager.ready;
-
-      // Ensuring ready is how we know the DOM elements are mounted.
-      //debugger;
-
-      if (
-        state.ready &&
-        typeof action.payload.environmentManager.editorCanvasId === 'string' &&
-        typeof action.payload.environmentManager.editorCanvasContainerId === 'string' &&
-        typeof action.payload.environmentManager.worldCanvasId === 'string' &&
-        typeof action.payload.environmentManager.worldCanvasContainerId === 'string'
-      ) {
-        console.log('environmentManager.initEnvironmentManager', action.payload);
-
-        state.editorCanvasId = action.payload.environmentManager.editorCanvasId;
-        state.editorCanvasContainerId = action.payload.environmentManager.editorCanvasContainerId;
-        state.worldCanvasId = action.payload.environmentManager.worldCanvasId;
-        state.worldCanvasContainerId = action.payload.environmentManager.worldCanvasContainerId;
-
-        /*
-        let editorCanvasEl = document.getElementById(state.editorCanvasId);// as HTMLCanvasElement | null;
-        let editorCanvasContainerEl = document.getElementById(state.editorCanvasContainerId);
-        let worldCanvasEl = document.getElementById(state.worldCanvasId);// as HTMLCanvasElement | null;
-        let worldCanvasContainerEl = document.getElementById(state.worldCanvasContainerId);
-
-        if (
-          isHTMLCanvasElement(editorCanvasEl) &&
-          isHTMLDivElement(editorCanvasContainerEl) &&
-          isHTMLCanvasElement(worldCanvasEl) &&
-          isHTMLDivElement(worldCanvasContainerEl)
-        ) {
-          const cellSize = action.payload.worldEnvironment.config.cell_size;
-
-          worldRendering.initWorldRendering(worldCanvasContainerEl, worldCanvasEl, cellSize);
-
-          //worldSimulation.init();
-        }
-      }
-    },*/
-
     // Rendering
 
     startWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.startWorldRendering, payload:', action.payload);
+      console.log('environmentManager, startWorldRendering, payload:', action.payload);
       state.worldRenderingRunning = action.payload.worldRenderingRunning;
-
       worldRendering.start(action.payload);
     },
     stopWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
@@ -177,7 +130,7 @@ export const environmentManagerSlice = createSlice({
     // Simulation
 
     startWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.startWorldSimulation, payload:', action.payload);
+      console.log('environmentManager, startWorldSimulation, payload:', action.payload);
       state.worldSimulationRunning = action.payload.worldSimulationRunning;
       worldSimulation.start(action.payload);
     },
@@ -207,7 +160,6 @@ export const environmentManagerSlice = createSlice({
 export const selectEnvironmentManager = (state: RootState) => state.environmentManager;
 
 export const {
-  //initEnvironmentManager,
   startWorldRendering,
   stopWorldRendering,
   resetWorldRendering,

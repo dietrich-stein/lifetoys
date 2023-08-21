@@ -18,13 +18,14 @@ interface GridMapInterface {
   grid: Array<Array<GridCell>>;
   cols: number;
   rows: number;
-  cell_size: number;
-  resize: (cols: number, rows: number, cell_size: number) => void;
-  fillGrid: (state: AllCellStatesType, ignore_walls: boolean) => void;
+  resize: (cols: number, rows: number, cellSize: number) => void;
+  fillGrid: (state: AnyCellState, ignore_walls: boolean) => void;
   cellAt: (col: number, row: number) => GridCell | null;
-  setCellState: (col: number, row: number, state: AllCellStatesType) => void;
+  setCellState: (col: number, row: number, state: AnyCellState) => void;
   setCellOwnerOrganism: (col: number, row: number, owner_cell: Cell) => void;
   isValidLoc: (col: number, row: number) => boolean;
+  getCenter: () => Array<number>;
+  xyToColRow: (x: number, y: number, cellSize: number) => Array<number>;
   serialize: () => SerializedGridMap;
   loadRaw: (grid: SerializedGridMap) => void;
 }
@@ -33,21 +34,18 @@ class GridMap implements GridMapInterface {
   grid: Array<Array<GridCell>>;
   cols: number;
   rows: number;
-  cell_size: number;
 
-  constructor(cols: number, rows: number, cell_size: number) {
+  constructor(cols: number, rows: number, cellSize: number) {
     this.grid = [];
     this.cols = cols;
     this.rows = rows;
-    this.cell_size = cell_size;
-    this.resize(cols, rows, cell_size);
+    this.resize(cols, rows, cellSize);
   }
 
-  resize(cols: number, rows: number, cell_size: number) {
+  resize(cols: number, rows: number, cellSize: number) {
     this.grid = [];
     this.cols = cols;
     this.rows = rows;
-    this.cell_size = cell_size;
     for (var c = 0; c < cols; c++) {
       var row = [];
 
@@ -56,8 +54,8 @@ class GridMap implements GridMapInterface {
           CellStates.empty,
           c,
           r,
-          c * cell_size,
-          r * cell_size,
+          c * cellSize,
+          r * cellSize,
         );
 
         row.push(cell);
@@ -67,7 +65,7 @@ class GridMap implements GridMapInterface {
     }
   }
 
-  fillGrid(state: AllCellStatesType, ignore_walls: boolean = false) {
+  fillGrid(state: AnyCellState, ignore_walls: boolean = false) {
     for (var col of this.grid) {
       for (var cell of col) {
         if (ignore_walls && cell.state === CellStates.wall) {
@@ -89,7 +87,7 @@ class GridMap implements GridMapInterface {
     return this.grid[col][row];
   }
 
-  setCellState(col: number, row: number, state: AllCellStatesType) {
+  setCellState(col: number, row: number, state: AnyCellState) {
     if (!this.isValidLoc(col, row)) {
       return;
     }
@@ -119,9 +117,9 @@ class GridMap implements GridMapInterface {
     return [Math.floor(this.cols / 2), Math.floor(this.rows / 2)];
   }
 
-  xyToColRow(x: number, y: number) {
-    var c = Math.floor(x / this.cell_size);
-    var r = Math.floor(y / this.cell_size);
+  xyToColRow(x: number, y: number, cellSize: number) {
+    var c = Math.floor(x / cellSize);
+    var r = Math.floor(y / cellSize);
 
     if (c >= this.cols) {
       c = this.cols - 1;

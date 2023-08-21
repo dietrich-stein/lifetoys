@@ -47,9 +47,9 @@ class Species implements SpeciesInterface {
   calcAnatomyDetails() {
     if (!this.anatomy) return;
     var new_cell_counts: CountArrayInterface = {};
-    var living = CellStates.getLiving();
+    var anatomyStates = CellStates.getAnatomyCellStates();
 
-    for (let c of living) {
+    for (let c of anatomyStates) {
       new_cell_counts[c.name] = 0;
     }
 

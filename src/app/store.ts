@@ -14,13 +14,12 @@ import worldEnvironmentReducer, {
   setWorldCanvasHeight,
 } from '../features/environment/world/worldEnvironmentSlice';
 import environmentManagerReducer, {
-  //initEnvironmentManager,
   startWorldSimulation,
   startWorldRendering,
 } from '../features/environment/environmentManagerSlice';
 import { startAppListening, listenerMiddleware } from './listenerMiddleware';
-//import WorldSimulation from './WorldSimulation';
 import WorldRendering from '../features/environment/world/WorldRendering';
+import WorldSimulation from '../features/environment/world/WorldSimulation';
 
 const reducer = {
   counter: counterReducer,
@@ -40,7 +39,7 @@ function isHTMLCanvasElement(input: any): input is HTMLCanvasElement {
 }
 
 const worldRendering = WorldRendering.getInstance();
-//const worldSimulation = WorldSimulation.getInstance();
+const worldSimulation = WorldSimulation.getInstance();
 
 startAppListening({
   matcher: isAnyOf(
@@ -62,25 +61,9 @@ startAppListening({
           // Effectively debounces the dispatches that follow it
           await listenerApi.delay(1000);
 
-          //console.log('debounced?');
-
-          // Keeping this around awhile because it shows how to combine states on an action
-          /*listenerApi.dispatch(initEnvironmentManager({
-            environmentManager: {
-              ...state.environmentManager,
-              ready: true,
-              editorCanvasId: state.editorEnvironment.canvasId,
-              editorCanvasContainerId: state.editorEnvironment.canvasContainerId,
-              worldCanvasId: state.worldEnvironment.canvasId,
-              worldCanvasContainerId: state.worldEnvironment.canvasContainerId,
-            },
-            worldEnvironment: {
-              ...state.worldEnvironment,
-            },
-          }));*/
+          console.log('store, startAppListening, effect');
 
           if (
-            //state.environmentManager.ready &&
             typeof state.editorEnvironment.canvasId === 'string' &&
             typeof state.editorEnvironment.canvasContainerId === 'string' &&
             typeof state.worldEnvironment.canvasId === 'string' &&
@@ -112,14 +95,19 @@ startAppListening({
               listenerApi.dispatch(setWorldNumCols(worldRendering.numCols));
               listenerApi.dispatch(setWorldNumRows(worldRendering.numRows));
 
-              listenerApi.dispatch(startWorldSimulation({ ...state.environmentManager, worldSimulationRunning: true }));
+              worldSimulation.init(state);
+
+              listenerApi.dispatch(startWorldSimulation({
+                ...state.environmentManager,
+                worldSimulationRunning: true,
+              }));
+
               listenerApi.dispatch(startWorldRendering({
                 ...state.environmentManager,
                 worldRenderingRunning: true,
               }));
             }
           }
-          /**/
         }
 
         break;
