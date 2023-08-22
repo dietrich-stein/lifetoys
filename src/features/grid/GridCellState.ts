@@ -23,8 +23,8 @@ class GridCellState implements GridCellStateInterface {
     if (
       cell.owner_cell === null ||
       (
-        cell.owner_cell.state !== CellStates.eye &&
-        cell.owner_cell.state !== CellStates.mouth
+        cell.owner_cell.state !== CellStates.eye //&&
+        //cell.owner_cell.state !== CellStates.mouth
       )
     ) {
       return;

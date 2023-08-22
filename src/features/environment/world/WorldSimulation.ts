@@ -8,6 +8,7 @@ import {
   setWorldSimulationStats,
 } from '../environmentManagerSlice';
 import WorldRendering from './WorldRendering';
+import FossilRecord from '../../stats/FossilRecord';
 
 /*interface WorldSimulationInterface {
   running: boolean;
@@ -28,6 +29,7 @@ export const DEFAULT_TICKS_DELAY = 16.67;
 const worldRendering = WorldRendering.getInstance();
 
 class WorldSimulation /*implements WorldSimulationInterface*/ {
+  // Control
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
@@ -36,6 +38,8 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   //
   gridMap: GridMap | null;
   storeState: RootState | null;
+  fossilRecord: FossilRecord | null;
+  fossilRecordRate: number;
   //
   organisms: Array<Organism>;
   walls: Array<GridCell>;
@@ -46,6 +50,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
+    // Control
     this.running = false;
     this.intervalId = null;
     this.timeElapsed = 0;
@@ -54,6 +59,8 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     //
     this.gridMap = null;
     this.storeState = null;
+    this.fossilRecord = null;
+    this.fossilRecordRate = 100;
     //
     this.organisms = [];
     this.walls = [];
@@ -89,55 +96,21 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       storeState.worldEnvironment.cellSize,
     );
 
-    //this.fossil_record = new FossilRecord(this);
+    this.fossilRecord = new FossilRecord();
 
-    console.log('WorldSimulation, init, gridmap:', this.gridMap, 'storeState:', this.storeState);
-  }
-
-  private initDefaultOrganism() {
-    if (this.gridMap === null || this.storeState === null) {
-      return;
-    }
-
-    var center = this.gridMap.getCenter();
-    var organism = new Organism(
-      center[0],
-      center[1],
-      'world',
-      this.storeState.environmentManager.hyperparams,
-      WorldSimulation.instance,
+    console.log(
+      'WorldSimulation, init, gridmap:', this.gridMap,
+      'storeState:', this.storeState,
+      'fossilRecord:', this.fossilRecord,
     );
-
-    console.log('WorldSimulation, initDefaultOrganism', organism);
-
-    organism.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false, this.storeState.environmentManager.hyperparams);
-    organism.anatomy.addDefaultCell(CellStates.producer, 1, 1, false, this.storeState.environmentManager.hyperparams);
-    organism.anatomy.addDefaultCell(CellStates.producer, -1, -1, true, this.storeState.environmentManager.hyperparams);
-
-    this.addOrganism(organism);
-
-    //fossil_record.addSpecies(org, null);
-  }
-
-  public addOrganism(organism: Organism) {
-    if (this.gridMap === null) {
-      return;
-    }
-
-    organism.updateGrid(this.gridMap);
-
-    this.total_mutability += organism.mutability;
-    this.organisms.push(organism);
-
-    if (organism.anatomy.cells.length > this.largest_cell_count) {
-      this.largest_cell_count = organism.anatomy.cells.length;
-    }
   }
 
   public start(state: EnvironmentManagerState) {
-    if (this.running) {
+    if (this.running || this.gridMap === null) {
       return;
     }
+
+    worldRendering.renderColorScheme(this.gridMap);
 
     this.intervalId = setInterval(() => {
       if (!this.running) { // not needed, but let's be certain
@@ -154,7 +127,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       }));
     }, this.ticksDelay);
 
-    this.initDefaultOrganism();
+    this.addDefaultOrganism();
 
     this.running = true;
   }
@@ -180,7 +153,126 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private simulate() {
+    if (this.gridMap === null || this.fossilRecord === null || this.storeState === null) {
+      return;
+    }
     //console.log('WorldSimulation, SIMULATE', this.ticksDelay);
+
+    var to_remove: Array<string> = [];
+
+    for (var i in this.organisms) {
+      var org = this.organisms[i];
+
+      if (!org.living || !org.update(this.gridMap, this.fossilRecord, this.ticksElapsed)) {
+        to_remove.push(i);
+      }
+    }
+
+    this.removeOrganisms(to_remove);
+
+    if (this.storeState.environmentManager.hyperparams.foodDropProb > 0) {
+      this.generateFood();
+    }
+
+    if (this.ticksElapsed % this.fossilRecordRate === 0) {
+      this.fossilRecord.updateData(this.organisms.length, this.averageMutability(), this.ticksElapsed);
+    }
+  }
+
+  private addDefaultOrganism() {
+    if (this.gridMap === null || this.storeState === null) {
+      return;
+    }
+
+    var center = this.gridMap.getCenter();
+    var organism = new Organism(
+      center[0],
+      center[1],
+      'world',
+      this.storeState.environmentManager.hyperparams,
+      WorldSimulation.instance,
+    );
+
+    console.log('WorldSimulation, addDefaultOrganism', organism);
+
+    organism.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false, this.storeState.environmentManager.hyperparams);
+    organism.anatomy.addDefaultCell(CellStates.producer, 1, 1, false, this.storeState.environmentManager.hyperparams);
+    organism.anatomy.addDefaultCell(CellStates.producer, -1, -1, true, this.storeState.environmentManager.hyperparams);
+
+    this.addOrganism(organism);
+
+    //fossil_record.addSpecies(org, null);
+  }
+
+  public addOrganism(organism: Organism) {
+    if (this.gridMap === null) {
+      return;
+    }
+
+    organism.updateGrid(this.gridMap);
+
+    this.total_mutability += organism.mutability;
+    this.organisms.push(organism);
+
+    if (organism.anatomy.cells.length > this.largest_cell_count) {
+      this.largest_cell_count = organism.anatomy.cells.length;
+    }
+  }
+
+  private removeOrganisms(org_indeces: Array<string>): void {
+    let start_pop = this.organisms.length;
+
+    for (var i of org_indeces.reverse()) {
+      this.total_mutability -= this.organisms[parseInt(i)].mutability;
+      this.organisms.splice(parseInt(i), 1);
+    }
+
+    /*if (this.organisms.length === 0 && start_pop > 0) {
+      if (auto_reset) {
+        auto_reset_count++;
+        this.resetEnvironment(false);
+      } else {
+        // @todo: sveltefix
+        //$('.pause-button')[0].click();
+      }
+    }*/
+  }
+
+  private generateFood(): void {
+    if (this.gridMap === null || this.storeState === null) {
+      return;
+    }
+
+    var num_food = Math.max(Math.floor((
+      this.gridMap.cols *
+      this.gridMap.rows *
+      this.storeState.environmentManager.hyperparams.foodDropProb
+    ) / 50000), 1);
+    var prob = this.storeState.environmentManager.hyperparams.foodDropProb;
+
+    for (var i = 0; i < num_food; i++) {
+      if (Math.random() <= prob) {
+        var c = Math.floor(Math.random() * this.gridMap.cols);
+        var r = Math.floor(Math.random() * this.gridMap.rows);
+        var grid_cell = this.gridMap.cellAt(c, r);
+
+        if (grid_cell !== null && grid_cell.state === CellStates.empty) {
+          this.gridMap.changeCell(c, r, CellStates.food);
+        }
+      }
+    }
+  }
+
+  private averageMutability(): number {
+    if (this.organisms.length < 1 || this.storeState === null) {
+      return 0;
+    }
+
+    if (this.storeState.environmentManager.hyperparams.useGlobalMutability) {
+      return this.storeState.environmentManager.hyperparams.globalMutability;
+    }
+
+    return this.total_mutability / this.organisms.length;
   }
 }
 

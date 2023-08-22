@@ -1,4 +1,6 @@
 import { store, RootState } from '../../../app/store';
+import CellStates from '../../anatomy/CellStates';
+import GridMap from '../../grid/GridMap';
 //import { useAppDispatch } from '../../../app/hooks';
 import {
   EnvironmentManagerState,
@@ -14,6 +16,7 @@ interface WorldRenderingInterface {
   timeStoppedElapsed: number;
   timeStoppedLast: number;
   // Settings
+  storeState: RootState | null;
   canvasContainer: HTMLDivElement | null;
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | undefined;
@@ -27,7 +30,7 @@ interface WorldRenderingInterface {
   cells_to_highlight: Set<GridCell> | null;
   highlighted_cells: Set<GridCell> | null;
   // Control
-  init: (canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) => void;
+  init: (storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) => void;
   start: (state: EnvironmentManagerState) => void;
   stop: () => void;
   reset: () => void;
@@ -38,7 +41,7 @@ interface WorldRenderingInterface {
   addToRender: (cell: GridCell) => void;
   renderCell: (cell: GridCell) => void;
   renderCells: () => void;
-  //renderFullGrid: (grid: GridCell[][]) => void;
+  renderFullGrid: (grid: GridCell[][]) => void;
   //renderCellHighlight: (cell: GridCell, color: string) => void;
   //renderHighlights: () => void;
   //highlightCell: (cell: GridCell) => void;
@@ -55,6 +58,7 @@ class WorldRendering implements WorldRenderingInterface {
   timeStoppedElapsed: number;
   timeStoppedLast: number;
   // Settings
+  storeState: RootState | null;
   canvasContainer: HTMLDivElement | null;
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | undefined;
@@ -80,6 +84,7 @@ class WorldRendering implements WorldRenderingInterface {
     this.timeStoppedElapsed = 0;
     this.timeStoppedLast = 0;
     // Settings
+    this.storeState = null;
     this.canvasContainer = null;
     this.canvas = null;
     this.ctx = undefined;
@@ -102,9 +107,9 @@ class WorldRendering implements WorldRenderingInterface {
     return WorldRendering.instance;
   }
 
-  public init(canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) {
+  public init(storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) {
     console.log('WorldRendering, init');
-
+    this.storeState = storeState;
     this.cellSize = cellSize;
     this.canvasContainer = canvasContainer;
     this.canvas = canvas;
@@ -145,13 +150,48 @@ class WorldRendering implements WorldRenderingInterface {
     cell.state.render(this.ctx, cell, this.cellSize);
   }
 
+  renderColorScheme(gridMap: GridMap) {
+    if (this.storeState === null) {
+      return;
+    }
+
+    for (var state of CellStates.all) {
+      state.color = this.storeState.worldEnvironment.config.color_scheme[state.name];
+    }
+
+    CellStates.eye.slit_color = this.storeState.worldEnvironment.config.color_scheme['eye-slit'];
+
+    // Update any legends or editor palettes
+    //for (var cell_type in this.storeState.worldEnvironment.config.color_scheme) {
+      /*
+      $('#' + cell_type + '.cell-type ').css(
+        'background-color',
+        WorldConfig.color_scheme[cell_type],
+      );
+      $('#' + cell_type + '.cell-legend-type').css(
+        'background-color',
+        WorldConfig.color_scheme[cell_type],
+      );
+      */
+    //}
+
+    this.renderFullGrid(gridMap.grid);
+  }
+
+  renderFullGrid(grid: GridCell[][]) {
+    for (var col of grid) {
+      for (var cell of col) {
+        this.renderCell(cell);
+      }
+    }
+  }
+
   public start(state: EnvironmentManagerState) {
-    //const dispatch = useAppDispatch();
     if (this.running) {
       return;
     }
 
-    console.log('WorldRendering, start');
+    console.log('WorldRendering, start, state:', state);
 
     const animate = (nowTime: DOMHighResTimeStamp) => {
       this.timeStartedElapsed = nowTime - this.timeStoppedElapsed;

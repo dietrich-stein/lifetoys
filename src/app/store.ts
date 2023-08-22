@@ -82,6 +82,7 @@ startAppListening({
             ) {
               // Triggers a call to WorldRendering.init() giving us valid values needed after
               worldRendering.init(
+                state,
                 worldCanvasContainerEl,
                 worldCanvasEl,
                 state.worldEnvironment.cellSize,

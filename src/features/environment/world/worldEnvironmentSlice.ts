@@ -87,7 +87,7 @@ export const worldEnvironmentSlice = createSlice({
       state.canvasHeight = action.payload;
     },
     setWorldColors: (state, action: PayloadAction<WorldEnvironmentState>) => {
-      //
+      console.log('WorldEnvironment, setWorldColors, payload:', action.payload);
     },
   },
 });

@@ -185,7 +185,7 @@ class Organism implements OrganismInterface {
 
     //produce mutated child
     //check nearby locations (is there room and a direct path)
-    var org: Organism = new Organism(0, 0, this.environment, this.hyperparams, this.simulation);
+    var org: Organism = new Organism(0, 0, this.environment, this.hyperparams, this.simulation, this);
 
     if (rotationEnabled) {
       org.rotation_direction = Directions.getRandomDirection();
@@ -209,6 +209,7 @@ class Organism implements OrganismInterface {
     var mutated = false;
 
     if (Math.random() * 100 <= prob) {
+      console.log('Organism, reproduce, calling mutateCells()...');
       mutated = org.mutateCells();
     }
 
@@ -276,41 +277,52 @@ class Organism implements OrganismInterface {
     let changed = false;
     let removed = false;
 
-    // add random cell
+    if (this.anatomy.cells.length === 0) {
+      return false;
+    }
+
+    // add random cell?
     // @todo: a way to define max # of cell type; or make this a param?!
     if (this.calcRandomChance(addProb)) {
-      let branch = this.anatomy.getRandomCell();
-      let state = CellStates.getRandomAnatomyCellState(); //branch.state;
-      let growth_direction =
-        Neighbors.all[Math.floor(Math.random() * Neighbors.all.length)];
-      let c = branch.loc_c + growth_direction[0];
-      let r = branch.loc_r + growth_direction[1];
+      let cellToBranch = this.anatomy.getRandomCell();
 
-      if (this.anatomy.canAddCellAt(c, r)) {
-        added = true;
-        this.anatomy.addRandomizedCell(state, c, r, false, this.hyperparams);
+      if (cellToBranch !== null) {
+        let randomState = CellStates.getRandomAnatomyCellState();
+        let growth_direction = Neighbors.all[
+          Math.floor(Math.random() * Neighbors.all.length)
+        ];
+        let c = cellToBranch.loc_c + growth_direction[0];
+        let r = cellToBranch.loc_r + growth_direction[1];
+
+        if (this.anatomy.canAddCellAt(c, r)) {
+          added = true;
+          this.anatomy.addRandomizedCell(randomState, c, r, false, this.hyperparams);
+        }
       }
     }
 
-    // replace cell with random cell
+    // replace cell with random cell?
     // @todo: a way to define max # of cell type; or make this a param?!
     if (this.calcRandomChance(changeProb)) {
-      let cell = this.anatomy.getRandomCell();
-      let state = CellStates.getRandomAnatomyCellState();
+      let cellToReplace = this.anatomy.getRandomCell();
 
-      this.anatomy.replaceCell(state, cell.loc_c, cell.loc_r, false, true, this.hyperparams);
-      changed = true;
+      if (cellToReplace !== null) {
+        let randomState = CellStates.getRandomAnatomyCellState();
+
+        this.anatomy.replaceCell(randomState, cellToReplace.loc_c, cellToReplace.loc_r, false, true, this.hyperparams);
+        changed = true;
+      }
     }
 
-    // remove
+    // remove? (if not last cell)
     // @todo: a way to define min # of cell type to keep; or make this a param?!
-    if (this.calcRandomChance(removeProb)) {
-      if (this.anatomy.cells.length > 1) {
-        let cell = this.anatomy.getRandomCell();
+    if (this.anatomy.cells.length > 1 && this.calcRandomChance(removeProb)) {
+      let cellToRemove = this.anatomy.getRandomCell();
 
+      if (cellToRemove !== null) {
         removed = this.anatomy.removeCell(
-          cell.loc_c,
-          cell.loc_r,
+          cellToRemove.loc_c,
+          cellToRemove.loc_r,
           false,
           true,
         );
@@ -336,7 +348,6 @@ class Organism implements OrganismInterface {
     var new_r = this.r + direction_r;
 
     if (this.isClear(gridMap, new_c, new_r)) {
-      //var grid_map: GridMap = (this.env as WorldEnvironment).grid_map;
       for (var cell of this.anatomy.cells) {
         var real_colrow = cell.rotatedColRow(this.rotation_direction);
         var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
@@ -603,8 +614,10 @@ class Organism implements OrganismInterface {
 
       // really "move_range" is "move_range_before_maybe_rotate_maybe_changedir"
       if (
-        (this.move_count > this.move_range + this.anatomy.mover_count &&
-          !changed_dir) ||
+        (
+          this.move_count > this.move_range + this.anatomy.mover_count &&
+          !changed_dir
+        ) ||
         !moved
       ) {
         var rotated = this.attemptRotate(grid_map);

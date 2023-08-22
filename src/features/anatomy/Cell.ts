@@ -19,9 +19,11 @@ interface CellInterface {
   performFunction: (gridMap: GridMap, fossilRecord: FossilRecord, ticks: number) => void;
   getRealCol: () => void;
   getRealRow: () => void;
+
   //getRealCell: () => GridCell | null;
   //rotatedCol: (dir: number) => number;
   //rotatedRow: (dir: number) => number;
+
   rotatedColRow: (dir: number) => number[];
 }
 

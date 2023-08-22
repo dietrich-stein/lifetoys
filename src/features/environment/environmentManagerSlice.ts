@@ -62,8 +62,8 @@ const initialState: EnvironmentManagerState = {
     killableNeighbors: Neighbors.adjacent,
     edibleNeighbors: Neighbors.adjacent,
     growableNeighbors: Neighbors.adjacent,
-    useGlobalMutability: false,
-    globalMutability: 5,
+    useGlobalMutability: true, // false
+    globalMutability: 15, // 5
     addProb: 33,
     changeProb: 33,
     removeProb: 33,

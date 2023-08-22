@@ -43,7 +43,7 @@ interface AnatomyInterface {
   removeCell: (c: number, r: number, allow_center_removal: boolean, check_types: boolean) => boolean;
   getLocalCell: (c: number, r: number) => Cell | null;
   checkTypeChange: () => void;
-  getRandomCell: () => Cell;
+  getRandomCell: () => Cell | null;
   getNeighborsOfCell: (col: number, row: number) => Array<Cell>;
   isEqual: (anatomy: Anatomy) => boolean;
   serialize: () => SerializedAnatomy;
@@ -272,6 +272,10 @@ class Anatomy implements AnatomyInterface {
   }
 
   getRandomCell() {
+    if (this.cells.length === 0) {
+      return null;
+    }
+
     return this.cells[Math.floor(Math.random() * this.cells.length)];
   }
 
