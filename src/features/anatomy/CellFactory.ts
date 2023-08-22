@@ -15,7 +15,7 @@ import EyeCell from './cells/EyeCell';
   ArmorState,
   EyeState,
 } from './CellStates';*/
-import { HyperparamsState } from '../environment/environmentManagerSlice';
+import { HyperparamsState } from '../world/WorldManagerSlice';
 
 interface CellClassesInterface {
   [key: string]:

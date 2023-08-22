@@ -3,7 +3,7 @@ import Cell from '../Cell';
 import Organism from '../../organism/Organism';
 import GridMap from '../../grid/GridMap';
 import FossilRecord from '../../stats/FossilRecord';
-import { HyperparamsState } from '../../environment/environmentManagerSlice';
+import { HyperparamsState } from '../../world/WorldManagerSlice';
 
 class ProducerCell extends Cell {
   constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {

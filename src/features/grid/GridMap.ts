@@ -1,7 +1,7 @@
 import GridCell from './GridCell';
 import CellStates from '../anatomy/CellStates';
 import Cell from '../anatomy/Cell';
-import WorldRendering from '../environment/world/WorldRendering';
+import WorldRendering from '../world/WorldRendering';
 
 type SerializedCell = {
   c: number;

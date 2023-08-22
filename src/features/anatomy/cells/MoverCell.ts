@@ -1,7 +1,7 @@
 import CellStates from '../CellStates';
 import Cell from '../Cell';
 import Organism from '../../organism/Organism';
-import { HyperparamsState } from '../../environment/environmentManagerSlice';
+import { HyperparamsState } from '../../world/WorldManagerSlice';
 
 class MoverCell extends Cell {
   constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {

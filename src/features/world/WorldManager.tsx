@@ -10,26 +10,26 @@ import {
   stopWorldSimulation,
   resetWorldSimulation,
   setWorldSimulationTicksDelay,
-} from './environmentManagerSlice';
+  setWorldRenderingCellSize,
+} from './WorldManagerSlice';
 import { formatTime } from '../../utils/FormatTime';
-import { DEFAULT_TICKS_DELAY } from './world/WorldSimulation';
-//import WorldRendering from './world/WorldRendering';
+import { DEFAULT_TICKS_DELAY } from './WorldSimulation';
 import * as dg from '@dietrich-stein/dis-gui-lifetoys';
 
-type EnvironmentManagerProps = {
+type WorldManagerProps = {
   children?: React.ReactNode
 };
 
-export function EnvironmentManager(props: EnvironmentManagerProps) {
+export function WorldManager(props: WorldManagerProps) {
   const {
     children,
   } = props;
-  const environmentManagerState = useAppSelector(selectEnvironmentManager);
+  const worldManagerState = useAppSelector(selectEnvironmentManager);
   const dispatch = useAppDispatch();
   const {
     worldRenderingRunning,
     worldSimulationRunning,
-  } = environmentManagerState;
+  } = worldManagerState;
   const { avgFps, maxFps, nowFps } = useStats();
   /*
    * NOTE: We use non-react classes for `setInterval()` and
@@ -43,7 +43,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
 
   const handleStartSimulationClick = () => {
     dispatch(startWorldSimulation({
-      ...environmentManagerState,
+      ...worldManagerState,
       worldSimulationRunning: true,
     }));
     handleStartRenderingClick();
@@ -51,7 +51,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
 
   const handleStopSimulationClick = () => {
     dispatch(stopWorldSimulation({
-      ...environmentManagerState,
+      ...worldManagerState,
       worldSimulationRunning: false,
     }));
     handleStopRenderingClick();
@@ -59,11 +59,11 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
 
   const handleResetSimulationClick = () => {
     dispatch(resetWorldRendering({
-      ...environmentManagerState,
+      ...worldManagerState,
       worldRenderingRunning: false,
     }));
     dispatch(resetWorldSimulation({
-      ...environmentManagerState,
+      ...worldManagerState,
       worldSimulationRunning: false,
       worldSimulationTicksDelay: DEFAULT_TICKS_DELAY,
     }));
@@ -73,22 +73,28 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
 
   const handleStartRenderingClick = () => {
     dispatch(startWorldRendering({
-      ...environmentManagerState,
+      ...worldManagerState,
       worldRenderingRunning: true,
     }));
   };
 
   const handleStopRenderingClick = () => {
     dispatch(stopWorldRendering({
-      ...environmentManagerState,
+      ...worldManagerState,
       worldRenderingRunning: false,
     }));
   };
 
   const handleSimulationTicksDelayChanged = (value: number) => {
     dispatch(setWorldSimulationTicksDelay({
-      ...environmentManagerState,
-      //...environmentManagerState,
+      ...worldManagerState,
+      worldSimulationTicksDelay: value,
+    }));
+  };
+
+  const handleRenderingCellSizeChanged = (value: number) => {
+    dispatch(setWorldRenderingCellSize({
+      ...worldManagerState,
       worldSimulationTicksDelay: value,
     }));
   };
@@ -98,7 +104,7 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
       { children }
       {
         <dg.GUI style={{ labelWidth: 120, controlWidth: 200 }}>
-          <dg.FolderWidget label='Simulation & Rendering' expanded={ true }>
+          <dg.FolderWidget label='Simulation' expanded={ true }>
             <dg.ButtonWidget
               disabled={ !worldSimulationRunning }
               label='Reset All'
@@ -108,35 +114,42 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
               label={ worldSimulationRunning ? 'Pause Simulation' : 'Resume Simulation' }
               onClick={ worldSimulationRunning ? handleStopSimulationClick : handleStartSimulationClick }>
             </dg.ButtonWidget>
+            <dg.TextWidget
+              label='Time'
+              value={ formatTime(useAppSelector((state: RootState) => state.worldManager.worldSimulationTime)) }
+              readOnly={ true }
+            />
+            <dg.TextWidget
+              label='Ticks'
+              value={
+                useAppSelector((state: RootState) => state.worldManager.worldSimulationTicks ).toString()
+              }
+              readOnly={ true }
+            />
             <dg.NumberWidget
-              label='Simulation Tick Delay'
+              label='Delay'
               value={ useAppSelector(
-                (state: RootState) => state.environmentManager.worldSimulationTicksDelay,
+                (state: RootState) => state.worldManager.worldSimulationTicksDelay,
               ) }
               min={ 0 }
               max={ 1000 }
               step={ 1 }
               onChange={ handleSimulationTicksDelayChanged }
             />
-            <dg.TextWidget
-              label='Simulation Ticks'
-              value={
-                useAppSelector((state: RootState) => state.environmentManager.worldSimulationTicks ).toString()
-              }
-              readOnly={ true }
-            />
-            <dg.TextWidget
-              label='Simulation Time'
-              value={ formatTime(useAppSelector((state: RootState) => state.environmentManager.worldSimulationTime)) }
-              readOnly={ true }
-            />
+          </dg.FolderWidget>
+          <dg.FolderWidget label='Rendering' expanded={ true }>
             <dg.ButtonWidget
               disabled={ !worldSimulationRunning }
               label={ worldRenderingRunning ? 'Pause Rendering' : 'Resume Rendering' }
               onClick={ worldRenderingRunning ? handleStopRenderingClick : handleStartRenderingClick }>
             </dg.ButtonWidget>
             <dg.TextWidget
-                label='Rendering Stats'
+              label='Time'
+              value={ formatTime(useAppSelector((state: RootState) => state.worldManager.worldRenderingTime )) }
+              readOnly={ true }
+            />
+            <dg.TextWidget
+                label='Stats'
                 value={
                   'FPS: ' + (worldRenderingRunning ? nowFps : 0) +
                   ' AVG: ' + (worldRenderingRunning ? avgFps : 0) +
@@ -144,10 +157,15 @@ export function EnvironmentManager(props: EnvironmentManagerProps) {
                 }
                 readOnly={ true }
             />
-            <dg.TextWidget
-              label='Rendering Time'
-              value={ formatTime(useAppSelector((state: RootState) => state.environmentManager.worldRenderingTime )) }
-              readOnly={ true }
+            <dg.NumberWidget
+              label='Cell Size'
+              value={ useAppSelector(
+                (state: RootState) => state.world.cellSize,
+              ) }
+              min={ 5 }
+              max={ 10 }
+              step={ 1 }
+              onChange={ handleRenderingCellSizeChanged }
             />
           </dg.FolderWidget>
         </dg.GUI>

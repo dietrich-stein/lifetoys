@@ -1,4 +1,3 @@
-//import WorldEnvironment from '../Environments/World/WorldEnvironment.svelte';
 import CellStates from '../anatomy/CellStates';
 import SerializeHelper from '../../utils/SerializeHelper';
 import Species from './Species';
@@ -17,7 +16,6 @@ interface ExtinctSpeciesInterface {
 }
 
 interface FossilRecordInterface {
-  //env: WorldEnvironment;
   extant_species: ExtantSpeciesInterface;
   extinct_species: ExtinctSpeciesInterface;
   min_discard: number;
@@ -44,7 +42,6 @@ interface FossilRecordInterface {
 }
 
 class FossilRecord implements FossilRecordInterface {
-  //env: WorldEnvironment;
   extant_species: ExtantSpeciesInterface;
   extinct_species: ExtinctSpeciesInterface;
   min_discard: number;
@@ -56,8 +53,7 @@ class FossilRecord implements FossilRecordInterface {
   av_cells: Array<number>;
   av_cell_counts: AverageCellCountsType;
 
-  constructor(/*env: WorldEnvironment*/) {
-    //this.env = env;
+  constructor() {
     this.min_discard = 10; // if org cumulative pop is fewer on extinction
     this.record_size_limit = 500; // store this many data points
 

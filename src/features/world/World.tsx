@@ -1,14 +1,14 @@
 import React from 'react';
-import { WorldEnvironmentCanvas } from './WorldEnvironmentCanvas';
-import styles from './WorldEnvironment.module.css';
+import { WorldCanvas } from './WorldCanvas';
+import styles from './World.module.css';
 
-export function WorldEnvironment() {
+export function World() {
   const canvasContainerId = 'world-canvas-container';
   const canvasId = 'world-canvas';
 
   return (
     <div id={ canvasContainerId } className={ styles.worldCanvasContainer }>
-      <WorldEnvironmentCanvas
+      <WorldCanvas
         canvasId={ canvasId }
         canvasContainerId={ canvasContainerId }
       />

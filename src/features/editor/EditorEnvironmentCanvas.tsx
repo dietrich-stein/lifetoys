@@ -2,7 +2,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { selectEditorEnvironment, initEditorEnvironment } from './editorEnvironmentSlice';
 import styles from './EditorEnvironmentCanvas.module.css';
 

@@ -4,7 +4,7 @@ import Directions from '../../organism/Directions';
 import Observation from '../../organism/perception/Observation';
 import Organism from '../../organism/Organism';
 import GridMap from '../../grid/GridMap';
-import { HyperparamsState } from '../../environment/environmentManagerSlice';
+import { HyperparamsState } from '../../world/WorldManagerSlice';
 
 class EyeCell extends Cell {
   direction: number;

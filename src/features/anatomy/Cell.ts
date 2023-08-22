@@ -4,7 +4,7 @@ import Directions from '../organism/Directions';
 import Organism from '../organism/Organism';
 import FossilRecord from '../stats/FossilRecord';
 //import { store, RootState } from '../../app/store';
-import { HyperparamsState } from '../environment/environmentManagerSlice';
+import { HyperparamsState } from '../world/WorldManagerSlice';
 
 interface CellInterface {
   //store: RootState;

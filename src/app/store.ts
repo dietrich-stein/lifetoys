@@ -5,27 +5,27 @@ import {
   isAnyOf,
 } from '@reduxjs/toolkit';
 import counterReducer from '../features/counter/counterSlice';
-import editorEnvironmentReducer, { initEditorEnvironment } from '../features/environment/editor/editorEnvironmentSlice';
-import worldEnvironmentReducer, {
-  initWorldEnvironment,
+import editorEnvironmentReducer, { initEditorEnvironment } from '../features/editor/editorEnvironmentSlice';
+import worldReducer, {
+  initWorld,
   setWorldNumCols,
   setWorldNumRows,
   setWorldCanvasWidth,
   setWorldCanvasHeight,
-} from '../features/environment/world/worldEnvironmentSlice';
-import environmentManagerReducer, {
+} from '../features/world/WorldSlice';
+import worldManagerReducer, {
   startWorldSimulation,
   startWorldRendering,
-} from '../features/environment/environmentManagerSlice';
+} from '../features/world/WorldManagerSlice';
 import { startAppListening, listenerMiddleware } from './listenerMiddleware';
-import WorldRendering from '../features/environment/world/WorldRendering';
-import WorldSimulation from '../features/environment/world/WorldSimulation';
+import WorldRendering from '../features/world/WorldRendering';
+import WorldSimulation from '../features/world/WorldSimulation';
 
 const reducer = {
   counter: counterReducer,
-  environmentManager: environmentManagerReducer,
+  worldManager: worldManagerReducer,
+  world: worldReducer,
   editorEnvironment: editorEnvironmentReducer,
-  worldEnvironment: worldEnvironmentReducer,
 };
 
 export type RootState = ReturnType<typeof store.getState>;
@@ -44,16 +44,16 @@ const worldSimulation = WorldSimulation.getInstance();
 startAppListening({
   matcher: isAnyOf(
     initEditorEnvironment,
-    initWorldEnvironment,
+    initWorld,
   ),
   effect: async (action, listenerApi) => {
     let state: RootState = listenerApi.getState();
 
     switch (action.type) {
-      case 'editorEnvironment/initEditorEnvironment':
-      case 'worldEnvironment/initWorldEnvironment':
+      case 'editor/initEditor':
+      case 'world/initWorld':
         if (
-          state.worldEnvironment.status === 'idle' &&
+          state.world.status === 'idle' &&
           state.editorEnvironment.status === 'idle'
         ) {
           listenerApi.cancelActiveListeners();
@@ -66,13 +66,13 @@ startAppListening({
           if (
             typeof state.editorEnvironment.canvasId === 'string' &&
             typeof state.editorEnvironment.canvasContainerId === 'string' &&
-            typeof state.worldEnvironment.canvasId === 'string' &&
-            typeof state.worldEnvironment.canvasContainerId === 'string'
+            typeof state.world.canvasId === 'string' &&
+            typeof state.world.canvasContainerId === 'string'
           ) {
             let editorCanvasEl = document.getElementById(state.editorEnvironment.canvasId);
             let editorCanvasContainerEl = document.getElementById(state.editorEnvironment.canvasContainerId);
-            let worldCanvasEl = document.getElementById(state.worldEnvironment.canvasId);
-            let worldCanvasContainerEl = document.getElementById(state.worldEnvironment.canvasContainerId);
+            let worldCanvasEl = document.getElementById(state.world.canvasId);
+            let worldCanvasContainerEl = document.getElementById(state.world.canvasContainerId);
 
             if (
               isHTMLCanvasElement(editorCanvasEl) &&
@@ -85,7 +85,6 @@ startAppListening({
                 state,
                 worldCanvasContainerEl,
                 worldCanvasEl,
-                state.worldEnvironment.cellSize,
               );
 
               // Dispatch setter actions for canvasHeight, canvasWidth, numCols, numRows values
@@ -97,12 +96,12 @@ startAppListening({
               worldSimulation.init(state);
 
               listenerApi.dispatch(startWorldSimulation({
-                ...state.environmentManager,
+                ...state.worldManager,
                 worldSimulationRunning: true,
               }));
 
               listenerApi.dispatch(startWorldRendering({
-                ...state.environmentManager,
+                ...state.worldManager,
                 worldRenderingRunning: true,
               }));
             }
@@ -120,7 +119,7 @@ export const store = configureStore({
     serializableCheck: {
       // Ignore these action types
       ignoredActions: [
-        //'environmentManager/init'
+        //'worldManager/init'
         //'editorEnvironment/setWorldStatus',
         //'editorEnvironment/setEditorStatus'
       ],
@@ -130,8 +129,8 @@ export const store = configureStore({
 
       // Ignore these paths in the state
       /*ignoredPaths: [
-        'environmentManager.editorCanvas',
-        'environmentManager.worldCanvas',
+        'worldManager.editorCanvas',
+        'worldManager.worldCanvas',
       ],*/
     },
   }).prepend(listenerMiddleware.middleware),

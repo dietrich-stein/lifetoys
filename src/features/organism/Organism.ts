@@ -12,8 +12,8 @@ import GridMap from '../grid/GridMap';
 import FossilRecord from '../stats/FossilRecord';
 //import { getKeyByValue } from '../../utils/GetKeyByValue';
 //import { /*store,*/RootState } from '../../app/store';
-import { HyperparamsState } from '../environment/environmentManagerSlice';
-import WorldSimulation from '../environment/world/WorldSimulation';
+import { HyperparamsState } from '../world/WorldManagerSlice';
+import WorldSimulation from '../world/WorldSimulation';
 
 type OrganismEnvironment = 'editor' | 'world';
 
@@ -110,7 +110,7 @@ class Organism implements OrganismInterface {
     this.rotation_direction = Directions.cardinals.n;
 
     this.can_rotate = (this.environment === 'world')
-      ? this.hyperparams.rotationEnabled //this.store.environmentManager.
+      ? this.hyperparams.rotationEnabled //this.store.worldManager.
       : false;
     this.move_count = 0;
     this.move_range = 4;

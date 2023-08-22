@@ -3,7 +3,7 @@ import Cell from '../Cell';
 import Organism from '../../organism/Organism';
 import GridCell from '../../grid/GridCell';
 import GridMap from '../../grid/GridMap';
-import { HyperparamsState } from '../../environment/environmentManagerSlice';
+import { HyperparamsState } from '../../world/WorldManagerSlice';
 
 class MouthCell extends Cell {
   constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {

@@ -2,28 +2,28 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { selectWorldEnvironment, initWorldEnvironment } from './worldEnvironmentSlice';
-import styles from './WorldEnvironmentCanvas.module.css';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { selectWorld, initWorld } from './WorldSlice';
+import styles from './WorldCanvas.module.css';
 
-export type EnvironmentCanvasProps = {
+export type WorldCanvasProps = {
   canvasId: string;
   canvasContainerId: string;
 };
 
-export function WorldEnvironmentCanvas(props: EnvironmentCanvasProps) {
+export function WorldCanvas(props: WorldCanvasProps) {
   const {
     canvasId,
     canvasContainerId,
   } = props;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dispatch = useAppDispatch();
-  const worldEnvironmentState = useAppSelector(selectWorldEnvironment);
+  const worldState = useAppSelector(selectWorld);
 
   useEffect(() => {
     if (canvasRef.current) {
-      dispatch(initWorldEnvironment({
-        ...worldEnvironmentState,
+      dispatch(initWorld({
+        ...worldState,
         status: 'idle',
         canvasId,
         canvasContainerId,

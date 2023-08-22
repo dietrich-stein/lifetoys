@@ -3,7 +3,7 @@ import CellFactory from './CellFactory';
 import CellStates from './CellStates';
 import SerializeHelper from '../../utils/SerializeHelper';
 import Organism from '../organism/Organism';
-import { HyperparamsState } from '../environment/environmentManagerSlice';
+import { HyperparamsState } from '../world/WorldManagerSlice';
 
 type SerializedAnatomy = {};
 

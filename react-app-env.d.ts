@@ -5,10 +5,6 @@
 //declare module 'react-d3-library';
 declare module '@dietrich-stein/dis-gui-lifetoys';
 //declare module '@canvasjs/charts';
-//declare module 'svelte-grid/build/helper/index.mjs';
-//declare module 'svelte-grid';
-//declare module 'svelte-fa';
-//declare module 'svrollbar';
 
 //type Perlin = import('./Utils/Perlin').default;
 //type ControlPanel = import('./Interaction/ControlPanel').default;
@@ -80,14 +76,6 @@ type AnyAnatomyCellClass =
   | KillerCellClass
   | ArmorCellClass
   | EyeCellClass;
-
-/*type AnyEnvironmentType =
-  | WorldEnvironment
-  | EditorEnvironment;*/
-
-/*type AnyRendererType =
-  | WorldRenderer
-  | EditorRenderer;*/
 
 // Metrics
 

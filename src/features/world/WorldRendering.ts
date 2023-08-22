@@ -1,11 +1,11 @@
-import { store, RootState } from '../../../app/store';
-import CellStates from '../../anatomy/CellStates';
-import GridMap from '../../grid/GridMap';
+import { store, RootState } from '../../app/store';
+import CellStates from '../anatomy/CellStates';
+import GridMap from '../grid/GridMap';
 //import { useAppDispatch } from '../../../app/hooks';
 import {
-  EnvironmentManagerState,
+  WorldManagerState,
   setWorldRenderingStats,
-} from '../environmentManagerSlice';
+} from './WorldManagerSlice';
 
 interface WorldRenderingInterface {
   // Control
@@ -24,14 +24,13 @@ interface WorldRenderingInterface {
   canvasHeight: number;
   numCols: number;
   numRows: number;
-  cellSize: number;
   // Cells
   cells_to_render: Set<GridCell> | null;
   cells_to_highlight: Set<GridCell> | null;
   highlighted_cells: Set<GridCell> | null;
   // Control
   init: (storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) => void;
-  start: (state: EnvironmentManagerState) => void;
+  start: (state: WorldManagerState) => void;
   stop: () => void;
   reset: () => void;
   fillWindow: () => void;
@@ -50,6 +49,7 @@ interface WorldRenderingInterface {
 }
 
 class WorldRendering implements WorldRenderingInterface {
+  storeState: RootState | null;
   // Control
   running: boolean;
   animateId: number | null;
@@ -58,7 +58,6 @@ class WorldRendering implements WorldRenderingInterface {
   timeStoppedElapsed: number;
   timeStoppedLast: number;
   // Settings
-  storeState: RootState | null;
   canvasContainer: HTMLDivElement | null;
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | undefined;
@@ -66,7 +65,6 @@ class WorldRendering implements WorldRenderingInterface {
   canvasHeight: number;
   numCols: number;
   numRows: number;
-  cellSize: number;
   // Cells
   cells_to_render: Set<GridCell>; // cellsRenderable
   cells_to_highlight: Set<GridCell>; // cellsHighlightable
@@ -76,6 +74,7 @@ class WorldRendering implements WorldRenderingInterface {
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
+    this.storeState = null;
     // Control
     this.running = false;
     this.animateId = null;
@@ -84,7 +83,6 @@ class WorldRendering implements WorldRenderingInterface {
     this.timeStoppedElapsed = 0;
     this.timeStoppedLast = 0;
     // Settings
-    this.storeState = null;
     this.canvasContainer = null;
     this.canvas = null;
     this.ctx = undefined;
@@ -92,7 +90,6 @@ class WorldRendering implements WorldRenderingInterface {
     this.canvasWidth = 0;
     this.numCols = 0;
     this.numRows = 0;
-    this.cellSize = 0; // worldEnvironment.config.cell_size
     // Cells
     this.cells_to_render = new Set();
     this.cells_to_highlight = new Set();
@@ -107,10 +104,9 @@ class WorldRendering implements WorldRenderingInterface {
     return WorldRendering.instance;
   }
 
-  public init(storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement, cellSize: number) {
+  public init(storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement/*, cellSize: number*/) {
     console.log('WorldRendering, init');
     this.storeState = storeState;
-    this.cellSize = cellSize;
     this.canvasContainer = canvasContainer;
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', {
@@ -143,11 +139,13 @@ class WorldRendering implements WorldRenderingInterface {
   }
 
   renderCell(cell: GridCell) {
-    if (typeof this.ctx === 'undefined') {
+    if (typeof this.ctx === 'undefined' || this.storeState === null) {
       return;
     }
 
-    cell.state.render(this.ctx, cell, this.cellSize);
+    const cellSize = this.storeState.world.cellSize;
+
+    cell.state.render(this.ctx, cell, cellSize);
   }
 
   renderColorScheme(gridMap: GridMap) {
@@ -156,13 +154,13 @@ class WorldRendering implements WorldRenderingInterface {
     }
 
     for (var state of CellStates.all) {
-      state.color = this.storeState.worldEnvironment.config.color_scheme[state.name];
+      state.color = this.storeState.world.config.color_scheme[state.name];
     }
 
-    CellStates.eye.slit_color = this.storeState.worldEnvironment.config.color_scheme['eye-slit'];
+    CellStates.eye.slit_color = this.storeState.world.config.color_scheme['eye-slit'];
 
     // Update any legends or editor palettes
-    //for (var cell_type in this.storeState.worldEnvironment.config.color_scheme) {
+    //for (var cell_type in this.storeState.world.config.color_scheme) {
       /*
       $('#' + cell_type + '.cell-type ').css(
         'background-color',
@@ -186,7 +184,7 @@ class WorldRendering implements WorldRenderingInterface {
     }
   }
 
-  public start(state: EnvironmentManagerState) {
+  public start(state: WorldManagerState) {
     if (this.running) {
       return;
     }
@@ -251,15 +249,17 @@ class WorldRendering implements WorldRenderingInterface {
   }
 
   public fillShape(height: number, width: number) {
-    if (this.canvas === null) {
+    if (this.canvas === null || this.storeState === null) {
       return;
     }
 
     this.canvasWidth = this.canvas.width = width;
     this.canvasHeight = this.canvas.height = height;
 
-    this.numCols = (this.cellSize > 0) ? Math.ceil(this.canvasWidth / this.cellSize) : 0;
-    this.numRows = (this.cellSize > 0) ? Math.ceil(this.canvasHeight / this.cellSize) : 0;
+    const cellSize = this.storeState.world.cellSize;
+
+    this.numCols = (cellSize > 0) ? Math.ceil(this.canvasWidth / cellSize) : 0;
+    this.numRows = (cellSize > 0) ? Math.ceil(this.canvasHeight / cellSize) : 0;
   }
 
   public clear() {

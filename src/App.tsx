@@ -1,16 +1,19 @@
 import React from 'react';
 import './App.css';
-import { EnvironmentManager } from './features/environment/EnvironmentManager';
-import { EditorEnvironment } from './features/environment/editor/EditorEnvironment';
-import { WorldEnvironment } from './features/environment/world/WorldEnvironment';
+import { WorldManager } from './features/world/WorldManager';
+import { EditorEnvironment } from './features/editor/EditorEnvironment';
+import { World } from './features/world/World';
+import { EditorManager } from './features/editor/EditorManager';
 
 function App() {
   return (
     <div className="App">
-      <EnvironmentManager>
+      <WorldManager>
+        <World />
+      </WorldManager>
+      <EditorManager>
         <EditorEnvironment />
-        <WorldEnvironment />
-      </EnvironmentManager>
+      </EditorManager>
     </div>
   );
 }

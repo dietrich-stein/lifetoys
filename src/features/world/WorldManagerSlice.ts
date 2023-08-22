@@ -1,9 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import WorldSimulation, { DEFAULT_TICKS_DELAY } from './world/WorldSimulation';
-import WorldRendering from './world/WorldRendering';
+import WorldSimulation, { DEFAULT_TICKS_DELAY } from './WorldSimulation';
+import WorldRendering from './WorldRendering';
 import Neighbors from '../grid/Neighbors';
 import { RootState } from '../../app/store';
-import { WorldEnvironmentState } from './world/worldEnvironmentSlice';
 
 export type HyperparamsState = {
   lifespanMultiplier: number;
@@ -27,7 +26,7 @@ export type HyperparamsState = {
 };
 
 // Optionality enables dispatch without including elements
-export interface EnvironmentManagerState {
+export interface WorldManagerState {
   // Rendering
   worldRenderingRunning: boolean;
   worldRenderingTime: number;
@@ -40,13 +39,7 @@ export interface EnvironmentManagerState {
   hyperparams: HyperparamsState;
 }
 
-// Keeping this around awhile because it shows how to combine states on an action
-/*export interface EnvironmentManagerAndWorldEnvironmentStates {
-  environmentManager: EnvironmentManagerState,
-  worldEnvironment: WorldEnvironmentState
-}*/
-
-const initialState: EnvironmentManagerState = {
+const initialState: WorldManagerState = {
   // Rendering
   worldRenderingRunning: false,
   worldRenderingTime: 0,
@@ -77,85 +70,83 @@ const initialState: EnvironmentManagerState = {
     extraMoverFoodCost: 0,
   },
 };
-/*
-function isHTMLDivElement(input: any): input is HTMLDivElement {
-  return (input) && (input !== null) && (input.tagName === 'DIV');
-}
-
-function isHTMLCanvasElement(input: any): input is HTMLCanvasElement {
-  return (input) && (input !== null) && (input.tagName === 'CANVAS');
-}*/
 const worldRendering = WorldRendering.getInstance();
 const worldSimulation = WorldSimulation.getInstance();
 
-export const environmentManagerSlice = createSlice({
-  name: 'environmentManager',
+export const WorldManagerSlice = createSlice({
+  name: 'worldManager',
   initialState,
   reducers: {
     // Rendering
-    startWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager, startWorldRendering, payload:', action.payload);
+    startWorldRendering: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice, startWorldRendering, payload:', action.payload);
       state.worldRenderingRunning = action.payload.worldRenderingRunning;
       worldRendering.start(action.payload);
     },
-    stopWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.stopWorldRendering, payload:', action.payload);
+    stopWorldRendering: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.stopWorldRendering, payload:', action.payload);
       state.worldRenderingRunning = action.payload.worldRenderingRunning;
 
       worldRendering.stop();
     },
-    setWorldRenderingStats: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.setWorldRenderingStats, payload:', action.payload);
+    setWorldRenderingStats: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.setWorldRenderingStats, payload:', action.payload);
       state.worldRenderingTime = action.payload.worldRenderingTime;
     },
-    resetWorldRendering: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.resetWorldRendering, payload:', action.payload);
+    resetWorldRendering: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.resetWorldRendering, payload:', action.payload);
       state.worldRenderingRunning = action.payload.worldRenderingRunning;
       worldRendering.reset();
     },
+    setWorldRenderingCellSize: (state, action: PayloadAction<WorldManagerState>) => {
+      console.log('WorldManagerSlice.setWorldRenderingCellSize, payload:', action.payload, 'state:', state);
+    },
 
     // Simulation
-    startWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager, startWorldSimulation, payload:', action.payload);
+    startWorldSimulation: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice, startWorldSimulation, payload:', action.payload);
       state.worldSimulationRunning = action.payload.worldSimulationRunning;
       worldSimulation.start(action.payload);
     },
-    stopWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.stopWorldSimulation, payload:', action.payload);
+    stopWorldSimulation: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.stopWorldSimulation, payload:', action.payload);
       state.worldSimulationRunning = action.payload.worldSimulationRunning;
       worldSimulation.stop();
     },
-    resetWorldSimulation: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.stopWorldSimulation, payload:', action.payload);
+    resetWorldSimulation: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.stopWorldSimulation, payload:', action.payload);
       state.worldSimulationTicksDelay = action.payload.worldSimulationTicksDelay;
       state.worldSimulationRunning = action.payload.worldSimulationRunning;
       worldSimulation.reset();
     },
-    setWorldSimulationStats: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      //console.log('environmentManager.setWorldSimulationStats, payload:', action.payload);
+    setWorldSimulationStats: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.setWorldSimulationStats, payload:', action.payload);
       state.worldSimulationTime = action.payload.worldSimulationTime;
       state.worldSimulationTicks = action.payload.worldSimulationTicks;
     },
-    setWorldSimulationTicksDelay: (state, action: PayloadAction<EnvironmentManagerState>) => {
-      console.log('environmentManager.setWorldSimulationTicksDelay, payload:', action.payload);
+    setWorldSimulationTicksDelay: (state, action: PayloadAction<WorldManagerState>) => {
+      console.log('WorldManagerSlice.setWorldSimulationTicksDelay, payload:', action.payload);
       state.worldSimulationTicksDelay = action.payload.worldSimulationTicksDelay;
       worldSimulation.setTicksDelay(action.payload, action.payload.worldSimulationTicksDelay);
     },
   },
 });
 
-export const selectEnvironmentManager = (state: RootState) => state.environmentManager;
+export const selectEnvironmentManager = (state: RootState) => state.worldManager;
 
 export const {
+  // Rendering
   startWorldRendering,
   stopWorldRendering,
   resetWorldRendering,
   setWorldRenderingStats,
+  setWorldRenderingCellSize,
+  // Simulation
   startWorldSimulation,
   stopWorldSimulation,
   resetWorldSimulation,
   setWorldSimulationStats,
   setWorldSimulationTicksDelay,
-} = environmentManagerSlice.actions;
+} = WorldManagerSlice.actions;
 
-export default environmentManagerSlice.reducer;
+export default WorldManagerSlice.reducer;

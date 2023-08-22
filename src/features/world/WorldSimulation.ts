@@ -1,14 +1,14 @@
-import { store, RootState } from '../../../app/store';
-import CellStates from '../../anatomy/CellStates';
-import GridCell from '../../grid/GridCell';
-import GridMap from '../../grid/GridMap';
-import Organism from '../../organism/Organism';
+import { store, RootState } from '../../app/store';
+import CellStates from '../anatomy/CellStates';
+import GridCell from '../grid/GridCell';
+import GridMap from '../grid/GridMap';
+import Organism from '../organism/Organism';
 import {
-  EnvironmentManagerState,
+  WorldManagerState,
   setWorldSimulationStats,
-} from '../environmentManagerSlice';
+} from './WorldManagerSlice';
 import WorldRendering from './WorldRendering';
-import FossilRecord from '../../stats/FossilRecord';
+import FossilRecord from '../stats/FossilRecord';
 
 /*interface WorldSimulationInterface {
   running: boolean;
@@ -18,8 +18,8 @@ import FossilRecord from '../../stats/FossilRecord';
   ticksElapsed: number;
   gridMap: GridMap | null,
   storeState: RootState | null,
-  setTicksDelay: (state: EnvironmentManagerState, value: number) => void;
-  start: (state: EnvironmentManagerState) => void;
+  setTicksDelay: (state: WorldManagerState, value: number) => void;
+  start: (state: WorldManagerState) => void;
   stop: () => void;
   reset: () => void;
 }*/
@@ -76,7 +76,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     return WorldSimulation.instance;
   }
 
-  public setTicksDelay(state: EnvironmentManagerState, value: number) {
+  public setTicksDelay(state: WorldManagerState, value: number) {
     this.ticksDelay = value;
 
     if (this.running) {
@@ -93,7 +93,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       worldRendering,
       worldRendering.numCols,
       worldRendering.numRows,
-      storeState.worldEnvironment.cellSize,
+      storeState.world.cellSize,
     );
 
     this.fossilRecord = new FossilRecord();
@@ -105,7 +105,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     );
   }
 
-  public start(state: EnvironmentManagerState) {
+  public start(state: WorldManagerState) {
     if (this.running || this.gridMap === null) {
       return;
     }
@@ -170,7 +170,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
 
     this.removeOrganisms(to_remove);
 
-    if (this.storeState.environmentManager.hyperparams.foodDropProb > 0) {
+    if (this.storeState.worldManager.hyperparams.foodDropProb > 0) {
       this.generateFood();
     }
 
@@ -189,15 +189,15 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       center[0],
       center[1],
       'world',
-      this.storeState.environmentManager.hyperparams,
+      this.storeState.worldManager.hyperparams,
       WorldSimulation.instance,
     );
 
     console.log('WorldSimulation, addDefaultOrganism', organism);
 
-    organism.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false, this.storeState.environmentManager.hyperparams);
-    organism.anatomy.addDefaultCell(CellStates.producer, 1, 1, false, this.storeState.environmentManager.hyperparams);
-    organism.anatomy.addDefaultCell(CellStates.producer, -1, -1, true, this.storeState.environmentManager.hyperparams);
+    organism.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false, this.storeState.worldManager.hyperparams);
+    organism.anatomy.addDefaultCell(CellStates.producer, 1, 1, false, this.storeState.worldManager.hyperparams);
+    organism.anatomy.addDefaultCell(CellStates.producer, -1, -1, true, this.storeState.worldManager.hyperparams);
 
     this.addOrganism(organism);
 
@@ -246,9 +246,9 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     var num_food = Math.max(Math.floor((
       this.gridMap.cols *
       this.gridMap.rows *
-      this.storeState.environmentManager.hyperparams.foodDropProb
+      this.storeState.worldManager.hyperparams.foodDropProb
     ) / 50000), 1);
-    var prob = this.storeState.environmentManager.hyperparams.foodDropProb;
+    var prob = this.storeState.worldManager.hyperparams.foodDropProb;
 
     for (var i = 0; i < num_food; i++) {
       if (Math.random() <= prob) {
@@ -268,8 +268,8 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       return 0;
     }
 
-    if (this.storeState.environmentManager.hyperparams.useGlobalMutability) {
-      return this.storeState.environmentManager.hyperparams.globalMutability;
+    if (this.storeState.worldManager.hyperparams.useGlobalMutability) {
+      return this.storeState.worldManager.hyperparams.globalMutability;
     }
 
     return this.total_mutability / this.organisms.length;
