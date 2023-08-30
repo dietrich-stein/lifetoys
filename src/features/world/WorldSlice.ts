@@ -43,7 +43,7 @@ const initialState: WorldState = {
     auto_reset: false,
     brush_size: 2,
     color_scheme: {
-      empty: '#111111',
+      empty: 'rgb(0, 0, 128)',
       food: '#15DE59',
       wall: '#808080',
       brain: '#FF00FF',

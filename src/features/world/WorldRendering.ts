@@ -145,7 +145,47 @@ class WorldRendering implements WorldRenderingInterface {
 
     const cellSize = this.storeState.world.cellSize;
 
-    cell.state.render(this.ctx, cell, cellSize);
+    //cell.state.render(this.ctx, cell, cellSize);
+    //render(ctx: CanvasRenderingContext2D, cell: GridCell, size: number) {
+    this.ctx.fillStyle = cell.state.color;
+    this.ctx.fillRect(cell.x, cell.y, cellSize, cellSize);
+
+    /*
+    // Render the eye slit?
+    if (
+      cell.owner_cell === null ||
+      (
+        cell.owner_cell.state !== CellStates.eye //&&
+        //cell.owner_cell.state !== CellStates.mouth
+      )
+    ) {
+      return;
+    }
+
+    ctx.fillStyle = this.color;
+    ctx.fillRect(cell.x, cell.y, size, size);
+    if (size === 1) {
+      return;
+    }
+
+    var half = size / 2;
+    var x = -size / 8;
+    var y = -half;
+    var h = size / 2 + size / 4;
+    var w = size / 4;
+
+    ctx.translate(cell.x + half, cell.y + half);
+    var abs_dir = cell.owner_cell.org.rotation_direction; //cell.owner_cell.org.getAbsoluteDirection();
+
+    if (cell.owner_cell.org.environment === 'editor') {
+      console.log('GridCellState.render: abs_dir = ', abs_dir);
+    }
+
+    ctx.rotate((abs_dir * 45 * Math.PI) / 180);
+    ctx.fillStyle = CellStates.eye.slit_color;
+    ctx.fillRect(x, y, w, h);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    */
   }
 
   renderColorScheme(gridMap: GridMap) {

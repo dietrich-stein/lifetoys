@@ -1,6 +1,7 @@
 .worldCanvasContainer {
-  position: fixed;
+  /*position: fixed;
   top: 0;
+  left:*/
   height: 100%;
   width: 100%;
   text-align: center;
@@ -9,4 +10,10 @@
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  border: 1px solid #666;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  box-sizing: border-box;
 }
