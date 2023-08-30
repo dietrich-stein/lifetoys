@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppSelector, useAppDispatch, useStats } from '../../app/hooks';
 import { RootState } from '../../app/store';
 import {
-  selectEnvironmentManager,
+  selectWorldManager,
   startWorldRendering,
   stopWorldRendering,
   resetWorldRendering,
@@ -24,7 +24,7 @@ export function WorldManager(props: WorldManagerProps) {
   const {
     children,
   } = props;
-  const worldManagerState = useAppSelector(selectEnvironmentManager);
+  const worldManagerState = useAppSelector(selectWorldManager);
   const dispatch = useAppDispatch();
   const {
     worldRenderingRunning,

@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import { WorldManager } from './features/world/WorldManager';
-import { EditorEnvironment } from './features/editor/EditorEnvironment';
+import { Editor } from './features/editor/Editor';
 import { World } from './features/world/World';
 import { EditorManager } from './features/editor/EditorManager';
 
@@ -12,7 +12,7 @@ function App() {
         <World />
       </WorldManager>
       <EditorManager>
-        <EditorEnvironment />
+        <Editor />
       </EditorManager>
     </div>
   );

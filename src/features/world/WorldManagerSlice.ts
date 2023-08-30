@@ -132,7 +132,7 @@ export const WorldManagerSlice = createSlice({
   },
 });
 
-export const selectEnvironmentManager = (state: RootState) => state.worldManager;
+export const selectWorldManager = (state: RootState) => state.worldManager;
 
 export const {
   // Rendering

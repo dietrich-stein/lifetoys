@@ -5,7 +5,7 @@ import {
   isAnyOf,
 } from '@reduxjs/toolkit';
 import counterReducer from '../features/counter/counterSlice';
-import editorEnvironmentReducer, { initEditorEnvironment } from '../features/editor/editorEnvironmentSlice';
+import editorReducer, { initEditor } from '../features/editor/EditorSlice';
 import worldReducer, {
   initWorld,
   setWorldNumCols,
@@ -25,7 +25,7 @@ const reducer = {
   counter: counterReducer,
   worldManager: worldManagerReducer,
   world: worldReducer,
-  editorEnvironment: editorEnvironmentReducer,
+  editor: editorReducer,
 };
 
 export type RootState = ReturnType<typeof store.getState>;
@@ -43,7 +43,7 @@ const worldSimulation = WorldSimulation.getInstance();
 
 startAppListening({
   matcher: isAnyOf(
-    initEditorEnvironment,
+    initEditor,
     initWorld,
   ),
   effect: async (action, listenerApi) => {
@@ -54,7 +54,7 @@ startAppListening({
       case 'world/initWorld':
         if (
           state.world.status === 'idle' &&
-          state.editorEnvironment.status === 'idle'
+          state.editor.status === 'idle'
         ) {
           listenerApi.cancelActiveListeners();
 
@@ -64,13 +64,13 @@ startAppListening({
           //console.log('store, startAppListening, effect');
 
           if (
-            typeof state.editorEnvironment.canvasId === 'string' &&
-            typeof state.editorEnvironment.canvasContainerId === 'string' &&
+            typeof state.editor.canvasId === 'string' &&
+            typeof state.editor.canvasContainerId === 'string' &&
             typeof state.world.canvasId === 'string' &&
             typeof state.world.canvasContainerId === 'string'
           ) {
-            let editorCanvasEl = document.getElementById(state.editorEnvironment.canvasId);
-            let editorCanvasContainerEl = document.getElementById(state.editorEnvironment.canvasContainerId);
+            let editorCanvasEl = document.getElementById(state.editor.canvasId);
+            let editorCanvasContainerEl = document.getElementById(state.editor.canvasContainerId);
             let worldCanvasEl = document.getElementById(state.world.canvasId);
             let worldCanvasContainerEl = document.getElementById(state.world.canvasContainerId);
 
@@ -120,8 +120,8 @@ export const store = configureStore({
       // Ignore these action types
       ignoredActions: [
         //'worldManager/init'
-        //'editorEnvironment/setWorldStatus',
-        //'editorEnvironment/setEditorStatus'
+        //'editor/setWorldStatus',
+        //'editor/setEditorStatus'
       ],
 
       // Ignore these field paths in all actions

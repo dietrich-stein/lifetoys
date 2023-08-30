@@ -91,11 +91,10 @@ type CellCountsType = {
 
 type AverageCellCountsType = Array<CellCountsType>;
 
-/*interface EnvironmentControllerInterface {
+/*interface ControllerInterface {
   // Common Properties
   mode: number;
   highlight_org: boolean;
-  env: AnyEnvironmentType | null;
   control_panel: ControlPanel | null;
   canvas: HTMLCanvasElement | null;
   mouse_x: number;

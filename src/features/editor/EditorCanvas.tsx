@@ -3,27 +3,27 @@ import React, {
   useRef,
 } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { selectEditorEnvironment, initEditorEnvironment } from './editorEnvironmentSlice';
-import styles from './EditorEnvironmentCanvas.module.css';
+import { selectEditor, initEditor } from './EditorSlice';
+import styles from './EditorCanvas.module.css';
 
-export type EditorEnvironmentCanvasProps = {
+export type EditorCanvasProps = {
   canvasId: string;
   canvasContainerId: string;
 };
 
-export function EditorEnvironmentCanvas(props: EditorEnvironmentCanvasProps) {
+export function EditorCanvas(props: EditorCanvasProps) {
   const {
     canvasId,
     canvasContainerId,
   } = props;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dispatch = useAppDispatch();
-  const editorEnvironmentState = useAppSelector(selectEditorEnvironment);
+  const editorState = useAppSelector(selectEditor);
 
   useEffect(() => {
     if (canvasRef.current) {
-      dispatch(initEditorEnvironment({
-        ...editorEnvironmentState,
+      dispatch(initEditor({
+        ...editorState,
         status: 'idle',
         canvasId,
         canvasContainerId,

@@ -15,7 +15,7 @@ import FossilRecord from '../stats/FossilRecord';
 import { HyperparamsState } from '../world/WorldManagerSlice';
 import WorldSimulation from '../world/WorldSimulation';
 
-type OrganismEnvironment = 'editor' | 'world';
+type Environment = 'editor' | 'world';
 
 interface OrganismInterface {
   //store: RootState;
@@ -23,7 +23,7 @@ interface OrganismInterface {
   hyperparams: HyperparamsState;
   c: number;
   r: number;
-  environment: OrganismEnvironment | null;
+  environment: Environment | null;
   lifetime: number;
   food_collected: number;
   living: boolean;
@@ -72,7 +72,7 @@ class Organism implements OrganismInterface {
   hyperparams: HyperparamsState;
   c: number;
   r: number;
-  environment: OrganismEnvironment;
+  environment: Environment;
   lifetime: number;
   food_collected: number;
   living: boolean;
@@ -91,7 +91,7 @@ class Organism implements OrganismInterface {
   constructor(
     centerCol: number,
     centerRow: number,
-    environment: OrganismEnvironment,
+    environment: Environment,
     hyperparams: HyperparamsState,
     simulation: WorldSimulation,
     parent?: Organism,
@@ -411,7 +411,6 @@ class Organism implements OrganismInterface {
   }
 
   changeRotationDirection(gridMap: GridMap, dir: number) {
-    //var grid_map: GridMap = (this.env as EditorEnvironment).grid_map;
     if (this.environment === 'editor') {
       //console.log('changeRotationDirection:', getKeyByValue(Directions.cardinals, dir));
       var cell_array = Array.from(Array(gridMap.cols), () => new Array(gridMap.rows));
@@ -430,7 +429,7 @@ class Organism implements OrganismInterface {
 
       if (this.environment === 'editor') {
         //console.log(cell);
-        //(this.env as EditorEnvironment).changeEditorCell(real_c, real_r, CellStates.empty, grid_map, null);
+        //(this.env as Editor).changeEditorCell(real_c, real_r, CellStates.empty, grid_map, null);
       } else if (this.environment === 'world') {
         gridMap.changeCell(real_c, real_r, CellStates.empty);
       }
