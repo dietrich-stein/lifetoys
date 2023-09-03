@@ -1,47 +1,43 @@
-import GridCell from './GridCell';
+import SimulatorCell from './SimulatorCell';
 import CellStates from '../anatomy/CellStates';
 import Cell from '../anatomy/Cell';
-import WorldRendering from '../world/WorldRendering';
 
 type SerializedCell = {
   c: number;
   r: number;
 }
 
-type SerializedGridMap = {
+type SerializedSimulatorMap = {
   cols: number;
   rows: number;
   food: Array<SerializedCell>;
   walls: Array<SerializedCell>;
 };
 
-interface GridMapInterface {
-  rendering: WorldRendering;
-  grid: Array<Array<GridCell>>;
+interface SimulatorMapInterface {
+  grid: Array<Array<SimulatorCell>>;
   cols: number;
   rows: number;
   changeCell(c: number, r: number, state: AnyCellState, ownerCell: Cell | null): void
   resize: (cols: number, rows: number, cellSize: number) => void;
   fillGrid: (state: AnyCellState, ignore_walls: boolean) => void;
-  cellAt: (col: number, row: number) => GridCell | null;
+  cellAt: (col: number, row: number) => SimulatorCell | null;
   setCellState: (col: number, row: number, state: AnyCellState) => void;
   setCellOwnerOrganism: (col: number, row: number, owner_cell: Cell) => void;
   isValidLoc: (col: number, row: number) => boolean;
   getCenter: () => Array<number>;
   xyToColRow: (x: number, y: number, cellSize: number) => Array<number>;
-  serialize: () => SerializedGridMap;
-  loadRaw: (grid: SerializedGridMap) => void;
+  serialize: () => SerializedSimulatorMap;
+  loadRaw: (grid: SerializedSimulatorMap) => void;
 }
 
-class GridMap implements GridMapInterface {
-  rendering: WorldRendering;
-  grid: Array<Array<GridCell>>;
+class SimulatorMap implements SimulatorMapInterface {
+  grid: Array<Array<SimulatorCell>>;
   cols: number;
   rows: number;
 
-  constructor(rendering: WorldRendering, cols: number, rows: number, cellSize: number) {
+  constructor(cols: number, rows: number, cellSize: number) {
     console.log('GridMap, constructor, cols', cols, 'rows', rows, 'cellSize', cellSize);
-    this.rendering = rendering;
     this.grid = [];
     this.cols = cols;
     this.rows = rows;
@@ -53,15 +49,14 @@ class GridMap implements GridMapInterface {
     const changedCell = this.cellAt(c, r);
 
     if (changedCell === null) {
-      return;
+      return null;
     }
-
-    //console.log('GridMap, changeCell:', this.changeCell);
-    this.rendering.addToRender(changedCell);
 
     if (ownerCell !== null) {
       this.setCellOwnerOrganism(c, r, ownerCell);
     }
+
+    return changedCell;
   }
 
   setCellState(col: number, row: number, state: AnyCellState) {
@@ -95,7 +90,7 @@ class GridMap implements GridMapInterface {
       var row = [];
 
       for (var r = 0; r < rows; r++) {
-        var cell = new GridCell(
+        var cell = new SimulatorCell(
           CellStates.empty,
           c,
           r,
@@ -163,7 +158,7 @@ class GridMap implements GridMapInterface {
     // Rather than store every single cell, we will store non organism cells (food+walls)
     // and assume everything else is empty. Organism cells will be set when the organism
     // list is loaded. This reduces filesize and complexity.
-    let grid: SerializedGridMap = {
+    let grid: SerializedSimulatorMap = {
       cols: this.cols,
       rows: this.rows,
       food: [],
@@ -194,7 +189,7 @@ class GridMap implements GridMapInterface {
     return grid;
   }
 
-  loadRaw(grid: SerializedGridMap) {
+  loadRaw(grid: SerializedSimulatorMap) {
     for (let f of grid.food) {
       this.setCellState(f.c, f.r, CellStates.food);
     }
@@ -205,4 +200,4 @@ class GridMap implements GridMapInterface {
   }
 }
 
-export default GridMap;
+export default SimulatorMap;

@@ -1,11 +1,11 @@
-import GridCell from '../../grid/GridCell';
+import SimulatorCell from '../../simulator/SimulatorCell';
 
 class Observation {
-  cell: GridCell;
+  cell: SimulatorCell;
   distance: number;
   direction: number;
 
-  constructor(cell: GridCell, distance: number, direction: number) {
+  constructor(cell: SimulatorCell, distance: number, direction: number) {
     this.cell = cell;
     this.distance = distance;
     this.direction = direction;

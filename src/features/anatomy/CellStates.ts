@@ -1,60 +1,60 @@
-import GridCellState from '../grid/GridCellState';
+import SimulatorCellState from '../simulator/SimulatorCellState';
 
-export class EmptyState extends GridCellState {
+export class EmptyState extends SimulatorCellState {
   constructor() {
     super('empty');
   }
 }
 
-export class FoodState extends GridCellState {
+export class FoodState extends SimulatorCellState {
   constructor() {
     super('food');
   }
 }
 
-export class WallState extends GridCellState {
+export class WallState extends SimulatorCellState {
   constructor() {
     super('wall');
   }
 }
 
-export class BrainState extends GridCellState {
+export class BrainState extends SimulatorCellState {
   constructor() {
     super('brain');
   }
 }
 
-export class MouthState extends GridCellState {
+export class MouthState extends SimulatorCellState {
   constructor() {
     super('mouth');
   }
 }
 
-export class ProducerState extends GridCellState {
+export class ProducerState extends SimulatorCellState {
   constructor() {
     super('producer');
   }
 }
 
-export class MoverState extends GridCellState {
+export class MoverState extends SimulatorCellState {
   constructor() {
     super('mover');
   }
 }
 
-export class KillerState extends GridCellState {
+export class KillerState extends SimulatorCellState {
   constructor() {
     super('killer');
   }
 }
 
-export class ArmorState extends GridCellState {
+export class ArmorState extends SimulatorCellState {
   constructor() {
     super('armor');
   }
 }
 
-export class EyeState extends GridCellState {
+export class EyeState extends SimulatorCellState {
   slit_color: string;
   constructor() {
     super('eye');

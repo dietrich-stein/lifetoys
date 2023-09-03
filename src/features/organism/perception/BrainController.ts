@@ -3,8 +3,9 @@ import CellStates from '../../anatomy/CellStates';
 import Organism from '../Organism';
 import Observation from './Observation';
 import Decision from './Decision';
-import GridMap from '../../grid/GridMap';
 import { store, RootState } from '../../../app/store';
+import SimulatorMap from '../../simulator/SimulatorMap';
+import WorldRenderer from '../../world/WorldRenderer';
 
 interface DecisionsMapInterface {
   [key: string]: number;
@@ -66,7 +67,7 @@ class BrainController implements BrainControllerInterface {
     this.observations.push(observation);
   }
 
-  decide(grid_map: GridMap) {
+  decide(renderer: WorldRenderer, map: SimulatorMap) {
     const lookRange = this.store.worldManager.hyperparams.lookRange;
 
     var decision = Decision.neutral;
@@ -88,11 +89,11 @@ class BrainController implements BrainControllerInterface {
     this.observations = [];
 
     if (decision === Decision.chase) {
-      this.owner_org.changeRotationDirection(grid_map, move_direction);
+      this.owner_org.changeRotationDirection(renderer, map, move_direction);
 
       return true;
     } else if (decision === Decision.retreat) {
-      this.owner_org.changeRotationDirection(grid_map, Directions.getOppositeDirection(move_direction));
+      this.owner_org.changeRotationDirection(renderer, map, Directions.getOppositeDirection(move_direction));
 
       return true;
     }

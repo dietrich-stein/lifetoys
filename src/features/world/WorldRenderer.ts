@@ -1,25 +1,24 @@
 import { store, RootState } from '../../app/store';
 import CellStates from '../anatomy/CellStates';
-import GridMap from '../grid/GridMap';
+import SimulatorCell from '../simulator/SimulatorCell';
+import WorldSimulation from './WorldSimulation';
 //import { useAppDispatch } from '../../../app/hooks';
 import {
   WorldManagerState,
-  setWorldRenderingStats,
+  setWorldRendererStats,
 } from './WorldManagerSlice';
 
-interface WorldRenderingInterface {
+interface WorldRendererInterface {
   // State
   storeState: RootState | null;
   canvasContainerWidth: number;
   canvasContainerHeight: number;
-  gridOptions: any;
-  gridMap: GridMap | null;
+  gridCols: number;
+  gridRows: number;
   gridWidth: number;
   gridHeight: number;
-  cellSize: number;
-  borderSize: number;
-  numCols: number;
-  numRows: number;
+  gridCellSize: number;
+  gridBorderSize: number;
   // Control
   running: boolean;
   animateId: number | null;
@@ -32,9 +31,9 @@ interface WorldRenderingInterface {
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | undefined;
   // Cells
-  cellsToRender: Set<GridCell> | null;
-  cellsToHighlight: Set<GridCell> | null;
-  cellsHighlighted: Set<GridCell> | null;
+  cellsToRender: Set<SimulatorCell> | null;
+  cellsToHighlight: Set<SimulatorCell> | null;
+  cellsHighlighted: Set<SimulatorCell> | null;
   // Control
   init: (storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) => void;
   start: (state: WorldManagerState) => void;
@@ -42,32 +41,31 @@ interface WorldRenderingInterface {
   reset: () => void;
   clear: () => void;
   // Cells
-  addToRender: (cell: GridCell) => void;
-  renderCell: (cell: GridCell) => void;
+  addToRender: (cell: SimulatorCell) => void;
+  renderCell: (cell: SimulatorCell) => void;
   renderCells: () => void;
-  renderFullGrid: (grid: GridCell[][]) => void;
   initGrid: (drawLines: boolean) => void;
   resizeWindow: () => void;
-  //renderCellHighlight: (cell: GridCell, color: string) => void;
+  //renderCellHighlight: (cell: SimulatorCell, color: string) => void;
   //renderHighlights: () => void;
-  //highlightCell: (cell: GridCell) => void;
+  //highlightCell: (cell: SimulatorCell) => void;
   //highlightOrganism: (org: Organism) => void;
   //clearAllHighlights: (clear_to_highlight: boolean) => void; // = false
 }
 
-class WorldRendering implements WorldRenderingInterface {
+//const worldSimulation = WorldSimulation.getInstance();
+
+class WorldRenderer implements WorldRendererInterface {
   // State
   storeState: RootState | null;
   canvasContainerWidth: number;
   canvasContainerHeight: number;
-  gridOptions: any;
-  gridMap: GridMap | null;
+  gridCols: number;
+  gridRows: number;
   gridWidth: number;
   gridHeight: number;
-  cellSize: number;
-  borderSize: number;
-  numCols: number;
-  numRows: number;
+  gridCellSize: number;
+  gridBorderSize: number;
   // Control
   running: boolean;
   animateId: number | null;
@@ -80,32 +78,24 @@ class WorldRendering implements WorldRenderingInterface {
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | undefined;
   // Cells
-  cellsToRender: Set<GridCell>;
-  cellsToHighlight: Set<GridCell>;
-  cellsHighlighted: Set<GridCell>;
+  cellsToRender: Set<SimulatorCell>;
+  cellsToHighlight: Set<SimulatorCell>;
+  cellsHighlighted: Set<SimulatorCell>;
 
-  private static instance: WorldRendering;
+  private static instance: WorldRenderer;
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
     // State
     this.storeState = null;
-    this.gridOptions = {
-      param: {
-        stroke: '#000000',
-        strokeWidth: 1,
-        selectable: false,
-      },
-    };
-    this.gridMap = null;
-    this.gridWidth = 0;
-    this.gridHeight = 0;
     this.canvasContainerWidth = 0;
     this.canvasContainerHeight = 0;
-    this.cellSize = 5; // this.storeState.world.cellSize
-    this.borderSize = 0;
-    this.numCols = 0;
-    this.numRows = 0;
+    this.gridCols = 0;
+    this.gridRows = 0;
+    this.gridWidth = 0;
+    this.gridHeight = 0;
+    this.gridCellSize = 5; // this.storeState.world.gridCellSize
+    this.gridBorderSize = 0;
     // Control
     this.running = false;
     this.animateId = null;
@@ -123,37 +113,37 @@ class WorldRendering implements WorldRenderingInterface {
     this.cellsHighlighted = new Set();
   }
 
-  public static getInstance(): WorldRendering {
-    if (!WorldRendering.instance) {
-      WorldRendering.instance = new WorldRendering();
+  public static getInstance(): WorldRenderer {
+    if (!WorldRenderer.instance) {
+      WorldRenderer.instance = new WorldRenderer();
     }
 
-    return WorldRendering.instance;
+    return WorldRenderer.instance;
   }
 
   drawGridLines() {
-    if (this.borderSize === 0 || this.ctx === undefined) {
+    if (/*this.gridBorderSize === 0 ||*/ this.ctx === undefined) {
       return;
     }
 
-    const gridCellsWidth = this.cellSize * this.numCols;
-    const gridCellsHeight = this.cellSize * this.numRows;
+    const gridCellsWidth = this.gridCellSize * this.gridCols;
+    const gridCellsHeight = this.gridCellSize * this.gridRows;
     const xRemain = this.gridWidth - (gridCellsWidth + 1);
     const yRemain = this.gridHeight - (gridCellsHeight + 1);
     const xShift = Math.floor(xRemain / 2);
     const yShift = Math.floor(yRemain / 2);
 
     this.clear();
-    this.ctx.lineWidth = this.gridOptions.param.strokeWidth;
-    this.ctx.fillStyle = this.gridOptions.param.stroke;
+    this.ctx.lineWidth = 1;
+    this.ctx.fillStyle = '#FFFF00';
     this.ctx.translate(0.5, 0.5); // part 1 of 2, a fix for CSS causing blurry lines
     this.ctx.beginPath();
 
     let i, xLine, yLine, x1, x2, y1, y2;
 
     // Draw vertical lines in the top row of each grid cell
-    for (i = 0; i < this.numCols; i++) {
-      xLine = i * this.cellSize;
+    for (i = 0; i < this.gridCols; i++) {
+      xLine = i * this.gridCellSize;
       x1 = xShift + xLine;
       y1 = yShift + 0;
       x2 = xShift + xLine;
@@ -164,8 +154,8 @@ class WorldRendering implements WorldRenderingInterface {
     }
 
     // Draw horizontal lines in the left column of each grid cell
-    for (i = 0; i < this.numRows; i++) {
-      yLine = i * this.cellSize;
+    for (i = 0; i < this.gridRows; i++) {
+      yLine = i * this.gridCellSize;
       x1 = xShift + 0;
       y1 = yShift + yLine;
       x2 = xShift + gridCellsWidth;
@@ -192,45 +182,45 @@ class WorldRendering implements WorldRenderingInterface {
     this.gridWidth = this.canvasContainerWidth;
 
     //const minBorderSize = 0;
-    //const borderSize = Math.max(minBorderSize, this.borderSize);
+    //const gridBorderSize = Math.max(minBorderSize, this.gridBorderSize);
     // Adjust cell size in case too small
-    //const minCellSize = (borderSize > 0) ? 2 : 1;
-    //let tempCellSize = Math.max(minCellSize, this.cellSize - 1);
+    //const minCellSize = (gridBorderSize > 0) ? 2 : 1;
+    //let tempCellSize = Math.max(minCellSize, this.gridCellSize - 1);
 
     // Adjust cell size in case too large
-    this.cellSize = Math.min(
+    this.gridCellSize = Math.min(
       Math.min(this.gridWidth - 1, this.gridHeight - 1),
-      this.cellSize, //tempCellSize,
+      this.gridCellSize, //tempCellSize,
     );
 
-    this.numCols = Math.floor((this.gridWidth - this.borderSize) / this.cellSize);
-    while (this.numCols > 0 && ((this.numCols * this.cellSize) + this.borderSize) > this.gridWidth) {
-      this.numCols -= 1;
+    this.gridCols = Math.floor((this.gridWidth - this.gridBorderSize) / this.gridCellSize);
+    while (this.gridCols > 0 && ((this.gridCols * this.gridCellSize) + this.gridBorderSize) > this.gridWidth) {
+      this.gridCols -= 1;
     }
 
-    this.numRows = Math.floor((this.gridHeight - this.borderSize) / this.cellSize);
-    while (this.numRows > 0 && (this.numRows * this.cellSize) + this.borderSize > this.gridHeight) {
-      this.numRows -= 1;
+    this.gridRows = Math.floor((this.gridHeight - this.gridBorderSize) / this.gridCellSize);
+    while (this.gridRows > 0 && (this.gridRows * this.gridCellSize) + this.gridBorderSize > this.gridHeight) {
+      this.gridRows -= 1;
     }
 
-    if (this.gridMap !== null) {
-      this.gridMap.resize(this.numCols, this.numRows, this.cellSize);
-    }
+    /*if (this.gridMap !== null) {
+      this.gridMap.resize(this.gridCols, this.gridRows, this.gridCellSize);
+    }*/
   }
 
   initGrid(drawLines: boolean = true) {
     this.resizeGrid();
 
-    this.gridMap = new GridMap(
+    /*this.gridMap = new GridMap(
       this,
-      this.numCols,
-      this.numRows,
-      this.cellSize,
-    );
+      this.gridCols,
+      this.gridRows,
+      this.gridCellSize,
+    );*/
 
-    if (drawLines){
+    /*if (drawLines){
       this.drawGridLines();
-    }
+    }*/
   }
 
   public resizeWindow() {
@@ -252,7 +242,7 @@ class WorldRendering implements WorldRenderingInterface {
   }
 
   public init(storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) {
-    console.log('WorldRendering, init');
+    console.log('WorldRenderer, init');
     this.storeState = storeState;
 
     this.canvasContainer = canvasContainer;
@@ -294,14 +284,16 @@ class WorldRendering implements WorldRenderingInterface {
     this.cellsToRender.clear();
   }
 
-  renderCell(cell: GridCell) {
+  renderCell(cell: SimulatorCell) {
     if (typeof this.ctx === 'undefined' || this.storeState === null) {
       return;
     }
 
+    // @TODO: What this needs is kind of a culling so that it doesn't render off-grid cells
+
     //this.ctx.fillStyle = Math.floor(Math.random()*16777215).toString(16);
     this.ctx.fillStyle = cell.state.color;
-    this.ctx.fillRect(cell.x, cell.y, this.cellSize, this.cellSize);
+    this.ctx.fillRect(cell.x, cell.y, this.gridCellSize, this.gridCellSize);
 
     /*
     // Render the eye slit?
@@ -331,7 +323,7 @@ class WorldRendering implements WorldRenderingInterface {
     var abs_dir = cell.owner_cell.org.rotation_direction; //cell.owner_cell.org.getAbsoluteDirection();
 
     if (cell.owner_cell.org.environment === 'editor') {
-      console.log('GridCellState.render: abs_dir = ', abs_dir);
+      console.log('SimulatorCellState.render: abs_dir = ', abs_dir);
     }
 
     ctx.rotate((abs_dir * 45 * Math.PI) / 180);
@@ -341,8 +333,8 @@ class WorldRendering implements WorldRenderingInterface {
     */
   }
 
-  renderColorScheme() {
-    if (this.storeState === null || this.gridMap === null) {
+  renderColorScheme(cells: SimulatorCell[][]) {
+    if (this.storeState === null) {
       return;
     }
 
@@ -366,11 +358,7 @@ class WorldRendering implements WorldRenderingInterface {
       */
     //}
 
-    this.renderFullGrid(this.gridMap.grid);
-  }
-
-  renderFullGrid(grid: GridCell[][]) {
-    for (var col of grid) {
+    for (var col of cells) {
       for (var cell of col) {
         this.renderCell(cell);
       }
@@ -382,14 +370,14 @@ class WorldRendering implements WorldRenderingInterface {
       return;
     }
 
-    console.log('WorldRendering, start, state:', state);
+    console.log('WorldRenderer, start, state:', state);
 
     const animate = (nowTime: DOMHighResTimeStamp) => {
       this.timeStartedElapsed = nowTime - this.timeStoppedElapsed;
       this.render();
-      store.dispatch(setWorldRenderingStats({
+      store.dispatch(setWorldRendererStats({
         ...state,
-        worldRenderingTime: this.timeStartedElapsed,
+        worldRendererTime: this.timeStartedElapsed,
       }));
       this.animateId = requestAnimationFrame(animate);
     };
@@ -439,17 +427,16 @@ class WorldRendering implements WorldRenderingInterface {
     this.ctx.fillRect(0, 0, this.canvasContainerWidth, this.canvasContainerHeight);
   }
 
-  addToRender(cell: GridCell) {
+  addToRender(cell: SimulatorCell) {
     this.cellsToRender.add(cell);
   }
   /*
-  renderFullGrid: (grid: GridCell[][]) => void;
-  renderCellHighlight: (cell: GridCell, color: string) => void;
+  renderCellHighlight: (cell: SimulatorCell, color: string) => void;
   renderHighlights: () => void;
-  highlightCell: (cell: GridCell) => void;
+  highlightCell: (cell: SimulatorCell) => void;
   highlightOrganism: (org: Organism) => void;
   clearAllHighlights: (clear_to_highlight: boolean = false) => void; // = false
   */
 }
 
-export default WorldRendering;
+export default WorldRenderer;

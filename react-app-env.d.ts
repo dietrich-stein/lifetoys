@@ -9,7 +9,7 @@ declare module '@dietrich-stein/dis-gui-lifetoys';
 //type Perlin = import('./Utils/Perlin').default;
 //type ControlPanel = import('./Interaction/ControlPanel').default;
 type Organism = import('./src/features/organism/Organism').default;
-type GridCell = import('./src/features/grid/GridCell').default;
+type SimulatorCell = import('./src/features/simulator/SimulatorCell').default;
 //type LoadController = import('./Interaction/LoadController').default;
 
 // Cell States

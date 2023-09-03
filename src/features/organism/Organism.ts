@@ -1,5 +1,5 @@
 import CellStates from '../anatomy/CellStates';
-import Neighbors from '../grid/Neighbors';
+import Neighbors from '../simulator/SimulatorNeighbors';
 import Directions from './Directions';
 import Anatomy from '../anatomy/Anatomy';
 import Brain from './perception/BrainController';
@@ -7,18 +7,15 @@ import SerializeHelper from '../../utils/SerializeHelper';
 import Species from '../stats/Species';
 import BrainController from './perception/BrainController';
 import Cell from '../anatomy/Cell';
-import GridCell from '../grid/GridCell';
-import GridMap from '../grid/GridMap';
-import FossilRecord from '../stats/FossilRecord';
-//import { getKeyByValue } from '../../utils/GetKeyByValue';
-//import { /*store,*/RootState } from '../../app/store';
+import SimulatorCell from '../simulator/SimulatorCell';
+import SimulatorMap from '../simulator/SimulatorMap';
 import { HyperparamsState } from '../world/WorldManagerSlice';
 import WorldSimulation from '../world/WorldSimulation';
+import WorldRenderer from '../world/WorldRenderer';
 
 type Environment = 'editor' | 'world';
 
 interface OrganismInterface {
-  //store: RootState;
   simulation: WorldSimulation;
   hyperparams: HyperparamsState;
   c: number;
@@ -43,29 +40,27 @@ interface OrganismInterface {
   foodNeeded: () => number;
   lifespan: () => number;
   maxHealth: () => number;
-  reproduce: (grid_map: GridMap) => void;
+  reproduce: (renderer: WorldRenderer, map: SimulatorMap) => void;
   mutateCells: () => boolean;
   calcRandomChance: (prob: number) => boolean;
-  attemptMove: (grid_map: GridMap) => boolean;
-  attemptRotate: (grid_map: GridMap) => boolean;
-  rotateDirectionLeft: (grid_map: GridMap) => void;
-  rotateDirectionRight: (grid_map: GridMap) => void;
-  changeRotationDirection: (grid_map: GridMap, dir: number) => void;
+  attemptMove: (renderer: WorldRenderer, map: SimulatorMap) => boolean;
+  attemptRotate: (renderer: WorldRenderer, map: SimulatorMap) => boolean;
+  rotateDirectionLeft: (renderer: WorldRenderer, map: SimulatorMap) => void;
+  rotateDirectionRight: (renderer: WorldRenderer, map: SimulatorMap) => void;
+  changeRotationDirection: (renderer: WorldRenderer, map: SimulatorMap, dir: number) => void;
   //changeMovementDirection: (dir: number) => void;
-  isStraightPath: (grid_map: GridMap, c1: number, r1: number, c2: number, r2: number, parent: Organism) => boolean;
-  isPassableCell: (cell: GridCell, parent: Organism) => boolean;
-  isClear: (grid_map: GridMap, col: number, row: number, rotation: number) => boolean;
-  harm: (grid_map: GridMap, fossil_record: FossilRecord, ticks: number) => void;
-  die: (grid_map: GridMap, fossil_record: FossilRecord, ticks: number) => void;
-  updateGrid: (grid_map: GridMap) => void;
-  update: (grid_map: GridMap, fossil_record: FossilRecord, ticks: number) => boolean;
-  getRealCell: (grid_map: GridMap, local_cell: Cell, c: number, r: number, rotation: number) => GridCell | null;
+  isStraightPath: (map: SimulatorMap, c1: number, r1: number, c2: number, r2: number, parent: Organism) => boolean;
+  isPassableCell: (cell: SimulatorCell, parent: Organism) => boolean;
+  isClear: (map: SimulatorMap, col: number, row: number, rotation: number) => boolean;
+  harm: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => void;
+  die: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => void;
+  updateMap: (renderer: WorldRenderer, map: SimulatorMap) => void;
+  update: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => boolean;
+  getRealCell: (map: SimulatorMap, local_cell: Cell, c: number, r: number, rotation: number) => SimulatorCell | null;
   isNatural: () => boolean;
   serialize: () => any;
   loadRaw: (org: Organism) => void;
 }
-
-//const worldSimulation = WorldSimulation.getInstance();
 
 class Organism implements OrganismInterface {
   simulation: WorldSimulation;
@@ -172,7 +167,7 @@ class Organism implements OrganismInterface {
     return this.anatomy.cells.length;
   }
 
-  reproduce(grid_map: GridMap) {
+  reproduce(renderer: WorldRenderer, map: SimulatorMap) {
     if (this.environment !== 'world') {
       return;
     }
@@ -245,15 +240,15 @@ class Organism implements OrganismInterface {
     var new_r = this.r + direction_r * basemovement + direction_r * offset;
 
     if (
-      org.isClear(grid_map, new_c, new_r, org.rotation_direction) &&
-      org.isStraightPath(grid_map, new_c, new_r, this.c, this.r, this)
+      org.isClear(map, new_c, new_r, org.rotation_direction) &&
+      org.isStraightPath(map, new_c, new_r, this.c, this.r, this)
     ) {
       org.c = new_c;
       org.r = new_r;
 
       this.simulation.addOrganism(org);
 
-      org.updateGrid(grid_map);
+      org.updateMap(renderer, map);
 
       if (mutated && this.species !== null) {
         // TODO: Dispatch this
@@ -336,7 +331,7 @@ class Organism implements OrganismInterface {
     return Math.random() * 100 < prob;
   }
 
-  attemptMove(gridMap: GridMap) {
+  attemptMove(renderer: WorldRenderer, map: SimulatorMap) {
     if (this.environment === null || this.environment !== 'world') {
       return false;
     }
@@ -347,18 +342,21 @@ class Organism implements OrganismInterface {
     var new_c = this.c + direction_c;
     var new_r = this.r + direction_r;
 
-    if (this.isClear(gridMap, new_c, new_r)) {
+    if (this.isClear(map, new_c, new_r)) {
       for (var cell of this.anatomy.cells) {
         var real_colrow = cell.rotatedColRow(this.rotation_direction);
         var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
         var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
+        var changed = map.changeCell(real_c, real_r, CellStates.empty);
 
-        gridMap.changeCell(real_c, real_r, CellStates.empty);
+        if (changed !== null) {
+          renderer.addToRender(changed);
+        }
       }
 
       this.c = new_c;
       this.r = new_r;
-      this.updateGrid(gridMap);
+      this.updateMap(renderer, map);
 
       return true;
     }
@@ -366,7 +364,7 @@ class Organism implements OrganismInterface {
     return false;
   }
 
-  attemptRotate(grid_map: GridMap) {
+  attemptRotate(renderer: WorldRenderer, map: SimulatorMap) {
     if (this.environment !== 'world') {
       return false;
     }
@@ -380,20 +378,20 @@ class Organism implements OrganismInterface {
 
     var new_rotation = Directions.getRandomDirection();
 
-    if (this.isClear(grid_map, this.c, this.r, new_rotation)) {
+    if (this.isClear(map, this.c, this.r, new_rotation)) {
       /**/
       for (var cell of this.anatomy.cells) {
         var real_colrow = cell.rotatedColRow(this.rotation_direction);
         var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
         var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
 
-        grid_map.changeCell(real_c, real_r, CellStates.empty);
+        map.changeCell(real_c, real_r, CellStates.empty);
       }
       /**/
 
       this.rotation_direction = new_rotation;
       //this.movement_direction = Directions.getRandomDirection();
-      this.updateGrid(grid_map);
+      this.updateMap(renderer, map);
       this.move_count = 0;
 
       return true;
@@ -402,18 +400,18 @@ class Organism implements OrganismInterface {
     return false;
   }
 
-  rotateDirectionLeft(grid_map: GridMap) {
-    this.changeRotationDirection(grid_map, Directions.rotateLeft(this.rotation_direction));
+  rotateDirectionLeft(renderer: WorldRenderer, map: SimulatorMap) {
+    this.changeRotationDirection(renderer, map, Directions.rotateLeft(this.rotation_direction));
   }
 
-  rotateDirectionRight(grid_map: GridMap) {
-    this.changeRotationDirection(grid_map, Directions.rotateRight(this.rotation_direction));
+  rotateDirectionRight(renderer: WorldRenderer, map: SimulatorMap) {
+    this.changeRotationDirection(renderer, map, Directions.rotateRight(this.rotation_direction));
   }
 
-  changeRotationDirection(gridMap: GridMap, dir: number) {
+  changeRotationDirection(renderer: WorldRenderer, map: SimulatorMap, dir: number) {
     if (this.environment === 'editor') {
       //console.log('changeRotationDirection:', getKeyByValue(Directions.cardinals, dir));
-      var cell_array = Array.from(Array(gridMap.cols), () => new Array(gridMap.rows));
+      var cell_array = Array.from(Array(map.cols), () => new Array(map.rows));
 
       for (var cell_cols of cell_array) {
         cell_cols.fill(0);
@@ -429,15 +427,19 @@ class Organism implements OrganismInterface {
 
       if (this.environment === 'editor') {
         //console.log(cell);
-        //(this.env as Editor).changeEditorCell(real_c, real_r, CellStates.empty, grid_map, null);
+        //(this.env as Editor).changeEditorCell(real_c, real_r, CellStates.empty, map, null);
       } else if (this.environment === 'world') {
-        gridMap.changeCell(real_c, real_r, CellStates.empty);
+        var changed = map.changeCell(real_c, real_r, CellStates.empty);
+
+        if (changed !== null) {
+          renderer.addToRender(changed);
+        }
       }
     }
 
     this.rotation_direction = dir;
     this.move_count = 0;
-    this.updateGrid(gridMap);
+    this.updateMap(renderer, map);
   }
 
   /*changeMovementDirection(dir: number) {
@@ -446,13 +448,13 @@ class Organism implements OrganismInterface {
   }*/
 
   // assumes either c1==c2 or r1==r2, returns true if there is a clear path from point 1 to 2
-  isStraightPath(grid_map: GridMap, c1: number, r1: number, c2: number, r2: number, parent: Organism) {
+  isStraightPath(map: SimulatorMap, c1: number, r1: number, c2: number, r2: number, parent: Organism) {
     if (this.environment === null) {
       return false;
     }
 
     let i: number, temp: number;
-    let cell: GridCell | null;
+    let cell: SimulatorCell | null;
 
     if (c1 === c2) {
       if (r1 > r2) {
@@ -463,7 +465,7 @@ class Organism implements OrganismInterface {
       }
 
       for (i = r1; i !== r2; i++) {
-        cell = grid_map.cellAt(c1, i);
+        cell = map.cellAt(c1, i);
 
         if (cell === null || !this.isPassableCell(cell, parent)) {
           return false;
@@ -480,7 +482,7 @@ class Organism implements OrganismInterface {
       }
 
       for (i = c1; i !== c2; i++) {
-        cell = grid_map.cellAt(i, r1);
+        cell = map.cellAt(i, r1);
 
         if (cell === null || !this.isPassableCell(cell, parent)) {
           return false;
@@ -491,7 +493,7 @@ class Organism implements OrganismInterface {
     }
   }
 
-  isPassableCell(cell: GridCell, parent: Organism) {
+  isPassableCell(cell: SimulatorCell, parent: Organism) {
     return (
       cell !== null &&
       (cell.state === CellStates.empty ||
@@ -501,11 +503,11 @@ class Organism implements OrganismInterface {
     );
   }
 
-  isClear(grid_map: GridMap, col: number, row: number, rotation: number = this.rotation_direction) {
+  isClear(map: SimulatorMap, col: number, row: number, rotation: number = this.rotation_direction) {
     const foodBlocksReproduction = this.hyperparams.foodBlocksReproduction;
 
     for (var loccell of this.anatomy.cells) {
-      var cell = this.getRealCell(grid_map, loccell, col, row, rotation);
+      var cell = this.getRealCell(map, loccell, col, row, rotation);
 
       if (cell === null) {
         return false;
@@ -525,18 +527,18 @@ class Organism implements OrganismInterface {
     return true;
   }
 
-  harm(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
+  harm(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
     const instaKill = this.hyperparams.instaKill;
 
     this.damage++;
 
     if (this.damage >= this.maxHealth() || instaKill) {
-      this.die(grid_map, fossil_record, ticks);
+      this.die(renderer, simulation, ticks);
     }
   }
 
-  die(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
-    if (this.environment === null || this.environment === 'world') {
+  die(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
+    if (this.environment === null || this.environment === 'world' || simulation.map === null) {
       return;
     }
 
@@ -544,18 +546,21 @@ class Organism implements OrganismInterface {
       var real_colrow = cell.rotatedColRow(this.rotation_direction);
       var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
       var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
+      var changed = simulation.map.changeCell(real_c, real_r, CellStates.food);
 
-      grid_map.changeCell(real_c, real_r, CellStates.food);
+      if (changed !== null) {
+        renderer.addToRender(changed);
+      }
     }
 
-    if (this.species !== null) {
-      fossil_record.decreasePopulation(this.species, ticks);
+    if (simulation.fossilRecord !== null && this.species !== null) {
+      simulation.fossilRecord.decreasePopulation(this.species, ticks);
     }
 
     this.living = false;
   }
 
-  updateGrid(grid_map: GridMap) {
+  updateMap(renderer: WorldRenderer, map: SimulatorMap) {
     if (this.environment === null) {
       return;
     }
@@ -566,28 +571,36 @@ class Organism implements OrganismInterface {
       var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
 
       if (this.environment === 'world') {
-        grid_map.changeCell(real_c, real_r, cell.state, cell);
+        const changed = map.changeCell(real_c, real_r, cell.state, cell);
+
+        if (changed !== null) {
+          renderer.addToRender(changed);
+        }
       } else if (this.environment === 'editor') {
-        //this.env.changeEditorCell(real_c, real_r, cell.state, this.env.grid_map, cell);
+        //this.env.changeEditorCell(real_c, real_r, cell.state, this.env.map, cell);
       }
     }
   }
 
-  update(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
+  update(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
+    if (simulation.map === null || simulation.fossilRecord === null) {
+      return false;
+    }
+
     this.lifetime++;
 
     if (this.lifetime > this.lifespan()) {
-      this.die(grid_map, fossil_record, ticks);
+      this.die(renderer, simulation, ticks);
 
       return this.living;
     }
 
     if (this.food_collected >= this.foodNeeded()) {
-      this.reproduce(grid_map);
+      this.reproduce(renderer, simulation.map);
     }
 
     for (var cell of this.anatomy.cells) {
-      cell.performFunction(grid_map, fossil_record, ticks);
+      cell.performFunction(renderer, simulation, ticks);
 
       if (!this.living) {
         return this.living;
@@ -604,12 +617,12 @@ class Organism implements OrganismInterface {
         this.ignore_brain_for === 0 &&
         this.brain !== null
       ) {
-        changed_dir = this.brain.decide(grid_map);
+        changed_dir = this.brain.decide(renderer, simulation.map);
       } else if (this.ignore_brain_for > 0) {
         this.ignore_brain_for--;
       }
 
-      var moved = this.attemptMove(grid_map);
+      var moved = this.attemptMove(renderer, simulation.map);
 
       // really "move_range" is "move_range_before_maybe_rotate_maybe_changedir"
       if (
@@ -619,10 +632,10 @@ class Organism implements OrganismInterface {
         ) ||
         !moved
       ) {
-        var rotated = this.attemptRotate(grid_map);
+        var rotated = this.attemptRotate(renderer, simulation.map);
 
         if (!rotated) {
-          this.changeRotationDirection(grid_map, Directions.getRandomDirection());
+          this.changeRotationDirection(renderer, simulation.map, Directions.getRandomDirection());
 
           if (changed_dir) {
             this.ignore_brain_for =
@@ -636,7 +649,7 @@ class Organism implements OrganismInterface {
   }
 
   getRealCell(
-    grid_map: GridMap,
+    map: SimulatorMap,
     local_cell: Cell,
     c: number = this.c,
     r: number = this.r,
@@ -650,7 +663,7 @@ class Organism implements OrganismInterface {
     var real_c = c + real_colrow[0]; //local_cell.rotatedCol(rotation);
     var real_r = r + real_colrow[1]; //local_cell.rotatedRow(rotation);
 
-    return grid_map.cellAt(real_c, real_r);
+    return map.cellAt(real_c, real_r);
   }
 
   isNatural() {

@@ -3,8 +3,10 @@ import Cell from '../Cell';
 import Directions from '../../organism/Directions';
 import Observation from '../../organism/perception/Observation';
 import Organism from '../../organism/Organism';
-import GridMap from '../../grid/GridMap';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
+import WorldSimulation from '../../world/WorldSimulation';
+import WorldRenderer from '../../world/WorldRenderer';
+import SimulatorMap from '../../simulator/SimulatorMap';
 
 class EyeCell extends Cell {
   direction: number;
@@ -31,10 +33,14 @@ class EyeCell extends Cell {
     this.direction = Directions.cardinals.n;
   }
 
-  performFunction(grid_map: GridMap) {
+  performFunction(renderer: WorldRenderer, simulation: WorldSimulation) {
+    if (simulation.map === null) {
+      return;
+    }
+
     // @todo: decide if there should be some eye-benefit without a brain
     if (this.org.anatomy.has_brain && this.org.brain !== null) {
-      var obs = this.look(grid_map);
+      var obs = this.look(simulation.map);
 
       if (obs !== null) {
         this.org.brain.observe(obs);
@@ -42,7 +48,7 @@ class EyeCell extends Cell {
     }
   }
 
-  look(grid_map: GridMap) {
+  look(map: SimulatorMap) {
     var env = this.org.environment;
 
     if (env === null) {
@@ -105,7 +111,7 @@ class EyeCell extends Cell {
     for (var i = 0; i < lookRange; i++) {
       col += addCol;
       row += addRow;
-      cell = grid_map.cellAt(col, row);
+      cell = map.cellAt(col, row);
 
       if (cell === null) {
         continue;

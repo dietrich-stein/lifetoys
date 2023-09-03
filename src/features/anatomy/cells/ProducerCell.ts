@@ -1,9 +1,9 @@
 import CellStates from '../CellStates';
 import Cell from '../Cell';
 import Organism from '../../organism/Organism';
-import GridMap from '../../grid/GridMap';
-import FossilRecord from '../../stats/FossilRecord';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
+import WorldSimulation from '../../world/WorldSimulation';
+import WorldRenderer from '../../world/WorldRenderer';
 
 class ProducerCell extends Cell {
   constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
@@ -25,8 +25,8 @@ class ProducerCell extends Cell {
     // initialize to default values
   }
 
-  performFunction(gridMap: GridMap, fossil_record: FossilRecord, ticks: number) {
-    if (this.org.environment !== 'world') {
+  performFunction(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
+    if (this.org.environment !== 'world' || simulation.map === null) {
       return;
     }
 
@@ -51,10 +51,14 @@ class ProducerCell extends Cell {
       ];
       var loc_c = loc[0];
       var loc_r = loc[1];
-      var cell = gridMap.cellAt(real_c + loc_c, real_r + loc_r);
+      var cell = simulation.map.cellAt(real_c + loc_c, real_r + loc_r);
 
       if (cell !== null && cell.state === CellStates.empty) {
-        gridMap.changeCell(real_c + loc_c, real_r + loc_r, CellStates.food);
+        const changed = simulation.map.changeCell(real_c + loc_c, real_r + loc_r, CellStates.food);
+
+        if (changed !== null) {
+          renderer.addToRender(changed);
+        }
 
         return;
       }

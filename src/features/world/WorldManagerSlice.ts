@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import WorldSimulation, { DEFAULT_TICKS_DELAY } from './WorldSimulation';
-import WorldRendering from './WorldRendering';
-import Neighbors from '../grid/Neighbors';
+import WorldRenderer from './WorldRenderer';
+import Neighbors from '../simulator/SimulatorNeighbors';
 import { RootState } from '../../app/store';
 
 export type HyperparamsState = {
@@ -28,9 +28,9 @@ export type HyperparamsState = {
 // Optionality enables dispatch without including elements
 export interface WorldManagerState {
   // Rendering
-  worldRenderingRunning: boolean;
-  worldRenderingTime: number;
-  worldRenderingCellSize: number;
+  worldRendererRunning: boolean;
+  worldRendererTime: number;
+  worldRendererCellSize: number;
   // Simulation
   worldSimulationRunning: boolean;
   worldSimulationTicks: number;
@@ -42,9 +42,9 @@ export interface WorldManagerState {
 
 const initialState: WorldManagerState = {
   // Rendering
-  worldRenderingRunning: false,
-  worldRenderingTime: 0,
-  worldRenderingCellSize: 5,
+  worldRendererRunning: false,
+  worldRendererTime: 0,
+  worldRendererCellSize: 5,
   // Simulation
   worldSimulationRunning: false,
   worldSimulationTicks: 0,
@@ -72,7 +72,7 @@ const initialState: WorldManagerState = {
     extraMoverFoodCost: 0,
   },
 };
-const worldRendering = WorldRendering.getInstance();
+const worldRenderer = WorldRenderer.getInstance();
 const worldSimulation = WorldSimulation.getInstance();
 
 export const WorldManagerSlice = createSlice({
@@ -80,30 +80,30 @@ export const WorldManagerSlice = createSlice({
   initialState,
   reducers: {
     // Rendering
-    startWorldRendering: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice, startWorldRendering, payload:', action.payload);
-      state.worldRenderingRunning = action.payload.worldRenderingRunning;
-      worldRendering.start(action.payload);
+    startWorldRenderer: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice, startWorldRenderer, payload:', action.payload);
+      state.worldRendererRunning = action.payload.worldRendererRunning;
+      worldRenderer.start(action.payload);
     },
-    stopWorldRendering: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice.stopWorldRendering, payload:', action.payload);
-      state.worldRenderingRunning = action.payload.worldRenderingRunning;
+    stopWorldRenderer: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.stopWorldRenderer, payload:', action.payload);
+      state.worldRendererRunning = action.payload.worldRendererRunning;
 
-      worldRendering.stop();
+      worldRenderer.stop();
     },
-    setWorldRenderingStats: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice.setWorldRenderingStats, payload:', action.payload);
-      state.worldRenderingTime = action.payload.worldRenderingTime;
+    setWorldRendererStats: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.setWorldRendererStats, payload:', action.payload);
+      state.worldRendererTime = action.payload.worldRendererTime;
     },
-    resetWorldRendering: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice.resetWorldRendering, payload:', action.payload);
-      state.worldRenderingRunning = action.payload.worldRenderingRunning;
-      worldRendering.reset();
+    resetWorldRenderer: (state, action: PayloadAction<WorldManagerState>) => {
+      //console.log('WorldManagerSlice.resetWorldRenderer, payload:', action.payload);
+      state.worldRendererRunning = action.payload.worldRendererRunning;
+      worldRenderer.reset();
     },
-    setWorldRenderingCellSize: (state, action: PayloadAction<WorldManagerState>) => {
-      console.log('WorldManagerSlice.setWorldRenderingCellSize, payload:', action.payload, 'state:', state);
-      state.worldRenderingCellSize = action.payload.worldRenderingCellSize;
-      worldRendering.reset();
+    setWorldRendererCellSize: (state, action: PayloadAction<WorldManagerState>) => {
+      console.log('WorldManagerSlice.setWorldRendererCellSize, payload:', action.payload, 'state:', state);
+      state.worldRendererCellSize = action.payload.worldRendererCellSize;
+      worldRenderer.reset();
     },
 
     // Simulation
@@ -140,11 +140,11 @@ export const selectWorldManager = (state: RootState) => state.worldManager;
 
 export const {
   // Rendering
-  startWorldRendering,
-  stopWorldRendering,
-  resetWorldRendering,
-  setWorldRenderingStats,
-  setWorldRenderingCellSize,
+  startWorldRenderer,
+  stopWorldRenderer,
+  resetWorldRenderer,
+  setWorldRendererStats,
+  setWorldRendererCellSize,
   // Simulation
   startWorldSimulation,
   stopWorldSimulation,

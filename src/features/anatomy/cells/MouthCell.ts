@@ -1,9 +1,11 @@
 import CellStates from '../CellStates';
 import Cell from '../Cell';
 import Organism from '../../organism/Organism';
-import GridCell from '../../grid/GridCell';
-import GridMap from '../../grid/GridMap';
+import SimulatorCell from '../../simulator/SimulatorCell';
+import SimulatorMap from '../../simulator/SimulatorMap';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
+import WorldRenderer from '../../world/WorldRenderer';
+import WorldSimulation from '../../world/WorldSimulation';
 
 class MouthCell extends Cell {
   constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
@@ -23,8 +25,8 @@ class MouthCell extends Cell {
     // initialize to default values
   }
 
-  performFunction(grid_map: GridMap) {
-    if (this.org.environment !== 'world') {
+  performFunction(renderer: WorldRenderer, simulation: WorldSimulation) {
+    if (this.org.environment !== 'world' || simulation.map === null) {
       return;
     }
 
@@ -34,22 +36,26 @@ class MouthCell extends Cell {
     const edibleNeighbors = this.hyperparams.edibleNeighbors;
 
     for (var loc of edibleNeighbors) {
-      var cell = grid_map.cellAt(real_c + loc[0], real_r + loc[1]);
+      var cell = simulation.map.cellAt(real_c + loc[0], real_r + loc[1]);
 
       if (cell !== null) {
-        this.eatNeighbor(grid_map, cell);
+        this.eatNeighbor(renderer, simulation.map, cell);
       }
     }
   }
 
-  eatNeighbor(gridMap: GridMap, cell: GridCell) {
+  eatNeighbor(renderer: WorldRenderer, map: SimulatorMap, cell: SimulatorCell) {
     if (cell === null) {
       return;
     }
 
     if (cell.state === CellStates.food) {
-      gridMap.changeCell(cell.col, cell.row, CellStates.empty);
-      this.org.food_collected++;
+      const changed = map.changeCell(cell.col, cell.row, CellStates.empty);
+
+      if (changed !== null) {
+        renderer.addToRender(changed);
+        this.org.food_collected++;
+      }
     }
   }
 }

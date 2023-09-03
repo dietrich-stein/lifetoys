@@ -1,10 +1,10 @@
 import CellStates from '../CellStates';
 import Cell from '../Cell';
-import GridCell from '../../grid/GridCell';
 import Organism from '../../organism/Organism';
-import GridMap from '../../grid/GridMap';
-import FossilRecord from '../../stats/FossilRecord';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
+import WorldSimulation from '../../world/WorldSimulation';
+import SimulatorCell from '../../simulator/SimulatorCell';
+import WorldRenderer from '../../world/WorldRenderer';
 
 class KillerCell extends Cell {
   constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
@@ -24,8 +24,8 @@ class KillerCell extends Cell {
     // initialize to default values
   }
 
-  performFunction(grid_map: GridMap, fossil_record: FossilRecord, ticks: number) {
-    if (this.org.environment !== 'world') {
+  performFunction(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
+    if (this.org.environment !== 'world' || simulation.map === null) {
       return;
     }
 
@@ -35,16 +35,18 @@ class KillerCell extends Cell {
     const killableNeighbors = this.hyperparams.killableNeighbors;
 
     for (var loc of killableNeighbors) {
-      var cell = grid_map.cellAt(c + loc[0], r + loc[1]);
+      var cell = simulation.map.cellAt(c + loc[0], r + loc[1]);
 
       if (cell !== null) {
-        this.killNeighbor(grid_map, fossil_record, ticks, cell);
+        this.killNeighbor(renderer, simulation, ticks, cell);
       }
     }
   }
 
-  killNeighbor(grid_map: GridMap, fossil_record: FossilRecord, ticks: number, neighbor_cell: GridCell) {
+  killNeighbor(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number, neighbor_cell: SimulatorCell) {
     if (
+      simulation.map === null ||
+      simulation.fossilRecord === null ||
       neighbor_cell === null ||
       neighbor_cell.owner_org === null ||
       neighbor_cell.owner_org === this.org ||
@@ -56,12 +58,12 @@ class KillerCell extends Cell {
 
     var is_hit = neighbor_cell.state === CellStates.killer; // has to be calculated before death
 
-    neighbor_cell.owner_org.harm(grid_map, fossil_record, ticks);
+    neighbor_cell.owner_org.harm(renderer, simulation, ticks);
 
     const instaKill = this.hyperparams.instaKill;
 
     if (instaKill && is_hit) {
-      this.org.harm(grid_map, fossil_record, ticks);
+      this.org.harm(renderer, simulation, ticks);
     }
   }
 }

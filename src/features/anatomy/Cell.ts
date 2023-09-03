@@ -1,10 +1,9 @@
-//import GridCell from '../grid/GridCell';
-import GridMap from '../grid/GridMap';
 import Directions from '../organism/Directions';
 import Organism from '../organism/Organism';
-import FossilRecord from '../stats/FossilRecord';
 //import { store, RootState } from '../../app/store';
 import { HyperparamsState } from '../world/WorldManagerSlice';
+import WorldRenderer from '../world/WorldRenderer';
+import WorldSimulation from '../world/WorldSimulation';
 
 interface CellInterface {
   //store: RootState;
@@ -16,7 +15,7 @@ interface CellInterface {
   initInherit: (parent: Cell) => void;
   initRandom: () => void;
   initDefault: () => void;
-  performFunction: (gridMap: GridMap, fossilRecord: FossilRecord, ticks: number) => void;
+  performFunction: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => void;
   getRealCol: () => void;
   getRealRow: () => void;
 
@@ -67,7 +66,7 @@ class Cell implements CellInterface {
     // initialize to default values
   }
 
-  performFunction(gridMap: GridMap, fossilRecord: FossilRecord, ticks: number) {
+  performFunction(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
     // default behavior: none
   }
 

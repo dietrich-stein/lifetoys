@@ -15,10 +15,10 @@ import worldReducer, {
 } from '../features/world/WorldSlice';
 import worldManagerReducer, {
   startWorldSimulation,
-  startWorldRendering,
+  startWorldRenderer,
 } from '../features/world/WorldManagerSlice';
 import { startAppListening, listenerMiddleware } from './listenerMiddleware';
-import WorldRendering from '../features/world/WorldRendering';
+import WorldRenderer from '../features/world/WorldRenderer';
 import WorldSimulation from '../features/world/WorldSimulation';
 
 const reducer = {
@@ -38,7 +38,7 @@ function isHTMLCanvasElement(input: any): input is HTMLCanvasElement {
   return (input) && (input !== null) && (input.tagName === 'CANVAS');
 }
 
-const worldRendering = WorldRendering.getInstance();
+const worldRenderer = WorldRenderer.getInstance();
 const worldSimulation = WorldSimulation.getInstance();
 
 startAppListening({
@@ -80,30 +80,22 @@ startAppListening({
               isHTMLCanvasElement(worldCanvasEl) &&
               isHTMLDivElement(worldCanvasContainerEl)
             ) {
-              // Triggers a call to WorldRendering.init() giving us valid values needed after
-              worldRendering.init(
-                state,
-                worldCanvasContainerEl,
-                worldCanvasEl,
-              );
-
-              // Dispatch setter actions for canvasHeight, canvasWidth, numCols, numRows values
-              //listenerApi.dispatch(setWorldCanvasWidth(worldRendering.canvasWidth));
-              //listenerApi.dispatch(setWorldCanvasHeight(worldRendering.canvasHeight));
-              //listenerApi.dispatch(setWorldNumCols(worldRendering.numCols));
-              //listenerApi.dispatch(setWorldNumRows(worldRendering.numRows));
-
-              listenerApi.dispatch(startWorldRendering({
+              worldRenderer.init(state, worldCanvasContainerEl, worldCanvasEl);
+              listenerApi.dispatch(startWorldRenderer({
                 ...state.worldManager,
-                worldRenderingRunning: true,
+                worldRendererRunning: true,
               }));
 
               worldSimulation.init(state);
-
               listenerApi.dispatch(startWorldSimulation({
                 ...state.worldManager,
                 worldSimulationRunning: true,
               }));
+              // Dispatch setter actions for canvasHeight, canvasWidth, numCols, numRows values
+              //listenerApi.dispatch(setWorldCanvasWidth(worldRenderer.canvasWidth));
+              //listenerApi.dispatch(setWorldCanvasHeight(worldRenderer.canvasHeight));
+              //listenerApi.dispatch(setWorldNumCols(worldRenderer.numCols));
+              //listenerApi.dispatch(setWorldNumRows(worldRenderer.numRows));
             }
           }
         }

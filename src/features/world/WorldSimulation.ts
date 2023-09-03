@@ -1,32 +1,34 @@
 import { store, RootState } from '../../app/store';
 import CellStates from '../anatomy/CellStates';
-import GridCell from '../grid/GridCell';
-import GridMap from '../grid/GridMap';
+import SimulatorCell from '../simulator/SimulatorCell';
+import SimulatorMap from '../simulator/SimulatorMap';
 import Organism from '../organism/Organism';
 import {
   WorldManagerState,
   setWorldSimulationStats,
 } from './WorldManagerSlice';
-import WorldRendering from './WorldRendering';
+import WorldRenderer from './WorldRenderer';
 import FossilRecord from '../stats/FossilRecord';
 
-/*interface WorldSimulationInterface {
+/*
+interface WorldSimulationInterface {
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
   timeElapsed: number;
   ticksDelay: number;
   ticksElapsed: number;
-  gridMap: GridMap | null,
+  map: SimulatorMap | null,
   storeState: RootState | null,
   setTicksDelay: (state: WorldManagerState, value: number) => void;
   start: (state: WorldManagerState) => void;
   stop: () => void;
   reset: () => void;
-}*/
+}
+*/
 
 export const DEFAULT_TICKS_DELAY = 16.67;
 
-const worldRendering = WorldRendering.getInstance();
+const worldRenderer = WorldRenderer.getInstance();
 
 class WorldSimulation /*implements WorldSimulationInterface*/ {
   // Control
@@ -36,13 +38,13 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   ticksDelay: number;
   ticksElapsed: number;
   //
-  //gridMap: GridMap | null;
+  map: SimulatorMap | null;
   storeState: RootState | null;
   fossilRecord: FossilRecord | null;
   fossilRecordRate: number;
   //
   organisms: Array<Organism>;
-  walls: Array<GridCell>;
+  walls: Array<SimulatorCell>;
   largest_cell_count: number;
   total_mutability: number;
 
@@ -57,7 +59,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     this.ticksDelay = DEFAULT_TICKS_DELAY;
     this.ticksElapsed = 0;
     //
-    //worldRendering.gridMap = null;
+    this.map = null;
     this.storeState = null;
     this.fossilRecord = null;
     this.fossilRecordRate = 100;
@@ -89,22 +91,27 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   public init(storeState: RootState) {
     this.storeState = storeState;
 
+    this.map = new SimulatorMap(
+      worldRenderer.gridCols, // use like 100, not the grid
+      worldRenderer.gridRows,
+      worldRenderer.gridCellSize,
+    );
+
     this.fossilRecord = new FossilRecord();
 
     console.log(
       'WorldSimulation, init',
-      'worldRendering.gridMap:', worldRendering.gridMap,
       'storeState:', this.storeState,
       'fossilRecord:', this.fossilRecord,
     );
   }
 
   public start(state: WorldManagerState) {
-    if (this.running || worldRendering.gridMap === null) {
+    if (this.running || this.map === null) {
       return;
     }
 
-    worldRendering.renderColorScheme();
+    worldRenderer.renderColorScheme(this.map.grid);
 
     this.intervalId = setInterval(() => {
       if (!this.running) { // not needed, but let's be certain
@@ -147,7 +154,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private simulate() {
-    if (worldRendering.gridMap === null || this.fossilRecord === null || this.storeState === null) {
+    if (this.map === null || this.fossilRecord === null || this.storeState === null) {
       return;
     }
     //console.log('WorldSimulation, SIMULATE', this.ticksDelay);
@@ -157,7 +164,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     for (var i in this.organisms) {
       var org = this.organisms[i];
 
-      if (!org.living || !org.update(worldRendering.gridMap, this.fossilRecord, this.ticksElapsed)) {
+      if (!org.living || !org.update(worldRenderer, this, this.ticksElapsed)) {
         to_remove.push(i);
       }
     }
@@ -174,11 +181,11 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private addDefaultOrganism() {
-    if (worldRendering.gridMap === null || this.storeState === null) {
+    if (this.map === null || this.storeState === null) {
       return;
     }
 
-    var center = worldRendering.gridMap.getCenter();
+    var center = this.map.getCenter();
     var organism = new Organism(
       center[0],
       center[1],
@@ -199,11 +206,11 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   public addOrganism(organism: Organism) {
-    if (worldRendering.gridMap === null) {
+    if (this.map === null) {
       return;
     }
 
-    organism.updateGrid(worldRendering.gridMap);
+    organism.updateMap(worldRenderer, this.map);
 
     this.total_mutability += organism.mutability;
     this.organisms.push(organism);
@@ -214,7 +221,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private removeOrganisms(org_indeces: Array<string>): void {
-    let start_pop = this.organisms.length;
+    //let start_pop = this.organisms.length;
 
     for (var i of org_indeces.reverse()) {
       this.total_mutability -= this.organisms[parseInt(i)].mutability;
@@ -233,25 +240,29 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private generateFood(): void {
-    if (worldRendering.gridMap === null || this.storeState === null) {
+    if (this.map === null || this.storeState === null) {
       return;
     }
 
     var num_food = Math.max(Math.floor((
-      worldRendering.gridMap.cols *
-      worldRendering.gridMap.rows *
+      this.map.cols *
+      this.map.rows *
       this.storeState.worldManager.hyperparams.foodDropProb
     ) / 50000), 1);
     var prob = this.storeState.worldManager.hyperparams.foodDropProb;
 
     for (var i = 0; i < num_food; i++) {
       if (Math.random() <= prob) {
-        var c = Math.floor(Math.random() * worldRendering.gridMap.cols);
-        var r = Math.floor(Math.random() * worldRendering.gridMap.rows);
-        var grid_cell = worldRendering.gridMap.cellAt(c, r);
+        var c = Math.floor(Math.random() * this.map.cols);
+        var r = Math.floor(Math.random() * this.map.rows);
+        var grid_cell = this.map.cellAt(c, r);
 
         if (grid_cell !== null && grid_cell.state === CellStates.empty) {
-          worldRendering.gridMap.changeCell(c, r, CellStates.food);
+          const changed = this.map.changeCell(c, r, CellStates.food);
+
+          if (changed !== null) {
+            worldRenderer.addToRender(changed);
+          }
         }
       }
     }

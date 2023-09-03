@@ -1,12 +1,12 @@
 import CellStates from '../anatomy/CellStates';
-import GridCell from './GridCell';
+import SimulatorCell from './SimulatorCell';
 
-interface GridCellStateInterface {
+interface SimulatorCellStateInterface {
   name: string;
   color: null | string;
 }
 
-class GridCellState implements GridCellStateInterface {
+class SimulatorCellState implements SimulatorCellStateInterface {
   name: string;
   color: string;
 
@@ -16,4 +16,4 @@ class GridCellState implements GridCellStateInterface {
   }
 }
 
-export default GridCellState;
+export default SimulatorCellState;

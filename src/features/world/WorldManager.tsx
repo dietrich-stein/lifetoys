@@ -3,14 +3,14 @@ import { useAppSelector, useAppDispatch, useStats } from '../../app/hooks';
 import { RootState } from '../../app/store';
 import {
   selectWorldManager,
-  startWorldRendering,
-  stopWorldRendering,
-  resetWorldRendering,
+  startWorldRenderer,
+  stopWorldRenderer,
+  resetWorldRenderer,
   startWorldSimulation,
   stopWorldSimulation,
   resetWorldSimulation,
   setWorldSimulationTicksDelay,
-  setWorldRenderingCellSize,
+  setWorldRendererCellSize,
 } from './WorldManagerSlice';
 import { formatTime } from '../../utils/FormatTime';
 import { DEFAULT_TICKS_DELAY } from './WorldSimulation';
@@ -27,7 +27,7 @@ export function WorldManager(props: WorldManagerProps) {
   const worldManagerState = useAppSelector(selectWorldManager);
   const dispatch = useAppDispatch();
   const {
-    worldRenderingRunning,
+    worldRendererRunning,
     worldSimulationRunning,
   } = worldManagerState;
   const { avgFps, maxFps, nowFps } = useStats();
@@ -40,7 +40,7 @@ export function WorldManager(props: WorldManagerProps) {
   // Simulation
   //const worldSimulation = WorldSimulation.getInstance();
   // Rendering
-  //const worldRendering = WorldRendering.getInstance();
+  //const worldRenderer = WorldRenderer.getInstance();
 
   const handleStartSimulationClick = () => {
     dispatch(startWorldSimulation({
@@ -59,9 +59,9 @@ export function WorldManager(props: WorldManagerProps) {
   };
 
   const handleResetSimulationClick = () => {
-    dispatch(resetWorldRendering({
+    dispatch(resetWorldRenderer({
       ...worldManagerState,
-      worldRenderingRunning: false,
+      worldRendererRunning: false,
     }));
     dispatch(resetWorldSimulation({
       ...worldManagerState,
@@ -73,16 +73,16 @@ export function WorldManager(props: WorldManagerProps) {
   };
 
   const handleStartRenderingClick = () => {
-    dispatch(startWorldRendering({
+    dispatch(startWorldRenderer({
       ...worldManagerState,
-      worldRenderingRunning: true,
+      worldRendererRunning: true,
     }));
   };
 
   const handleStopRenderingClick = () => {
-    dispatch(stopWorldRendering({
+    dispatch(stopWorldRenderer({
       ...worldManagerState,
-      worldRenderingRunning: false,
+      worldRendererRunning: false,
     }));
   };
 
@@ -94,7 +94,7 @@ export function WorldManager(props: WorldManagerProps) {
   };
 
   const handleRenderingCellSizeChanged = (value: number) => {
-    dispatch(setWorldRenderingCellSize({
+    dispatch(setWorldRendererCellSize({
       ...worldManagerState,
       worldSimulationTicksDelay: value,
     }));
@@ -141,20 +141,20 @@ export function WorldManager(props: WorldManagerProps) {
           <dg.FolderWidget label='Rendering' expanded={ true }>
             <dg.ButtonWidget
               disabled={ !worldSimulationRunning }
-              label={ worldRenderingRunning ? 'Pause Rendering' : 'Resume Rendering' }
-              onClick={ worldRenderingRunning ? handleStopRenderingClick : handleStartRenderingClick }>
+              label={ worldRendererRunning ? 'Pause Rendering' : 'Resume Rendering' }
+              onClick={ worldRendererRunning ? handleStopRenderingClick : handleStartRenderingClick }>
             </dg.ButtonWidget>
             <dg.TextWidget
               label='Time'
-              value={ formatTime(useAppSelector((state: RootState) => state.worldManager.worldRenderingTime )) }
+              value={ formatTime(useAppSelector((state: RootState) => state.worldManager.worldRendererTime )) }
               readOnly={ true }
             />
             <dg.TextWidget
                 label='Stats'
                 value={
-                  'FPS: ' + (worldRenderingRunning ? nowFps : 0) +
-                  ' AVG: ' + (worldRenderingRunning ? avgFps : 0) +
-                  ' MAX: ' + (worldRenderingRunning ? maxFps : 0)
+                  'FPS: ' + (worldRendererRunning ? nowFps : 0) +
+                  ' AVG: ' + (worldRendererRunning ? avgFps : 0) +
+                  ' MAX: ' + (worldRendererRunning ? maxFps : 0)
                 }
                 readOnly={ true }
             />
