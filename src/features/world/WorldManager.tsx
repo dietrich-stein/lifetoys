@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppSelector, useAppDispatch, useStats } from '../../app/hooks';
 import { RootState } from '../../app/store';
 import {
@@ -31,6 +31,7 @@ export function WorldManager(props: WorldManagerProps) {
     worldSimulationRunning,
   } = worldManagerState;
   const { avgFps, maxFps, nowFps } = useStats();
+
   /*
    * NOTE: We use non-react classes for `setInterval()` and
    * `requestAnimationFrame()` because this gets better performance with less
@@ -157,6 +158,12 @@ export function WorldManager(props: WorldManagerProps) {
                 }
                 readOnly={ true }
             />
+          </dg.FolderWidget>
+        </dg.GUI>
+      }
+    </>
+  );
+  /*
             <dg.NumberWidget
               label='Cell Size'
               value={ useAppSelector(
@@ -167,9 +174,5 @@ export function WorldManager(props: WorldManagerProps) {
               step={ 1 }
               onChange={ handleRenderingCellSizeChanged }
             />
-          </dg.FolderWidget>
-        </dg.GUI>
-      }
-    </>
-  );
+  */
 }

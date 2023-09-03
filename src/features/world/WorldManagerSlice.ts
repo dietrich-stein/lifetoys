@@ -30,6 +30,7 @@ export interface WorldManagerState {
   // Rendering
   worldRenderingRunning: boolean;
   worldRenderingTime: number;
+  worldRenderingCellSize: number;
   // Simulation
   worldSimulationRunning: boolean;
   worldSimulationTicks: number;
@@ -43,6 +44,7 @@ const initialState: WorldManagerState = {
   // Rendering
   worldRenderingRunning: false,
   worldRenderingTime: 0,
+  worldRenderingCellSize: 5,
   // Simulation
   worldSimulationRunning: false,
   worldSimulationTicks: 0,
@@ -100,6 +102,8 @@ export const WorldManagerSlice = createSlice({
     },
     setWorldRenderingCellSize: (state, action: PayloadAction<WorldManagerState>) => {
       console.log('WorldManagerSlice.setWorldRenderingCellSize, payload:', action.payload, 'state:', state);
+      state.worldRenderingCellSize = action.payload.worldRenderingCellSize;
+      worldRendering.reset();
     },
 
     // Simulation

@@ -43,6 +43,7 @@
     "@dietrich-stein/dis-gui-lifetoys": "git+https://github.com/dietrich-stein/dis-gui-lifetoys.git#master",
     "@dietrich-stein/stats.js": "git+https://github.com/dietrich-stein/stats.js.git",
     "lodash": "^4.17.21",
+    "react-use": "^17.4.0",
     "utility-types": "^3.10.0"
   },
   "eslintConfig": {

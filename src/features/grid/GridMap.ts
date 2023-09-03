@@ -40,6 +40,7 @@ class GridMap implements GridMapInterface {
   rows: number;
 
   constructor(rendering: WorldRendering, cols: number, rows: number, cellSize: number) {
+    console.log('GridMap, constructor, cols', cols, 'rows', rows, 'cellSize', cellSize);
     this.rendering = rendering;
     this.grid = [];
     this.cols = cols;
@@ -55,6 +56,7 @@ class GridMap implements GridMapInterface {
       return;
     }
 
+    //console.log('GridMap, changeCell:', this.changeCell);
     this.rendering.addToRender(changedCell);
 
     if (ownerCell !== null) {
@@ -85,6 +87,7 @@ class GridMap implements GridMapInterface {
   }
 
   resize(cols: number, rows: number, cellSize: number) {
+    console.log('GridMap, resize, cols', cols, 'rows', rows, 'cellSize', cellSize);
     this.grid = [];
     this.cols = cols;
     this.rows = rows;

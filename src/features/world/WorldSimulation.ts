@@ -36,7 +36,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   ticksDelay: number;
   ticksElapsed: number;
   //
-  gridMap: GridMap | null;
+  //gridMap: GridMap | null;
   storeState: RootState | null;
   fossilRecord: FossilRecord | null;
   fossilRecordRate: number;
@@ -57,7 +57,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     this.ticksDelay = DEFAULT_TICKS_DELAY;
     this.ticksElapsed = 0;
     //
-    this.gridMap = null;
+    //worldRendering.gridMap = null;
     this.storeState = null;
     this.fossilRecord = null;
     this.fossilRecordRate = 100;
@@ -89,28 +89,22 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   public init(storeState: RootState) {
     this.storeState = storeState;
 
-    this.gridMap = new GridMap(
-      worldRendering,
-      worldRendering.numCols,
-      worldRendering.numRows,
-      storeState.world.cellSize,
-    );
-
     this.fossilRecord = new FossilRecord();
 
     console.log(
-      'WorldSimulation, init, gridmap:', this.gridMap,
+      'WorldSimulation, init',
+      'worldRendering.gridMap:', worldRendering.gridMap,
       'storeState:', this.storeState,
       'fossilRecord:', this.fossilRecord,
     );
   }
 
   public start(state: WorldManagerState) {
-    if (this.running || this.gridMap === null) {
+    if (this.running || worldRendering.gridMap === null) {
       return;
     }
 
-    worldRendering.renderColorScheme(this.gridMap);
+    worldRendering.renderColorScheme();
 
     this.intervalId = setInterval(() => {
       if (!this.running) { // not needed, but let's be certain
@@ -153,7 +147,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private simulate() {
-    if (this.gridMap === null || this.fossilRecord === null || this.storeState === null) {
+    if (worldRendering.gridMap === null || this.fossilRecord === null || this.storeState === null) {
       return;
     }
     //console.log('WorldSimulation, SIMULATE', this.ticksDelay);
@@ -163,7 +157,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     for (var i in this.organisms) {
       var org = this.organisms[i];
 
-      if (!org.living || !org.update(this.gridMap, this.fossilRecord, this.ticksElapsed)) {
+      if (!org.living || !org.update(worldRendering.gridMap, this.fossilRecord, this.ticksElapsed)) {
         to_remove.push(i);
       }
     }
@@ -180,11 +174,11 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private addDefaultOrganism() {
-    if (this.gridMap === null || this.storeState === null) {
+    if (worldRendering.gridMap === null || this.storeState === null) {
       return;
     }
 
-    var center = this.gridMap.getCenter();
+    var center = worldRendering.gridMap.getCenter();
     var organism = new Organism(
       center[0],
       center[1],
@@ -205,11 +199,11 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   public addOrganism(organism: Organism) {
-    if (this.gridMap === null) {
+    if (worldRendering.gridMap === null) {
       return;
     }
 
-    organism.updateGrid(this.gridMap);
+    organism.updateGrid(worldRendering.gridMap);
 
     this.total_mutability += organism.mutability;
     this.organisms.push(organism);
@@ -239,25 +233,25 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private generateFood(): void {
-    if (this.gridMap === null || this.storeState === null) {
+    if (worldRendering.gridMap === null || this.storeState === null) {
       return;
     }
 
     var num_food = Math.max(Math.floor((
-      this.gridMap.cols *
-      this.gridMap.rows *
+      worldRendering.gridMap.cols *
+      worldRendering.gridMap.rows *
       this.storeState.worldManager.hyperparams.foodDropProb
     ) / 50000), 1);
     var prob = this.storeState.worldManager.hyperparams.foodDropProb;
 
     for (var i = 0; i < num_food; i++) {
       if (Math.random() <= prob) {
-        var c = Math.floor(Math.random() * this.gridMap.cols);
-        var r = Math.floor(Math.random() * this.gridMap.rows);
-        var grid_cell = this.gridMap.cellAt(c, r);
+        var c = Math.floor(Math.random() * worldRendering.gridMap.cols);
+        var r = Math.floor(Math.random() * worldRendering.gridMap.rows);
+        var grid_cell = worldRendering.gridMap.cellAt(c, r);
 
         if (grid_cell !== null && grid_cell.state === CellStates.empty) {
-          this.gridMap.changeCell(c, r, CellStates.food);
+          worldRendering.gridMap.changeCell(c, r, CellStates.food);
         }
       }
     }

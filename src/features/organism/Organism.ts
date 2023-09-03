@@ -209,7 +209,7 @@ class Organism implements OrganismInterface {
     var mutated = false;
 
     if (Math.random() * 100 <= prob) {
-      console.log('Organism, reproduce, calling mutateCells()...');
+      //console.log('Organism, reproduce, calling mutateCells()...');
       mutated = org.mutateCells();
     }
 

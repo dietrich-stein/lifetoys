@@ -19,11 +19,11 @@ export interface WorldState {
   status: 'idle' | 'loading';
   canvasId: string | null;
   canvasContainerId: string | null;
-  canvasWidth: number;
-  canvasHeight: number;
-  cellSize: number;
-  numCols: number;
-  numRows: number;
+  //canvasWidth: number;
+  //canvasHeight: number;
+  //cellSize: number;
+  //numCols: number;
+  //numRows: number;
   config: WorldConfigState;
 }
 
@@ -31,11 +31,11 @@ const initialState: WorldState = {
   status: 'loading',
   canvasId: null,
   canvasContainerId: null,
-  canvasWidth: 0,
-  canvasHeight: 0,
-  cellSize: 5,
-  numCols: 0,
-  numRows: 0,
+  //canvasWidth: 0,
+  //canvasHeight: 0,
+  //cellSize: 5,
+  //numCols: 0,
+  //numRows: 0,
   config: {
     fill_window: true,
     num_random_orgs: 100,
@@ -67,7 +67,7 @@ export const worldSlice = createSlice({
       state.canvasId = action.payload.canvasId;
       state.canvasContainerId = action.payload.canvasContainerId;
     },
-    setWorldCellSize: (state, action: PayloadAction<number>) => {
+    /*setWorldCellSize: (state, action: PayloadAction<number>) => {
       state.cellSize = action.payload;
     },
     setWorldNumCols: (state, action: PayloadAction<number>) => {
@@ -75,13 +75,13 @@ export const worldSlice = createSlice({
     },
     setWorldNumRows: (state, action: PayloadAction<number>) => {
       state.numRows = action.payload;
-    },
-    setWorldCanvasWidth: (state, action: PayloadAction<number>) => {
+    },*/
+    /*setWorldCanvasWidth: (state, action: PayloadAction<number>) => {
       state.canvasWidth = action.payload;
     },
     setWorldCanvasHeight: (state, action: PayloadAction<number>) => {
       state.canvasHeight = action.payload;
-    },
+    },*/
     setWorldColors: (state, action: PayloadAction<WorldState>) => {
       console.log('World, setWorldColors, payload:', action.payload);
     },
@@ -92,12 +92,12 @@ export const selectWorld = (state: RootState) => state.world;
 
 export const {
   initWorld,
-  setWorldCellSize,
-  setWorldNumCols,
-  setWorldNumRows,
+  //setWorldCellSize,
+  //setWorldNumCols,
+  //setWorldNumRows,
   setWorldColors,
-  setWorldCanvasWidth,
-  setWorldCanvasHeight,
+  //setWorldCanvasWidth,
+  //setWorldCanvasHeight,
 } = worldSlice.actions;
 
 export default worldSlice.reducer;

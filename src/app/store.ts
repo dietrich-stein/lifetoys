@@ -8,10 +8,10 @@ import counterReducer from '../features/counter/counterSlice';
 import editorReducer, { initEditor } from '../features/editor/EditorSlice';
 import worldReducer, {
   initWorld,
-  setWorldNumCols,
-  setWorldNumRows,
-  setWorldCanvasWidth,
-  setWorldCanvasHeight,
+  //setWorldNumCols,
+  //setWorldNumRows,
+  //setWorldCanvasWidth,
+  //setWorldCanvasHeight,
 } from '../features/world/WorldSlice';
 import worldManagerReducer, {
   startWorldSimulation,
@@ -88,21 +88,21 @@ startAppListening({
               );
 
               // Dispatch setter actions for canvasHeight, canvasWidth, numCols, numRows values
-              listenerApi.dispatch(setWorldCanvasWidth(worldRendering.canvasWidth));
-              listenerApi.dispatch(setWorldCanvasHeight(worldRendering.canvasHeight));
-              listenerApi.dispatch(setWorldNumCols(worldRendering.numCols));
-              listenerApi.dispatch(setWorldNumRows(worldRendering.numRows));
+              //listenerApi.dispatch(setWorldCanvasWidth(worldRendering.canvasWidth));
+              //listenerApi.dispatch(setWorldCanvasHeight(worldRendering.canvasHeight));
+              //listenerApi.dispatch(setWorldNumCols(worldRendering.numCols));
+              //listenerApi.dispatch(setWorldNumRows(worldRendering.numRows));
+
+              listenerApi.dispatch(startWorldRendering({
+                ...state.worldManager,
+                worldRenderingRunning: true,
+              }));
 
               worldSimulation.init(state);
 
               listenerApi.dispatch(startWorldSimulation({
                 ...state.worldManager,
                 worldSimulationRunning: true,
-              }));
-
-              listenerApi.dispatch(startWorldRendering({
-                ...state.worldManager,
-                worldRenderingRunning: true,
               }));
             }
           }
