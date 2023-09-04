@@ -1,14 +1,16 @@
 import AnatomyCell from './AnatomyCell';
-import CellFactory from './AnatomyCellFactory';
+import AnatomyCellFactory from './AnatomyCellFactory';
 import SimulatorCellStates from '../simulator/SimulatorCellStates';
 import SerializeHelper from '../../utils/SerializeHelper';
 import Organism from '../organism/Organism';
 import { HyperparamsState } from '../world/WorldManagerSlice';
+import Directions from '../organism/Directions';
 
 type SerializedAnatomy = {};
 
 interface AnatomyInterface {
   cells: Array<AnatomyCell>;
+  plan: GrowthPlan;
   org: Organism;
   birth_distance: number;
   has_mouth: boolean;
@@ -27,21 +29,25 @@ interface AnatomyInterface {
   armor_count: number;
   clear: () => void;
   canAddCellAt: (x: number, y: number) => boolean;
-  addDefaultCell: (
+  addCell: (
     x: number,
     y: number,
     state: AnatomyCellState,
     check_types: boolean,
     hyperparams: HyperparamsState
   ) => AnatomyCell;
-  addRandomizedCell: (
+  addRandomCell: (
     x: number,
     y: number,
     state: AnatomyCellState,
     check_types: boolean,
     hyperparams: HyperparamsState
   ) => AnatomyCell;
-  addInheritCell: (parent_cell: AnatomyCell, check_types: boolean, hyperparams: HyperparamsState) => AnatomyCell;
+  addInheritedCell: (
+    parent_cell: AnatomyCell,
+    check_types: boolean,
+    hyperparams: HyperparamsState
+  ) => AnatomyCell;
   replaceCell: (
     x: number,
     y: number,
@@ -56,12 +62,15 @@ interface AnatomyInterface {
   getRandomCell: () => AnatomyCell | null;
   getNeighborsOfCell: (x: number, y: number) => Array<AnatomyCell>;
   //isEqual: (anatomy: Anatomy) => boolean;
+  executeGrowthPlan: (value: GrowthPlan, hyperparams: HyperparamsState) => void;
+  //exportGrowthPlanFromCells: () => GrowthPlan;
   serialize: () => SerializedAnatomy;
   loadRaw: (anatomy: Anatomy, hyperparams: HyperparamsState) => void;
 }
 
 class Anatomy implements AnatomyInterface {
   cells: Array<AnatomyCell>;
+  plan: GrowthPlan;
   org: Organism;
   birth_distance: number;
   has_mouth: boolean;
@@ -81,6 +90,7 @@ class Anatomy implements AnatomyInterface {
 
   constructor(ownerOrganism: Organism) {
     this.cells = [];
+    this.plan = [];
     this.org = ownerOrganism;
     this.birth_distance = 4;
 
@@ -131,14 +141,14 @@ class Anatomy implements AnatomyInterface {
     return true;
   }
 
-  addDefaultCell(
+  addCell(
     x: number,
     y: number,
     state: AnatomyCellState,
     check_types: boolean = false,
     hyperparams: HyperparamsState,
   ) {
-    var new_cell = CellFactory.createDefault(x, y, this.org, state, hyperparams);
+    var new_cell = AnatomyCellFactory.createRegular(x, y, this.org, state, hyperparams);
 
     this.cells.push(new_cell);
 
@@ -149,14 +159,14 @@ class Anatomy implements AnatomyInterface {
     return new_cell;
   }
 
-  addRandomizedCell(
+  addRandomCell(
     x: number,
     y: number,
     state: AnatomyCellState,
     check_types: boolean = false,
     hyperparams: HyperparamsState,
   ) {
-    var new_cell = CellFactory.createRandom(x, y, this.org, state, hyperparams);
+    var new_cell = AnatomyCellFactory.createRandom(x, y, this.org, state, hyperparams);
 
     this.cells.push(new_cell);
 
@@ -176,8 +186,8 @@ class Anatomy implements AnatomyInterface {
     return new_cell;
   }
 
-  addInheritCell(parent_cell: AnatomyCell, check_types: boolean = false, hyperparams: HyperparamsState) {
-    var new_cell = CellFactory.createInherited(this.org, parent_cell, hyperparams);
+  addInheritedCell(parent: AnatomyCell, check_types: boolean = false, hyperparams: HyperparamsState) {
+    var new_cell = AnatomyCellFactory.createInherited(this.org, parent, hyperparams);
 
     this.cells.push(new_cell);
 
@@ -200,9 +210,9 @@ class Anatomy implements AnatomyInterface {
     this.removeCell(x, y, true, false);
 
     if (randomize) {
-      return this.addRandomizedCell(x, y, state, check_types, hyperparams);
+      return this.addRandomCell(x, y, state, check_types, hyperparams);
     } else {
-      return this.addDefaultCell(x, y, state, check_types, hyperparams);
+      return this.addCell(x, y, state, check_types, hyperparams);
     }
   }
 
@@ -326,6 +336,98 @@ class Anatomy implements AnatomyInterface {
     return true;
   }*/
 
+  executeGrowthPlan(value: GrowthPlan, hyperparams: HyperparamsState) {
+    this.plan = value;
+
+    let offsetX = 0;
+    let offsetY = 0;
+    let direction;
+    let debugSteps = [];
+
+    for (let step of this.plan) {
+      let x = 0;
+      let y = 0;
+      let stepDebug = '';
+
+      if (step.direction > -1) {
+        direction = Directions.scalars[step.direction];
+        x = direction[0];
+        y = direction[1];
+
+        stepDebug += Directions.labels[step.direction];
+      } else {
+        stepDebug += 'origin';
+      }
+
+      offsetX += x;
+      offsetY += y;
+
+      if (step.state !== null) {
+        this.addCell(offsetX, offsetY, step.state, false, hyperparams);
+        stepDebug += ` (${step.state.name})`;
+      }
+
+      debugSteps.push(stepDebug);
+    }
+
+    //console.log('executeGrowthPlan', debugSteps.join(' > '));
+  }
+
+  // Origin cells may have a scalar of [0, 0] which is not in the cardinal set.
+  //   - All this does is place the first cell without a move.
+  //
+  // Origin calls have no special abstractions or handling aside from allowance above.
+  //
+  // If the first item has [0, 0] scalar (n/a) the organism will have a central origin cell.
+  //     This DOES NOT enforce an odd number of X and Y organism cells.
+  //
+  // If the first item has a [-1, 0] scalar (west) the organism will simply move before placing
+  // a non-central origin
+  //     This DOES NOT enforce and even number of X and Y organism cells.
+  //
+  // Concerns over symmetry and efficiency of body plan compression are out of scope for now.
+  //
+  // For now, as long as it is the first item (plan step), we typically have something like this
+  // as a result of  a non-central origin step:
+  //
+  // {
+  //   state: MouthState,
+  //   direction: -1,
+  // }
+  //
+  // Anatomy is a radial model from origin cell at [0, 0].
+  // Growth plan is a procedural model that can also start at [0, 0].
+  //
+  // We have this function, exportGrowthPlanFromCells() to go from anatomy to plan.
+  // We also need one for plan to organism.
+  /*exportGrowthPlanFromCells() {
+    let plan: GrowthPlan = [];
+
+    for (let cell of this.cells) {
+      let scalarDirection = [ cell.x, cell.y ];
+      let direction = Directions.scalars.findIndex((value: number[]) => {
+        return (
+          value.length === 2 &&
+          scalarDirection[0] === value[0] &&
+          scalarDirection[1] === value[1]
+        );
+      });
+      let debugDirection = (direction > -1) ? Directions.labels[direction] : '';
+      let step: GrowthPlanStep = {
+        state: cell.state,
+        scalarDirection,
+        direction,
+        debugDirection,
+      };
+
+      plan.push(step);
+    }
+
+    console.log('plan:', plan);
+
+    return plan;
+  }*/
+
   serialize() {
     let anatomy = SerializeHelper.copyNonObjects(this) as Anatomy;
 
@@ -348,7 +450,7 @@ class Anatomy implements AnatomyInterface {
   loadRaw(anatomy: Anatomy, hyperparams: HyperparamsState) {
     this.clear();
     for (let cell of anatomy.cells) {
-      this.addInheritCell(cell, false, hyperparams);
+      this.addInheritedCell(cell, false, hyperparams);
     }
 
     this.checkTypeChange();

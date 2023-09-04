@@ -9,6 +9,8 @@ import {
 } from './WorldManagerSlice';
 import WorldRenderer from './WorldRenderer';
 import FossilRecord from '../stats/FossilRecord';
+import Anatomy from '../anatomy/Anatomy';
+import Directions from '../organism/Directions';
 
 /*
 interface WorldSimulationInterface {
@@ -99,11 +101,11 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
 
     this.fossilRecord = new FossilRecord();
 
-    console.log(
+    /*console.log(
       'WorldSimulation, init',
       'storeState:', this.storeState,
       'fossilRecord:', this.fossilRecord,
-    );
+    );*/
   }
 
   public start(state: WorldManagerState) {
@@ -128,7 +130,24 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       }));
     }, this.ticksDelay);
 
-    this.addDefaultOrganism();
+    this.addCenteredOrganismByPlan([
+      {
+        state: CellStates.mouth,
+        direction: Directions.noDirection, // -1
+      },
+      {
+        state: CellStates.producer,
+        direction: Directions.cardinals.se,
+      },
+      {
+        state: null,
+        direction: Directions.cardinals.nw,
+      },
+      {
+        state: CellStates.producer,
+        direction: Directions.cardinals.nw,
+      },
+    ]);
 
     this.running = true;
   }
@@ -180,7 +199,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     }
   }
 
-  private addDefaultOrganism() {
+  private addCenteredOrganismByPlan(plan: GrowthPlan) {
     if (this.map === null || this.storeState === null) {
       return;
     }
@@ -194,12 +213,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       WorldSimulation.instance,
     );
 
-    console.log('WorldSimulation, addDefaultOrganism', organism);
-
-    organism.anatomy.addDefaultCell(0, 0, CellStates.mouth, false, this.storeState.worldManager.hyperparams);
-    organism.anatomy.addDefaultCell(1, 1, CellStates.producer, false, this.storeState.worldManager.hyperparams);
-    organism.anatomy.addDefaultCell(-1, -1, CellStates.producer, true, this.storeState.worldManager.hyperparams);
-
+    organism.anatomy.executeGrowthPlan(plan, this.storeState.worldManager.hyperparams);
     this.addOrganism(organism);
 
     //fossil_record.addSpecies(org, null);

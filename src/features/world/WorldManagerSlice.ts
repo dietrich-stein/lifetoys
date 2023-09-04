@@ -129,7 +129,7 @@ export const WorldManagerSlice = createSlice({
       state.worldSimulationTicks = action.payload.worldSimulationTicks;
     },
     setWorldSimulationTicksDelay: (state, action: PayloadAction<WorldManagerState>) => {
-      console.log('WorldManagerSlice.setWorldSimulationTicksDelay, payload:', action.payload);
+      //console.log('WorldManagerSlice.setWorldSimulationTicksDelay, payload:', action.payload);
       state.worldSimulationTicksDelay = action.payload.worldSimulationTicksDelay;
       worldSimulation.setTicksDelay(action.payload, action.payload.worldSimulationTicksDelay);
     },

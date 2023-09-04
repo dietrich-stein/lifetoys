@@ -71,16 +71,48 @@ type AnatomyCellClass =
 // Metrics
 
 type CellCountsType = {
-  mouth: number;
-  brain: number;
-  producer: number;
-  mover: number;
-  killer: number;
-  armor: number;
-  eye: number;
+  mouth: number,
+  brain: number,
+  producer: number,
+  mover: number,
+  killer: number,
+  armor: number,
+  eye: number,
 }
 
 type AverageCellCountsType = Array<CellCountsType>;
+
+type CardinalDirectionLabel =
+  | 'n'
+  | 'ne'
+  | 'e'
+  | 'se'
+  | 's'
+  | 'sw'
+  | 'w'
+  | 'nw';
+
+type CardinalLabelsType = Array<CardinalDirectionLabel>;
+
+type CardinalDirectionsType = {
+  n: number;
+  ne: number;
+  e: number;
+  se: number;
+  s: number;
+  sw: number;
+  w: number;
+  nw: number;
+}
+
+type ScalarCoordinatesType = Array<Array<number>>;
+
+type GrowthPlanStep = {
+  state: AnatomyCellState | null, // null represents crossover/overlap
+  direction: number,
+};
+
+type GrowthPlan = Array<GrowthPlanStep>;
 
 /*interface ControllerInterface {
   // Common Properties

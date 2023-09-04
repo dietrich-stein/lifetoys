@@ -163,7 +163,7 @@ export function WorldManager(props: WorldManagerProps) {
               value={ useAppSelector(
                 (state: RootState) => state.worldManager.worldRendererCellSize,
               ) }
-              min={ 5 }
+              min={ 1 }
               max={ 100 }
               step={ 1 }
               onChange={ handleRenderingCellSizeChanged }

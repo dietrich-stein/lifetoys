@@ -13,11 +13,10 @@ interface AnatomyCellInterface {
   org: Organism;
   x: number;
   y: number;
+  initRegular: () => void;
   initInherited: (parent: AnatomyCell) => void;
   initRandom: () => void;
-  initDefault: () => void;
   performFunction: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => void;
-
   getRealX: () => void;
   getRealY: () => void;
   getRotatedXY: (dir: number) => number[];
@@ -59,6 +58,10 @@ class AnatomyCell implements AnatomyCellInterface {
     }
   }
 
+  initRegular() {
+    // initialize to default values
+  }
+
   initInherited(parent: AnatomyCell) {
     this.x = parent.x;
     this.y = parent.y;
@@ -66,10 +69,6 @@ class AnatomyCell implements AnatomyCellInterface {
 
   initRandom() {
     // initialize values randomly
-  }
-
-  initDefault() {
-    // initialize to default values
   }
 
   performFunction(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {

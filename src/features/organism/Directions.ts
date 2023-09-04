@@ -1,19 +1,20 @@
 const MAX_DIR_INDEX = 7;
 
-type CardinalDirectionsType = {
-  n: number;
-  ne: number;
-  e: number;
-  se: number;
-  s: number;
-  sw: number;
-  w: number;
-  nw: number;
-}
-
-type ScalarCoordinatesType = Array<Array<number>>;
-
 abstract class Directions {
+
+  public static labels: CardinalLabelsType = [
+    'n',
+    'ne',
+    'e',
+    'se',
+    's',
+    'sw',
+    'w',
+    'nw',
+  ];
+
+  public static noDirection: number = -1;
+
   public static cardinals: CardinalDirectionsType = {
     n: 0,
     ne: 1,

@@ -35,7 +35,7 @@ interface OrganismInterface {
   damage: number;
   species: Species | null;
   brain: BrainController | null;
-  inherit: (parent: Organism) => void;
+  inheritFromParent: (parent: Organism) => void;
   //getAbsoluteDirection: () => number;
   foodNeeded: () => number;
   lifespan: () => number;
@@ -122,18 +122,20 @@ class Organism implements OrganismInterface {
     this.species = null;
 
     if (typeof parent !== 'undefined') {
-      this.inherit(parent);
+      this.inheritFromParent(parent);
     }
   }
 
-  inherit(parent: Organism) {
+  inheritFromParent(parent: Organism) {
+    // Copy evolved properties
     this.move_range = parent.move_range;
     this.mutability = parent.mutability;
     this.species = parent.species;
 
-    for (var c of parent.anatomy.cells) {
-      //deep copy parent cells
-      this.anatomy.addInheritCell(c, false, this.hyperparams);
+    // Copy anatomy plan and cell without executing growth plan
+    this.anatomy.plan = parent.anatomy.plan;
+    for (var cell of parent.anatomy.cells) {
+      this.anatomy.addInheritedCell(cell, false, this.hyperparams);
     }
 
     this.anatomy.checkTypeChange();
@@ -296,7 +298,7 @@ class Organism implements OrganismInterface {
 
         if (this.anatomy.canAddCellAt(x, y)) {
           added = true;
-          this.anatomy.addRandomizedCell(x, y, randomState, false, this.hyperparams);
+          this.anatomy.addRandomCell(x, y, randomState, false, this.hyperparams);
         }
       }
     }
@@ -424,7 +426,7 @@ class Organism implements OrganismInterface {
         cell_cols.fill(0);
       }
 
-      console.log(cell_array);
+      //console.log(cell_array);
     }
 
     for (var cell of this.anatomy.cells) {

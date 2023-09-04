@@ -245,7 +245,7 @@ class WorldRenderer implements WorldRendererInterface {
   }
 
   public init(storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) {
-    console.log('WorldRenderer, init');
+    //console.log('WorldRenderer, init');
     this.storeState = storeState;
 
     this.canvasContainer = canvasContainer;
@@ -296,15 +296,37 @@ class WorldRenderer implements WorldRendererInterface {
     const y = cell.row * this.gridCellSize;
     const halfCell = Math.floor(this.gridCellSize / 2);
 
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = '#000000';
     this.ctx.fillStyle = cell.state.color;
     this.ctx.fillRect(x, y, this.gridCellSize, this.gridCellSize);
 
-    this.ctx.font = `${halfCell * 1.5}px serif`;
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'middle';
-    this.ctx.fillText(cell.state.name.charAt(0).toUpperCase(), x + halfCell, y + halfCell);
+    if (this.gridCellSize >= 5) {
+      this.ctx.translate(0.5, 0.5); // part 1 of 2, a fix for CSS causing blurry lines
 
+      this.ctx.strokeStyle = '#000000';
+      this.ctx.strokeRect(x, y, this.gridCellSize, this.gridCellSize);
+
+      if (this.gridCellSize >= 12) {
+        this.ctx.font = `${halfCell * 1.5}px serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+        this.ctx.fillText(
+          cell.state.name.charAt(0).toUpperCase(),
+          x + halfCell + 1,
+          y + Math.floor(halfCell * 1.15) + 1,
+        );
+
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+        this.ctx.fillText(cell.state.name.charAt(0).toUpperCase(), x + halfCell, y + Math.floor(halfCell * 1.15));
+      }
+
+      this.ctx.translate(-0.5, -0.5); // part 1 of 2, a fix for CSS causing blurry lines
+    }
+
+    this.ctx.closePath();
     /*
     // Render the eye slit?
     if (
@@ -380,7 +402,7 @@ class WorldRenderer implements WorldRendererInterface {
       return;
     }
 
-    console.log('WorldRenderer, start, state:', state);
+    //console.log('WorldRenderer, start, state:', state);
 
     const animate = (nowTime: DOMHighResTimeStamp) => {
       this.timeStartedElapsed = nowTime - this.timeStoppedElapsed;

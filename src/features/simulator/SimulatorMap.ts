@@ -37,7 +37,7 @@ class SimulatorMap implements SimulatorMapInterface {
   rows: number;
 
   constructor(cols: number, rows: number, cellSize: number) {
-    console.log('SimulatorMap, constructor(), cols', cols, 'rows', rows, 'cellSize', cellSize);
+    //console.log('SimulatorMap, constructor(), cols', cols, 'rows', rows, 'cellSize', cellSize);
     this.grid = [];
     this.cols = cols;
     this.rows = rows;

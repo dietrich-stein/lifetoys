@@ -7,6 +7,7 @@ import KillerCell from './cells/KillerCell';
 import ArmorCell from './cells/ArmorCell';
 import EyeCell from './cells/EyeCell';
 import { HyperparamsState } from '../world/WorldManagerSlice';
+import AnatomyCell from './AnatomyCell';
 
 interface AnatomyCellClassesInterface {
   [key: string]:
@@ -30,11 +31,30 @@ abstract class AnatomyCellFactory {
     'eye': EyeCell,
   };
 
-  public static createInherited(org: Organism, parentCell: AnatomyCellClass, hyperparams: HyperparamsState) {
-    const cellClass = AnatomyCellFactory.CellClasses[parentCell.state.name];
-    const newCell = new cellClass(parentCell.x, parentCell.y, org, hyperparams);
+  public static createRegular(
+    x: number,
+    y: number,
+    org: Organism,
+    state: AnatomyCellState,
+    hyperparams: HyperparamsState,
+  ) {
+    var cellClass = AnatomyCellFactory.CellClasses[state.name];
+    var cell = new cellClass(x, y, org, hyperparams);
 
-    newCell.initInherited(parentCell);
+    cell.initRegular();
+
+    return cell;
+  }
+
+  public static createInherited(
+    org: Organism,
+    parent: AnatomyCell,
+    hyperparams: HyperparamsState,
+  ) {
+    const cellClass = AnatomyCellFactory.CellClasses[parent.state.name];
+    const newCell = new cellClass(parent.x, parent.y, org, hyperparams);
+
+    newCell.initInherited(parent);
 
     return newCell;
   }
@@ -50,21 +70,6 @@ abstract class AnatomyCellFactory {
     var cell = new cellClass(x, y, org, hyperparams);
 
     cell.initRandom();
-
-    return cell;
-  }
-
-  public static createDefault(
-    x: number,
-    y: number,
-    org: Organism,
-    state: AnatomyCellState,
-    hyperparams: HyperparamsState,
-  ) {
-    var cellClass = AnatomyCellFactory.CellClasses[state.name];
-    var cell = new cellClass(x, y, org, hyperparams);
-
-    cell.initDefault();
 
     return cell;
   }
