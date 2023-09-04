@@ -4,47 +4,54 @@ import Organism from '../organism/Organism';
 import { HyperparamsState } from '../world/WorldManagerSlice';
 import WorldRenderer from '../world/WorldRenderer';
 import WorldSimulation from '../world/WorldSimulation';
+import Anatomy from './Anatomy';
 
-interface CellInterface {
+interface AnatomyCellInterface {
   //store: RootState;
   hyperparams: HyperparamsState,
-  state: AnyCellState;
+  state: AnatomyCellState;
   org: Organism;
-  loc_c: number;
-  loc_r: number;
-  initInherit: (parent: Cell) => void;
+  x: number;
+  y: number;
+  initInherited: (parent: AnatomyCell) => void;
   initRandom: () => void;
   initDefault: () => void;
   performFunction: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => void;
-  getRealCol: () => void;
-  getRealRow: () => void;
+
+  getRealX: () => void;
+  getRealY: () => void;
+  getRotatedXY: (dir: number) => number[];
 
   //getRealCell: () => GridCell | null;
   //rotatedCol: (dir: number) => number;
   //rotatedRow: (dir: number) => number;
-
-  rotatedColRow: (dir: number) => number[];
 }
 
-class Cell implements CellInterface {
+class AnatomyCell implements AnatomyCellInterface {
   //store: RootState;
   hyperparams: HyperparamsState;
-  state: AnyCellState;
+  state: AnatomyCellState;
   org: Organism;
-  loc_c: number;
-  loc_r: number;
+  x: number;
+  y: number;
 
-  constructor(state: AnyCellState, org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
+  constructor(
+    x: number,
+    y: number,
+    state: AnatomyCellState,
+    org: Organism,
+    hyperparams: HyperparamsState,
+  ) {
     //this.store = store.getState();
     this.hyperparams = hyperparams;
     this.state = state;
     this.org = org;
-    this.loc_c = loc_col;
-    this.loc_r = loc_row;
+    this.x = x;
+    this.y = y;
 
     var distance = Math.max(
-      Math.abs(loc_row) * 2 + 2,
-      Math.abs(loc_col) * 2 + 2,
+      Math.abs(x) * 2 + 2,
+      Math.abs(y) * 2 + 2,
     );
 
     if (this.org.anatomy.birth_distance < distance) {
@@ -52,10 +59,9 @@ class Cell implements CellInterface {
     }
   }
 
-  initInherit(parent: Cell) {
-    // deep copy parent values
-    this.loc_c = parent.loc_c;
-    this.loc_r = parent.loc_r;
+  initInherited(parent: AnatomyCell) {
+    this.x = parent.x;
+    this.y = parent.y;
   }
 
   initRandom() {
@@ -71,14 +77,14 @@ class Cell implements CellInterface {
   }
 
   // @TODO: Consolidate as "getRealColRow()"
-  getRealCol() {
-    var real_colrow = this.rotatedColRow(this.org.rotation_direction);
+  getRealX() {
+    var real_colrow = this.getRotatedXY(this.org.rotation_direction);
 
     return this.org.c + real_colrow[0]; //this.rotatedCol(this.org.rotation_direction);
   }
 
-  getRealRow() {
-    var real_colrow = this.rotatedColRow(this.org.rotation_direction);
+  getRealY() {
+    var real_colrow = this.getRotatedXY(this.org.rotation_direction);
 
     return this.org.r + real_colrow[1]; //this.rotatedRow(this.org.rotation_direction);
   }
@@ -98,66 +104,64 @@ class Cell implements CellInterface {
   // Instead, east-having directions will use east coords.
   // And, west-having directions will use west-coords.
   // However, eyes will still show the actual direction in the editor.
-  rotatedColRow(dir: number) {
-    let c = this.loc_c;
-    let r = this.loc_r;
+  getRotatedXY(dir: number) {
+    let x = this.x;
+    let y = this.y;
 
     switch (dir) {
       case Directions.cardinals.n:
-        c = this.loc_c;
-        r = this.loc_r;
+        x = this.x;
+        y = this.y;
         break;
 
-      /*case Directions.cardinals.ne:
-        c = this.loc_r * -1;
-        r = this.loc_r;
-        break;*/
+      //case Directions.cardinals.ne:
+        //c = this.row * -1;
+        //r = this.row;
+        //break;
 
       case Directions.cardinals.ne:
       case Directions.cardinals.se:
       case Directions.cardinals.e:
-        /*
-        c = this.loc_r * -1;
-        r = this.loc_c * -1;
-        */
-        c = this.loc_r * -1;
-        r = this.loc_c * -1;
+        //x = this.row * -1;
+        //r = this.col * -1;
+        x = this.y * -1;
+        y = this.x * -1;
         break;
 
-      /*case Directions.cardinals.se:
-        c = Math.abs(this.loc_r);
-        r = Math.abs(this.loc_r);
-        break;*/
+      //case Directions.cardinals.se:
+        //c = Math.abs(this.y);
+        //r = Math.abs(this.y);
+        //break;
 
       case Directions.cardinals.s:
-        c = this.loc_c * -1;
-        r = this.loc_r * -1;
+        x = this.x * -1;
+        y = this.y * -1;
         break;
 
-      /*case Directions.cardinals.sw:
-        c = this.loc_r;
-        r = this.loc_r * -1;
-        break;*/
+      //case Directions.cardinals.sw:
+        //x = this.y;
+        //r = this.y * -1;
+        //break;
 
       case Directions.cardinals.sw:
       case Directions.cardinals.nw:
       case Directions.cardinals.w:
-        c = this.loc_r;
-        r = this.loc_c;
+        x = this.y;
+        y = this.x;
         break;
 
-      /*case Directions.cardinals.nw:
-        c = this.loc_r;
-        r = this.loc_r;
-        break;*/
+      //case Directions.cardinals.nw:
+        //x = this.y;
+        //y = this.y;
+        //break;
     }
 
     if (this.org.environment === 'editor') {
-      console.log('rotatedColRow', [c, r]);
+      console.log('rotatedXY', [x, y]);
     }
 
-    return [c, r];
+    return [x, y];
   }
 }
 
-export default Cell;
+export default AnatomyCell;

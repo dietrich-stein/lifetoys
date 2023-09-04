@@ -1,19 +1,19 @@
-import CellStates from '../CellStates';
-import Cell from '../Cell';
+import CellStates from '../../simulator/SimulatorCellStates';
+import AnatomyCell from '../AnatomyCell';
 import Organism from '../../organism/Organism';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
 import WorldSimulation from '../../world/WorldSimulation';
 import SimulatorCell from '../../simulator/SimulatorCell';
 import WorldRenderer from '../../world/WorldRenderer';
 
-class KillerCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
-    super(CellStates.killer, org, loc_col, loc_row, hyperparams);
+class KillerCell extends AnatomyCell {
+  constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
+    super(x, y, CellStates.killer, org, hyperparams);
   }
 
-  initInherit(parent: Cell) {
+  initInherited(parent: AnatomyCell) {
     // deep copy parent values
-    super.initInherit(parent);
+    super.initInherited(parent);
   }
 
   initRandom() {
@@ -29,8 +29,8 @@ class KillerCell extends Cell {
       return;
     }
 
-    var c = this.getRealCol();
-    var r = this.getRealRow();
+    var c = this.getRealX();
+    var r = this.getRealY();
 
     const killableNeighbors = this.hyperparams.killableNeighbors;
 
@@ -48,9 +48,9 @@ class KillerCell extends Cell {
       simulation.map === null ||
       simulation.fossilRecord === null ||
       neighbor_cell === null ||
-      neighbor_cell.owner_org === null ||
-      neighbor_cell.owner_org === this.org ||
-      !neighbor_cell.owner_org.living ||
+      neighbor_cell.org === null ||
+      neighbor_cell.org === this.org ||
+      !neighbor_cell.org.living ||
       neighbor_cell.state === CellStates.armor
     ) {
       return;
@@ -58,7 +58,7 @@ class KillerCell extends Cell {
 
     var is_hit = neighbor_cell.state === CellStates.killer; // has to be calculated before death
 
-    neighbor_cell.owner_org.harm(renderer, simulation, ticks);
+    neighbor_cell.org.harm(renderer, simulation, ticks);
 
     const instaKill = this.hyperparams.instaKill;
 

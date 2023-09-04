@@ -1,5 +1,5 @@
-import CellStates from '../CellStates';
-import Cell from '../Cell';
+import CellStates from '../../simulator/SimulatorCellStates';
+import AnatomyCell from '../AnatomyCell';
 import Directions from '../../organism/Directions';
 import Observation from '../../organism/perception/Observation';
 import Organism from '../../organism/Organism';
@@ -8,18 +8,18 @@ import WorldSimulation from '../../world/WorldSimulation';
 import WorldRenderer from '../../world/WorldRenderer';
 import SimulatorMap from '../../simulator/SimulatorMap';
 
-class EyeCell extends Cell {
+class EyeCell extends AnatomyCell {
   direction: number;
 
-  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
-    super(CellStates.eye, org, loc_col, loc_row, hyperparams);
+  constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
+    super(x, y, CellStates.eye, org, hyperparams);
     this.org.anatomy.has_eye = true;
     this.direction = Directions.cardinals.n;
   }
 
-  initInherit(parent: any) {
+  initInherited(parent: any) {
     // deep copy parent values
-    super.initInherit(parent);
+    super.initInherited(parent);
     this.direction = parent.direction;
   }
 
@@ -97,11 +97,11 @@ class EyeCell extends Cell {
         break;
     }
 
-    var start_col = this.getRealCol();
-    var start_row = this.getRealRow();
+    var start_col = this.getRealX();
+    var start_row = this.getRealY();
     var col = start_col;
     var row = start_row;
-    var cell = null;
+    var simulatorCell = null;
 
     const {
       lookRange,
@@ -111,23 +111,23 @@ class EyeCell extends Cell {
     for (var i = 0; i < lookRange; i++) {
       col += addCol;
       row += addRow;
-      cell = map.cellAt(col, row);
+      simulatorCell = map.cellAt(col, row);
 
-      if (cell === null) {
+      if (simulatorCell === null) {
         continue;
         // @todo: if this break before to force the final return then why?
         // a null cell is kinda pointless isn't it?
         // it would need last_cell for that purpose to be effective
       }
 
-      if (cell.owner_org === this.org && seeThroughSelf) {
+      if (simulatorCell.org === this.org && seeThroughSelf) {
         continue;
       }
 
-      if (cell.state !== CellStates.empty) {
+      if (simulatorCell.state !== CellStates.empty) {
         var distance = Math.abs(start_col - col) + Math.abs(start_row - row);
 
-        return new Observation(cell, distance, lookDirection);
+        return new Observation(simulatorCell, distance, lookDirection);
       }
     }
 

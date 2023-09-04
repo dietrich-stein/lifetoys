@@ -14,21 +14,21 @@ type SimulatorCell = import('./src/features/simulator/SimulatorCell').default;
 
 // Cell States
 
-type CellStatesClass = import('./src/features/anatomy/CellStates').default;
+//type CellStatesClass = import('./src/features/world/WorldCellStates').default;
 
-type EmptyStateClass = import('./src/features/anatomy/CellStates').EmptyState;
-type FoodStateClass = import('./src/features/anatomy/CellStates').FoodState;
-type WallStateClass = import('./src/features/anatomy/CellStates').WallState;
+type EmptyStateClass = import('./src/features/simulator/SimulatorCellStates').EmptyState;
+type FoodStateClass = import('./src/features/simulator/SimulatorCellStates').FoodState;
+type WallStateClass = import('./src/features/simulator/SimulatorCellStates').WallState;
 
-type MouthStateClass = import('./src/features/anatomy/CellStates').MouthState;
-type BrainStateClass = import('./src/features/anatomy/CellStates').BrainState;
-type ProducerStateClass = import('./src/features/anatomy/CellStates').ProducerState;
-type MoverStateClass = import('./src/features/anatomy/CellStates').MoverState;
-type KillerStateClass = import('./src/features/anatomy/CellStates').KillerState;
-type ArmorStateClass = import('./src/features/anatomy/CellStates').ArmorState;
-type EyeStateClass = import('./src/features/anatomy/CellStates').EyeState;
+type MouthStateClass = import('./src/features/simulator/SimulatorCellStates').MouthState;
+type BrainStateClass = import('./src/features/simulator/SimulatorCellStates').BrainState;
+type ProducerStateClass = import('./src/features/simulator/SimulatorCellStates').ProducerState;
+type MoverStateClass = import('./src/features/simulator/SimulatorCellStates').MoverState;
+type KillerStateClass = import('./src/features/simulator/SimulatorCellStates').KillerState;
+type ArmorStateClass = import('./src/features/simulator/SimulatorCellStates').ArmorState;
+type EyeStateClass = import('./src/features/simulator/SimulatorCellStates').EyeState;
 
-type AnyCellState =
+type WorldCellState =
   | EmptyStateClass
   | FoodStateClass
   | WallStateClass
@@ -49,15 +49,6 @@ type AnatomyCellState =
   | ArmorStateClass
   | EyeStateClass;
 
-/*type AnyAnatomyCellClassObject =
-  | CellStates.mouth
-  | CellStates.brain
-  | CellStates.producer
-  | CellStates.mover
-  | CellStates.killer
-  | CellStates.armor
-  | CellStates.eye;*/
-
 // Cell Classes
 
 type MouthCellClass = import('./src/features/anatomy/cells/MouthCell').default;
@@ -68,7 +59,7 @@ type KillerCellClass = import('./src/features/anatomy/cells/KillerCell').default
 type ArmorCellClass = import('./src/features/anatomy/cells/ArmorCell').default;
 type EyeCellClass = import('./src/features/anatomy/cells/EyeCell').default;
 
-type AnyAnatomyCellClass =
+type AnatomyCellClass =
   | MouthCellClass
   | BrainCellClass
   | ProducerCellClass

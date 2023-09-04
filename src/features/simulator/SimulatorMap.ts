@@ -1,8 +1,9 @@
 import SimulatorCell from './SimulatorCell';
-import CellStates from '../anatomy/CellStates';
-import Cell from '../anatomy/Cell';
+import SimulatorCellState from './SimulatorCellState';
+import AnatomyCell from '../anatomy/AnatomyCell';
+import SimulatorCellStates from './SimulatorCellStates';
 
-type SerializedCell = {
+type SerializedSimulatorCell = {
   c: number;
   r: number;
 }
@@ -10,20 +11,21 @@ type SerializedCell = {
 type SerializedSimulatorMap = {
   cols: number;
   rows: number;
-  food: Array<SerializedCell>;
-  walls: Array<SerializedCell>;
+  food: Array<SerializedSimulatorCell>;
+  walls: Array<SerializedSimulatorCell>;
 };
 
 interface SimulatorMapInterface {
   grid: Array<Array<SimulatorCell>>;
   cols: number;
   rows: number;
-  changeCell(c: number, r: number, state: AnyCellState, ownerCell: Cell | null): void
-  resize: (cols: number, rows: number, cellSize: number) => void;
-  fillGrid: (state: AnyCellState, ignore_walls: boolean) => void;
+  changeCellState(c: number, r: number, state: SimulatorCellState): void; // , ownerCell: AnatomyCell | null
+  changeCellOrganism: (col: number, row: number, organism: Organism) => void;
+  //setCellOwnerCell(col: number, row: number, ownerCell: AnatomyCell) => void;
+  resizeGrid: (cols: number, rows: number, cellSize: number) => void;
+  //fillGrid: (state: SimulatorCellState, ignore_walls: boolean) => void;
   cellAt: (col: number, row: number) => SimulatorCell | null;
-  setCellState: (col: number, row: number, state: AnyCellState) => void;
-  setCellOwnerOrganism: (col: number, row: number, owner_cell: Cell) => void;
+  setCellState: (col: number, row: number, state: SimulatorCellState) => void;
   isValidLoc: (col: number, row: number) => boolean;
   getCenter: () => Array<number>;
   xyToColRow: (x: number, y: number, cellSize: number) => Array<number>;
@@ -37,14 +39,34 @@ class SimulatorMap implements SimulatorMapInterface {
   rows: number;
 
   constructor(cols: number, rows: number, cellSize: number) {
-    console.log('GridMap, constructor, cols', cols, 'rows', rows, 'cellSize', cellSize);
+    console.log('SimulatorMap, constructor(), cols', cols, 'rows', rows, 'cellSize', cellSize);
     this.grid = [];
     this.cols = cols;
     this.rows = rows;
-    this.resize(cols, rows, cellSize);
+
+    //this.initGrid(cols, rows, cellSize);
+
+    for (var c = 0; c < cols; c++) {
+      var row = [];
+
+      for (var r = 0; r < rows; r++) {
+        var simulatorCell = new SimulatorCell(
+          SimulatorCellStates.empty,
+          c,
+          r,
+          c * cellSize,
+          r * cellSize,
+        );
+
+        row.push(simulatorCell);
+      }
+
+      this.grid.push(row);
+    }
   }
 
-  public changeCell(c: number, r: number, state: AnyCellState, ownerCell: Cell | null = null) {
+  // ownerCell: AnatomyCell | null = null
+  public changeCellState(c: number, r: number, state: SimulatorCellState) {
     this.setCellState(c, r, state);
     const changedCell = this.cellAt(c, r);
 
@@ -52,14 +74,17 @@ class SimulatorMap implements SimulatorMapInterface {
       return null;
     }
 
-    if (ownerCell !== null) {
+    /*if (ownerCell !== null) {
+      this.setCellOwnerCell(c, r, ownerCell);
+
+      set organism?
       this.setCellOwnerOrganism(c, r, ownerCell);
-    }
+    }*/
 
     return changedCell;
   }
 
-  setCellState(col: number, row: number, state: AnyCellState) {
+  setCellState(col: number, row: number, state: SimulatorCellState) {
     if (!this.isValidLoc(col, row)) {
       return;
     }
@@ -67,22 +92,25 @@ class SimulatorMap implements SimulatorMapInterface {
     this.grid[col][row].setState(state);
   }
 
-  setCellOwnerOrganism(col: number, row: number, owner_cell: Cell) {
+  /*setCellOwnerCell(col: number, row: number, ownerCell: AnatomyCell) {
     if (!this.isValidLoc(col, row)) {
       return;
     }
 
-    this.grid[col][row].owner_cell = owner_cell;
+    this.grid[col][row].ownerCell = ownerCell;
+  }*/
 
-    if (owner_cell !== null) {
-      this.grid[col][row].owner_org = owner_cell.org;
-    } else {
-      this.grid[col][row].owner_org = null;
+  changeCellOrganism(col: number, row: number, ownerOrganism: Organism) {
+    if (!this.isValidLoc(col, row)) {
+      return;
     }
+
+    this.grid[col][row].org = (ownerOrganism !== null) ? ownerOrganism : null;
   }
 
-  resize(cols: number, rows: number, cellSize: number) {
-    console.log('GridMap, resize, cols', cols, 'rows', rows, 'cellSize', cellSize);
+  resizeGrid(cols: number, rows: number, cellSize: number) {
+    console.log('SimulatorMap, resizeGrid(), cols', cols, 'rows', rows, 'cellSize', cellSize);
+    /*
     this.grid = [];
     this.cols = cols;
     this.rows = rows;
@@ -91,7 +119,7 @@ class SimulatorMap implements SimulatorMapInterface {
 
       for (var r = 0; r < rows; r++) {
         var cell = new SimulatorCell(
-          CellStates.empty,
+          SimulatorCellStates.empty,
           c,
           r,
           c * cellSize,
@@ -103,21 +131,22 @@ class SimulatorMap implements SimulatorMapInterface {
 
       this.grid.push(row);
     }
+    */
   }
 
-  fillGrid(state: AnyCellState, ignore_walls: boolean = false) {
+  /*fillGrid(state: SimulatorCellState, ignore_walls: boolean = false) {
     for (var col of this.grid) {
       for (var cell of col) {
-        if (ignore_walls && cell.state === CellStates.wall) {
+        if (ignore_walls && cell.state === SimulatorCellStates.wall) {
           continue;
         }
 
         cell.setState(state);
-        cell.owner_org = null;
-        cell.owner_cell = null;
+        cell.org = null;
+        //cell.owner_cell = null;
       }
     }
-  }
+  }*/
 
   cellAt(col: number, row: number) {
     if (!this.isValidLoc(col, row)) {
@@ -168,16 +197,16 @@ class SimulatorMap implements SimulatorMapInterface {
     for (let col of this.grid) {
       for (let cell of col) {
         if (
-          cell.state === CellStates.wall ||
-          cell.state === CellStates.food
+          cell.state === SimulatorCellStates.wall ||
+          cell.state === SimulatorCellStates.food
         ) {
           // no need to store state
-          let c: SerializedCell = {
+          let c: SerializedSimulatorCell = {
             c: cell.col,
             r: cell.row,
           };
 
-          if (cell.state === CellStates.food) {
+          if (cell.state === SimulatorCellStates.food) {
             grid.food.push(c);
           } else {
             grid.walls.push(c);
@@ -191,11 +220,11 @@ class SimulatorMap implements SimulatorMapInterface {
 
   loadRaw(grid: SerializedSimulatorMap) {
     for (let f of grid.food) {
-      this.setCellState(f.c, f.r, CellStates.food);
+      this.setCellState(f.c, f.r, SimulatorCellStates.food);
     }
 
     for (let w of grid.walls) {
-      this.setCellState(w.c, w.r, CellStates.wall);
+      this.setCellState(w.c, w.r, SimulatorCellStates.wall);
     }
   }
 }

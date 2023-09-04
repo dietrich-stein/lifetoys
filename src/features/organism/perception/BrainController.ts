@@ -1,5 +1,5 @@
 import Directions from '../Directions';
-import CellStates from '../../anatomy/CellStates';
+import CellStates from '../../simulator/SimulatorCellStates';
 import Organism from '../Organism';
 import Observation from './Observation';
 import Decision from './Decision';
@@ -13,19 +13,19 @@ interface DecisionsMapInterface {
 
 interface BrainControllerInterface {
   store: RootState;
-  owner_org: Organism;
+  org: Organism;
   observations: Array<Observation>;
 }
 
 class BrainController implements BrainControllerInterface {
   store: RootState;
-  owner_org: Organism;
+  org: Organism;
   observations: Array<Observation>;
   decisions: DecisionsMapInterface;
 
   constructor(ownerOrganism: Organism) {
     this.store = store.getState();
-    this.owner_org = ownerOrganism;
+    this.org = ownerOrganism;
     this.observations = [];
 
     // corresponds to CellTypes
@@ -75,7 +75,7 @@ class BrainController implements BrainControllerInterface {
     var move_direction = 0;
 
     for (var obs of this.observations) {
-      if (obs.cell === null || obs.cell.owner_org === this.owner_org) {
+      if (obs.cell === null || obs.cell.org === this.org) {
         continue;
       }
 
@@ -89,11 +89,11 @@ class BrainController implements BrainControllerInterface {
     this.observations = [];
 
     if (decision === Decision.chase) {
-      this.owner_org.changeRotationDirection(renderer, map, move_direction);
+      this.org.changeRotationDirection(renderer, map, move_direction);
 
       return true;
     } else if (decision === Decision.retreat) {
-      this.owner_org.changeRotationDirection(renderer, map, Directions.getOppositeDirection(move_direction));
+      this.org.changeRotationDirection(renderer, map, Directions.getOppositeDirection(move_direction));
 
       return true;
     }

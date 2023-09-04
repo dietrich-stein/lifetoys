@@ -1,5 +1,5 @@
 import { store, RootState } from '../../app/store';
-import CellStates from '../anatomy/CellStates';
+import CellStates from '../simulator/SimulatorCellStates';
 import SimulatorCell from '../simulator/SimulatorCell';
 import SimulatorMap from '../simulator/SimulatorMap';
 import Organism from '../organism/Organism';
@@ -196,9 +196,9 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
 
     console.log('WorldSimulation, addDefaultOrganism', organism);
 
-    organism.anatomy.addDefaultCell(CellStates.mouth, 0, 0, false, this.storeState.worldManager.hyperparams);
-    organism.anatomy.addDefaultCell(CellStates.producer, 1, 1, false, this.storeState.worldManager.hyperparams);
-    organism.anatomy.addDefaultCell(CellStates.producer, -1, -1, true, this.storeState.worldManager.hyperparams);
+    organism.anatomy.addDefaultCell(0, 0, CellStates.mouth, false, this.storeState.worldManager.hyperparams);
+    organism.anatomy.addDefaultCell(1, 1, CellStates.producer, false, this.storeState.worldManager.hyperparams);
+    organism.anatomy.addDefaultCell(-1, -1, CellStates.producer, true, this.storeState.worldManager.hyperparams);
 
     this.addOrganism(organism);
 
@@ -258,7 +258,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
         var grid_cell = this.map.cellAt(c, r);
 
         if (grid_cell !== null && grid_cell.state === CellStates.empty) {
-          const changed = this.map.changeCell(c, r, CellStates.food);
+          const changed = this.map.changeCellState(c, r, CellStates.food);
 
           if (changed !== null) {
             worldRenderer.addToRender(changed);

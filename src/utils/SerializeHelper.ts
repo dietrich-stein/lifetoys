@@ -1,5 +1,5 @@
 import Anatomy from '../features/anatomy/Anatomy';
-import Cell from '../features/anatomy/Cell';
+import Cell from '../features/anatomy/AnatomyCell';
 import Organism from '../features/organism/Organism';
 import FossilRecord from '../features/stats/FossilRecord';
 import Species from '../features/stats/Species';

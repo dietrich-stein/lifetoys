@@ -1,4 +1,4 @@
-import CellStates from '../anatomy/CellStates';
+import CellStates from '../simulator/SimulatorCellStates';
 import Neighbors from '../simulator/SimulatorNeighbors';
 import Directions from './Directions';
 import Anatomy from '../anatomy/Anatomy';
@@ -6,7 +6,7 @@ import Brain from './perception/BrainController';
 import SerializeHelper from '../../utils/SerializeHelper';
 import Species from '../stats/Species';
 import BrainController from './perception/BrainController';
-import Cell from '../anatomy/Cell';
+import AnatomyCell from '../anatomy/AnatomyCell';
 import SimulatorCell from '../simulator/SimulatorCell';
 import SimulatorMap from '../simulator/SimulatorMap';
 import { HyperparamsState } from '../world/WorldManagerSlice';
@@ -56,7 +56,13 @@ interface OrganismInterface {
   die: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => void;
   updateMap: (renderer: WorldRenderer, map: SimulatorMap) => void;
   update: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => boolean;
-  getRealCell: (map: SimulatorMap, local_cell: Cell, c: number, r: number, rotation: number) => SimulatorCell | null;
+  getRealCell: (
+    map: SimulatorMap,
+    local_cell: AnatomyCell,
+    c: number,
+    r: number,
+    rotation: number
+  ) => SimulatorCell | null;
   isNatural: () => boolean;
   serialize: () => any;
   loadRaw: (org: Organism) => void;
@@ -172,7 +178,7 @@ class Organism implements OrganismInterface {
       return;
     }
 
-    const {
+    /*const {
       rotationEnabled,
       useGlobalMutability,
       globalMutability,
@@ -217,19 +223,17 @@ class Organism implements OrganismInterface {
       }
       org.brain.mutateDecisions();
     } */
-
     /*
-    Ultimately, having it determine genome length would be amazing.
-    In the near term, it could be interesting to add a cell-count cost to the
-    actions such that more advanced ones require not just specialized cell types
-    but a "large" enough brain to coordinate them.
+    // Ultimately, having it determine genome length would be amazing.
+    // In the near term, it could be interesting to add a cell-count cost to the
+    // actions such that more advanced ones require not just specialized cell types
+    // but a "large" enough brain to coordinate them.
 
-    Another interesting opportunity is "talk" which could send the brain config
-    and stats that represent current performance. A cell that does "talk" to a
-    species member could transfer beneficial learning if the recipient accepts
-    the information. Received learning could dramatically improve the
-    efficiency of the evolution process.
-    */
+    // Another interesting opportunity is "talk" which could send the brain config
+    // and stats that represent current performance. A cell that does "talk" to a
+    // species member could transfer beneficial learning if the recipient accepts
+    // the information. Received learning could dramatically improve the
+    // efficiency of the evolution process.
 
     var direction = Directions.getRandomScalar();
     var direction_c = direction[0];
@@ -259,6 +263,7 @@ class Organism implements OrganismInterface {
     }
 
     Math.max((this.food_collected -= this.foodNeeded()), 0);
+    */
   }
 
   mutateCells() {
@@ -286,12 +291,12 @@ class Organism implements OrganismInterface {
         let growth_direction = Neighbors.all[
           Math.floor(Math.random() * Neighbors.all.length)
         ];
-        let c = cellToBranch.loc_c + growth_direction[0];
-        let r = cellToBranch.loc_r + growth_direction[1];
+        let x = cellToBranch.x + growth_direction[0];
+        let y = cellToBranch.y + growth_direction[1];
 
-        if (this.anatomy.canAddCellAt(c, r)) {
+        if (this.anatomy.canAddCellAt(x, y)) {
           added = true;
-          this.anatomy.addRandomizedCell(randomState, c, r, false, this.hyperparams);
+          this.anatomy.addRandomizedCell(x, y, randomState, false, this.hyperparams);
         }
       }
     }
@@ -304,7 +309,7 @@ class Organism implements OrganismInterface {
       if (cellToReplace !== null) {
         let randomState = CellStates.getRandomAnatomyCellState();
 
-        this.anatomy.replaceCell(randomState, cellToReplace.loc_c, cellToReplace.loc_r, false, true, this.hyperparams);
+        this.anatomy.replaceCell(cellToReplace.x, cellToReplace.y, randomState, false, true, this.hyperparams);
         changed = true;
       }
     }
@@ -316,8 +321,8 @@ class Organism implements OrganismInterface {
 
       if (cellToRemove !== null) {
         removed = this.anatomy.removeCell(
-          cellToRemove.loc_c,
-          cellToRemove.loc_r,
+          cellToRemove.x,
+          cellToRemove.y,
           false,
           true,
         );
@@ -343,11 +348,12 @@ class Organism implements OrganismInterface {
     var new_r = this.r + direction_r;
 
     if (this.isClear(map, new_c, new_r)) {
+      // Erase old cell locations using empty state
       for (var cell of this.anatomy.cells) {
-        var real_colrow = cell.rotatedColRow(this.rotation_direction);
+        var real_colrow = cell.getRotatedXY(this.rotation_direction);
         var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
         var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
-        var changed = map.changeCell(real_c, real_r, CellStates.empty);
+        var changed = map.changeCellState(real_c, real_r, CellStates.empty);
 
         if (changed !== null) {
           renderer.addToRender(changed);
@@ -379,15 +385,16 @@ class Organism implements OrganismInterface {
     var new_rotation = Directions.getRandomDirection();
 
     if (this.isClear(map, this.c, this.r, new_rotation)) {
-      /**/
       for (var cell of this.anatomy.cells) {
-        var real_colrow = cell.rotatedColRow(this.rotation_direction);
+        var real_colrow = cell.getRotatedXY(this.rotation_direction);
         var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
         var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
+        var changed = map.changeCellState(real_c, real_r, CellStates.empty);
 
-        map.changeCell(real_c, real_r, CellStates.empty);
+        if (changed !== null) {
+          renderer.addToRender(changed);
+        }
       }
-      /**/
 
       this.rotation_direction = new_rotation;
       //this.movement_direction = Directions.getRandomDirection();
@@ -421,7 +428,7 @@ class Organism implements OrganismInterface {
     }
 
     for (var cell of this.anatomy.cells) {
-      var real_colrow = cell.rotatedColRow(this.rotation_direction);
+      var real_colrow = cell.getRotatedXY(this.rotation_direction);
       var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
       var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
 
@@ -429,7 +436,7 @@ class Organism implements OrganismInterface {
         //console.log(cell);
         //(this.env as Editor).changeEditorCell(real_c, real_r, CellStates.empty, map, null);
       } else if (this.environment === 'world') {
-        var changed = map.changeCell(real_c, real_r, CellStates.empty);
+        var changed = map.changeCellState(real_c, real_r, CellStates.empty);
 
         if (changed !== null) {
           renderer.addToRender(changed);
@@ -497,8 +504,8 @@ class Organism implements OrganismInterface {
     return (
       cell !== null &&
       (cell.state === CellStates.empty ||
-        cell.owner_org === this ||
-        cell.owner_org === parent ||
+        cell.org === this ||
+        cell.org === parent ||
         cell.state === CellStates.food)
     );
   }
@@ -514,7 +521,7 @@ class Organism implements OrganismInterface {
       }
 
       if (
-        cell.owner_org === this ||
+        cell.org === this ||
         cell.state === CellStates.empty ||
         (!foodBlocksReproduction && cell.state === CellStates.food)
       ) {
@@ -543,12 +550,13 @@ class Organism implements OrganismInterface {
     }
 
     for (var cell of this.anatomy.cells) {
-      var real_colrow = cell.rotatedColRow(this.rotation_direction);
+      var real_colrow = cell.getRotatedXY(this.rotation_direction);
       var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
       var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
-      var changed = simulation.map.changeCell(real_c, real_r, CellStates.food);
+      var changed = simulation.map.changeCellState(real_c, real_r, CellStates.food);
 
       if (changed !== null) {
+        //map.changeCellOrganism(real_c, real_r, cell.org);
         renderer.addToRender(changed);
       }
     }
@@ -566,14 +574,16 @@ class Organism implements OrganismInterface {
     }
 
     for (var cell of this.anatomy.cells) {
-      var real_colrow = cell.rotatedColRow(this.rotation_direction);
+      var real_colrow = cell.getRotatedXY(this.rotation_direction);
       var real_c = this.c + real_colrow[0]; //cell.rotatedCol(this.rotation_direction);
       var real_r = this.r + real_colrow[1]; //cell.rotatedRow(this.rotation_direction);
 
       if (this.environment === 'world') {
-        const changed = map.changeCell(real_c, real_r, cell.state, cell);
+        const changed = map.changeCellState(real_c, real_r, cell.state);
 
         if (changed !== null) {
+          map.changeCellOrganism(real_c, real_r, cell.org);
+
           renderer.addToRender(changed);
         }
       } else if (this.environment === 'editor') {
@@ -650,7 +660,7 @@ class Organism implements OrganismInterface {
 
   getRealCell(
     map: SimulatorMap,
-    local_cell: Cell,
+    local_cell: AnatomyCell,
     c: number = this.c,
     r: number = this.r,
     rotation: number = this.rotation_direction,
@@ -659,7 +669,7 @@ class Organism implements OrganismInterface {
       return null;
     }
 
-    var real_colrow = local_cell.rotatedColRow(rotation);
+    var real_colrow = local_cell.getRotatedXY(rotation);
     var real_c = c + real_colrow[0]; //local_cell.rotatedCol(rotation);
     var real_r = r + real_colrow[1]; //local_cell.rotatedRow(rotation);
 
@@ -680,14 +690,14 @@ class Organism implements OrganismInterface {
         let toCompare = this.anatomy.cells[j];
 
         if (
-          cell.loc_c === toCompare.loc_c &&
-          cell.loc_r === toCompare.loc_r
+          cell.x === toCompare.x &&
+          cell.y === toCompare.y
         ) {
           return false;
         }
       }
 
-      if (cell.loc_c === 0 && cell.loc_r === 0) {
+      if (cell.x === 0 && cell.y === 0) {
         found_center = true;
       }
     }

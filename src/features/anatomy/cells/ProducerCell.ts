@@ -1,20 +1,20 @@
-import CellStates from '../CellStates';
-import Cell from '../Cell';
+import WorldCellStates from '../../simulator/SimulatorCellStates';
+import AnatomyCell from '../AnatomyCell';
 import Organism from '../../organism/Organism';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
 import WorldSimulation from '../../world/WorldSimulation';
 import WorldRenderer from '../../world/WorldRenderer';
 
-class ProducerCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
-    super(CellStates.producer, org, loc_col, loc_row, hyperparams);
+class ProducerCell extends AnatomyCell {
+  constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
+    super(x, y, WorldCellStates.producer, org, hyperparams);
     this.hyperparams = hyperparams;
     this.org.anatomy.has_producer = true;
   }
 
-  initInherit(parent: Cell) {
+  initInherited(parent: AnatomyCell) {
     // deep copy parent values
-    super.initInherit(parent);
+    super.initInherited(parent);
   }
 
   initRandom() {
@@ -42,19 +42,19 @@ class ProducerCell extends Cell {
     }
 
     var prob = foodProdProb;
-    var real_c = this.getRealCol();
-    var real_r = this.getRealRow();
+    var real_c = this.getRealX();
+    var real_r = this.getRealY();
 
     if (Math.random() * 100 <= prob) {
       var loc = growableNeighbors[
         Math.floor(Math.random() * growableNeighbors.length)
       ];
-      var loc_c = loc[0];
-      var loc_r = loc[1];
-      var cell = simulation.map.cellAt(real_c + loc_c, real_r + loc_r);
+      var col = loc[0];
+      var row = loc[1];
+      var cell = simulation.map.cellAt(real_c + col, real_r + row);
 
-      if (cell !== null && cell.state === CellStates.empty) {
-        const changed = simulation.map.changeCell(real_c + loc_c, real_r + loc_r, CellStates.food);
+      if (cell !== null && cell.state === WorldCellStates.empty) {
+        const changed = simulation.map.changeCellState(real_c + col, real_r + row, WorldCellStates.food);
 
         if (changed !== null) {
           renderer.addToRender(changed);

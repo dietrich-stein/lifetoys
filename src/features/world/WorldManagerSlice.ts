@@ -44,7 +44,7 @@ const initialState: WorldManagerState = {
   // Rendering
   worldRendererRunning: false,
   worldRendererTime: 0,
-  worldRendererCellSize: 5,
+  worldRendererCellSize: 50,
   // Simulation
   worldSimulationRunning: false,
   worldSimulationTicks: 0,

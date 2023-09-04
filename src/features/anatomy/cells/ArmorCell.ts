@@ -1,16 +1,16 @@
-import CellStates from '../CellStates';
-import Cell from '../Cell';
+import CellStates from '../../simulator/SimulatorCellStates';
+import AnatomyCell from '../AnatomyCell';
 import Organism from '../../organism/Organism';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
 
-class ArmorCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
-    super(CellStates.armor, org, loc_col, loc_row, hyperparams);
+class ArmorCell extends AnatomyCell {
+  constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
+    super(x, y, CellStates.armor, org, hyperparams);
   }
 
-  initInherit(parent: Cell) {
+  initInherited(parent: AnatomyCell) {
     // deep copy parent values
-    super.initInherit(parent);
+    super.initInherited(parent);
   }
 
   initRandom() {

@@ -1,6 +1,6 @@
-import Cell from './Cell';
-import CellFactory from './CellFactory';
-import CellStates from './CellStates';
+import AnatomyCell from './AnatomyCell';
+import CellFactory from './AnatomyCellFactory';
+import SimulatorCellStates from '../simulator/SimulatorCellStates';
 import SerializeHelper from '../../utils/SerializeHelper';
 import Organism from '../organism/Organism';
 import { HyperparamsState } from '../world/WorldManagerSlice';
@@ -8,8 +8,8 @@ import { HyperparamsState } from '../world/WorldManagerSlice';
 type SerializedAnatomy = {};
 
 interface AnatomyInterface {
-  cells: Array<Cell>;
-  owner_org: Organism;
+  cells: Array<AnatomyCell>;
+  org: Organism;
   birth_distance: number;
   has_mouth: boolean;
   has_brain: boolean;
@@ -26,33 +26,43 @@ interface AnatomyInterface {
   producer_count: number;
   armor_count: number;
   clear: () => void;
-  canAddCellAt: (c: number, r: number) => boolean;
+  canAddCellAt: (x: number, y: number) => boolean;
   addDefaultCell: (
-    state: AnatomyCellState, c: number, r: number, check_types: boolean, hyperparams: HyperparamsState) => Cell;
-  addRandomizedCell: (
-    state: AnatomyCellState, c: number, r: number, check_types: boolean, hyperparams: HyperparamsState) => Cell;
-  addInheritCell: (parent_cell: Cell, check_types: boolean, hyperparams: HyperparamsState) => Cell;
-  replaceCell: (
+    x: number,
+    y: number,
     state: AnatomyCellState,
-    c: number,
-    r: number,
+    check_types: boolean,
+    hyperparams: HyperparamsState
+  ) => AnatomyCell;
+  addRandomizedCell: (
+    x: number,
+    y: number,
+    state: AnatomyCellState,
+    check_types: boolean,
+    hyperparams: HyperparamsState
+  ) => AnatomyCell;
+  addInheritCell: (parent_cell: AnatomyCell, check_types: boolean, hyperparams: HyperparamsState) => AnatomyCell;
+  replaceCell: (
+    x: number,
+    y: number,
+    state: AnatomyCellState,
     randomize: boolean,
     check_types: boolean,
     hyperparams: HyperparamsState
-  ) => Cell;
-  removeCell: (c: number, r: number, allow_center_removal: boolean, check_types: boolean) => boolean;
-  getLocalCell: (c: number, r: number) => Cell | null;
+  ) => AnatomyCell;
+  removeCell: (x: number, y: number, allow_center_removal: boolean, check_types: boolean) => boolean;
+  getLocalCell: (x: number, y: number) => AnatomyCell | null;
   checkTypeChange: () => void;
-  getRandomCell: () => Cell | null;
-  getNeighborsOfCell: (col: number, row: number) => Array<Cell>;
-  isEqual: (anatomy: Anatomy) => boolean;
+  getRandomCell: () => AnatomyCell | null;
+  getNeighborsOfCell: (x: number, y: number) => Array<AnatomyCell>;
+  //isEqual: (anatomy: Anatomy) => boolean;
   serialize: () => SerializedAnatomy;
   loadRaw: (anatomy: Anatomy, hyperparams: HyperparamsState) => void;
 }
 
 class Anatomy implements AnatomyInterface {
-  cells: Array<Cell>;
-  owner_org: Organism;
+  cells: Array<AnatomyCell>;
+  org: Organism;
   birth_distance: number;
   has_mouth: boolean;
   has_brain: boolean;
@@ -71,7 +81,7 @@ class Anatomy implements AnatomyInterface {
 
   constructor(ownerOrganism: Organism) {
     this.cells = [];
-    this.owner_org = ownerOrganism;
+    this.org = ownerOrganism;
     this.birth_distance = 4;
 
     this.has_mouth = false;
@@ -111,9 +121,9 @@ class Anatomy implements AnatomyInterface {
     this.armor_count = 0;
   }
 
-  canAddCellAt(c: number, r: number) {
+  canAddCellAt(x: number, y: number) {
     for (var cell of this.cells) {
-      if (cell.loc_c === c && cell.loc_r === r) {
+      if (cell.x === x && cell.y === y) {
         return false;
       }
     }
@@ -122,13 +132,13 @@ class Anatomy implements AnatomyInterface {
   }
 
   addDefaultCell(
+    x: number,
+    y: number,
     state: AnatomyCellState,
-    c: number,
-    r: number,
     check_types: boolean = false,
     hyperparams: HyperparamsState,
   ) {
-    var new_cell = CellFactory.createDefault(this.owner_org, state, c, r, hyperparams);
+    var new_cell = CellFactory.createDefault(x, y, this.org, state, hyperparams);
 
     this.cells.push(new_cell);
 
@@ -140,23 +150,23 @@ class Anatomy implements AnatomyInterface {
   }
 
   addRandomizedCell(
+    x: number,
+    y: number,
     state: AnatomyCellState,
-    c: number,
-    r: number,
     check_types: boolean = false,
     hyperparams: HyperparamsState,
   ) {
-    var new_cell = CellFactory.createRandom(this.owner_org, state, c, r, hyperparams);
+    var new_cell = CellFactory.createRandom(x, y, this.org, state, hyperparams);
 
     this.cells.push(new_cell);
 
     // randomize decisions for first brain cell
     if (
-      state === CellStates.brain &&
+      state === SimulatorCellStates.brain &&
       this.has_brain &&
-      this.owner_org.brain !== null
+      this.org.brain !== null
     ) {
-      this.owner_org.brain.randomizeDecisions();
+      this.org.brain.randomizeDecisions();
     }
 
     if (check_types) {
@@ -166,8 +176,8 @@ class Anatomy implements AnatomyInterface {
     return new_cell;
   }
 
-  addInheritCell(parent_cell: Cell, check_types: boolean = false, hyperparams: HyperparamsState) {
-    var new_cell = CellFactory.createInherited(this.owner_org, parent_cell, hyperparams);
+  addInheritCell(parent_cell: AnatomyCell, check_types: boolean = false, hyperparams: HyperparamsState) {
+    var new_cell = CellFactory.createInherited(this.org, parent_cell, hyperparams);
 
     this.cells.push(new_cell);
 
@@ -179,29 +189,32 @@ class Anatomy implements AnatomyInterface {
   }
 
   replaceCell(
+    x: number,
+    y: number,
     state: AnatomyCellState,
-    c: number,
-    r: number,
     randomize: boolean = true,
     check_types: boolean = false,
     hyperparams: HyperparamsState,
   ) {
     // false because we don't want to check types until after the replacement
-    this.removeCell(c, r, true, false);
+    this.removeCell(x, y, true, false);
 
     if (randomize) {
-      return this.addRandomizedCell(state, c, r, check_types, hyperparams);
+      return this.addRandomizedCell(x, y, state, check_types, hyperparams);
     } else {
-      return this.addDefaultCell(state, c, r, check_types, hyperparams);
+      return this.addDefaultCell(x, y, state, check_types, hyperparams);
     }
   }
 
-  removeCell(c: number, r: number, allow_center_removal: boolean = false, check_types: boolean = false) {
-    if (c === 0 && r === 0 && !allow_center_removal) return false;
+  removeCell(x: number, y: number, allow_center_removal: boolean = false, check_types: boolean = false) {
+    if (x === 0 && y === 0 && !allow_center_removal) {
+      return false;
+    }
+
     for (var i = 0; i < this.cells.length; i++) {
       var cell = this.cells[i];
 
-      if (cell.loc_c === c && cell.loc_r === r) {
+      if (cell.x === x && cell.y === y) {
         this.cells.splice(i, 1);
         break;
       }
@@ -214,9 +227,9 @@ class Anatomy implements AnatomyInterface {
     return true;
   }
 
-  getLocalCell(c: number, r: number) {
+  getLocalCell(x: number, y: number) {
     for (var cell of this.cells) {
-      if (cell.loc_c === c && cell.loc_r === r) {
+      if (cell.x === x && cell.y === y) {
         return cell;
       }
     }
@@ -234,37 +247,37 @@ class Anatomy implements AnatomyInterface {
     this.has_armor = false;
     for (var cell of this.cells) {
       // @todo: should be using a switch here
-      if (cell.state === CellStates.mouth) {
+      if (cell.state === SimulatorCellStates.mouth) {
         this.has_mouth = true;
         this.mouth_count++;
       }
 
-      if (cell.state === CellStates.brain) {
+      if (cell.state === SimulatorCellStates.brain) {
         this.has_brain = true;
         this.brain_count++;
       }
 
-      if (cell.state === CellStates.mover) {
+      if (cell.state === SimulatorCellStates.mover) {
         this.has_mover = true;
         this.mover_count++;
       }
 
-      if (cell.state === CellStates.eye) {
+      if (cell.state === SimulatorCellStates.eye) {
         this.has_eye = true;
         this.eye_count++;
       }
 
-      if (cell.state === CellStates.killer) {
+      if (cell.state === SimulatorCellStates.killer) {
         this.has_killer = true;
         this.killer_count++;
       }
 
-      if (cell.state === CellStates.producer) {
+      if (cell.state === SimulatorCellStates.producer) {
         this.has_producer = true;
         this.producer_count++;
       }
 
-      if (cell.state === CellStates.armor) {
+      if (cell.state === SimulatorCellStates.armor) {
         this.has_eye = true;
         this.armor_count++;
       }
@@ -279,12 +292,12 @@ class Anatomy implements AnatomyInterface {
     return this.cells[Math.floor(Math.random() * this.cells.length)];
   }
 
-  getNeighborsOfCell(col: number, row: number) {
+  getNeighborsOfCell(x: number, y: number) {
     var neighbors = [];
 
-    for (var x = -1; x <= 1; x++) {
-      for (var y = -1; y <= 1; y++) {
-        var neighbor = this.getLocalCell(col + x, row + y);
+    for (var i = -1; i <= 1; i++) {
+      for (var j = -1; j <= 1; j++) {
+        var neighbor = this.getLocalCell(x + i, y + j);
 
         if (neighbor !== null) {
           neighbors.push(neighbor);
@@ -295,7 +308,7 @@ class Anatomy implements AnatomyInterface {
     return neighbors;
   }
 
-  isEqual(anatomy: Anatomy) {
+  /*isEqual(anatomy: Anatomy) {
     // currently unused helper func. inefficient, avoid usage in prod.
     if (this.cells.length !== anatomy.cells.length) return false;
     for (let i in this.cells) {
@@ -303,22 +316,22 @@ class Anatomy implements AnatomyInterface {
       let their_cell = anatomy.cells[i];
 
       if (
-        my_cell.loc_c !== their_cell.loc_c ||
-        my_cell.loc_r !== their_cell.loc_r ||
+        my_cell.col !== their_cell.x ||
+        my_cell.row !== their_cell.y ||
         my_cell.state !== their_cell.state
       )
         return false;
     }
 
     return true;
-  }
+  }*/
 
   serialize() {
     let anatomy = SerializeHelper.copyNonObjects(this) as Anatomy;
 
     anatomy.cells = [];
     for (let cell of this.cells) {
-      let newCell = SerializeHelper.copyNonObjects(cell) as Cell;
+      let newCell = SerializeHelper.copyNonObjects(cell) as AnatomyCell;
 
       newCell.state = {
         name: cell.state.name,

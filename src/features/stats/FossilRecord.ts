@@ -1,4 +1,4 @@
-import CellStates from '../anatomy/CellStates';
+import CellStates from '../simulator/SimulatorCellStates';
 import SerializeHelper from '../../utils/SerializeHelper';
 import Species from './Species';
 import Organism from '../organism/Organism';

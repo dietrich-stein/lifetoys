@@ -6,18 +6,9 @@ import MoverCell from './cells/MoverCell';
 import KillerCell from './cells/KillerCell';
 import ArmorCell from './cells/ArmorCell';
 import EyeCell from './cells/EyeCell';
-/*import {
-  MouthState,
-  BrainState,
-  ProducerState,
-  MoverState,
-  KillerState,
-  ArmorState,
-  EyeState,
-} from './CellStates';*/
 import { HyperparamsState } from '../world/WorldManagerSlice';
 
-interface CellClassesInterface {
+interface AnatomyCellClassesInterface {
   [key: string]:
     | typeof MouthCell
     | typeof BrainCell
@@ -28,8 +19,8 @@ interface CellClassesInterface {
     | typeof EyeCell;
 }
 
-abstract class CellFactory {
-  private static CellClasses: CellClassesInterface = {
+abstract class AnatomyCellFactory {
+  private static CellClasses: AnatomyCellClassesInterface = {
     'mouth': MouthCell,
     'brain': BrainCell,
     'producer': ProducerCell,
@@ -39,24 +30,24 @@ abstract class CellFactory {
     'eye': EyeCell,
   };
 
-  public static createInherited(org: Organism, to_copy: AnyAnatomyCellClass, hyperparams: HyperparamsState) {
-    var cellClass = CellFactory.CellClasses[to_copy.state.name];
-    var cell = new cellClass(org, to_copy.loc_c, to_copy.loc_r, hyperparams);
+  public static createInherited(org: Organism, parentCell: AnatomyCellClass, hyperparams: HyperparamsState) {
+    const cellClass = AnatomyCellFactory.CellClasses[parentCell.state.name];
+    const newCell = new cellClass(parentCell.x, parentCell.y, org, hyperparams);
 
-    cell.initInherit(to_copy);
+    newCell.initInherited(parentCell);
 
-    return cell;
+    return newCell;
   }
 
   public static createRandom(
+    x: number,
+    y: number,
     org: Organism,
-    state: AnyCellState,
-    loc_col: number,
-    loc_row: number,
+    state: AnatomyCellState,
     hyperparams: HyperparamsState,
   ) {
-    var cellClass = CellFactory.CellClasses[state.name];
-    var cell = new cellClass(org, loc_col, loc_row, hyperparams);
+    var cellClass = AnatomyCellFactory.CellClasses[state.name];
+    var cell = new cellClass(x, y, org, hyperparams);
 
     cell.initRandom();
 
@@ -64,14 +55,14 @@ abstract class CellFactory {
   }
 
   public static createDefault(
+    x: number,
+    y: number,
     org: Organism,
-    state: AnyCellState,
-    loc_col: number,
-    loc_row: number,
+    state: AnatomyCellState,
     hyperparams: HyperparamsState,
   ) {
-    var cellClass = CellFactory.CellClasses[state.name];
-    var cell = new cellClass(org, loc_col, loc_row, hyperparams);
+    var cellClass = AnatomyCellFactory.CellClasses[state.name];
+    var cell = new cellClass(x, y, org, hyperparams);
 
     cell.initDefault();
 
@@ -79,4 +70,4 @@ abstract class CellFactory {
   }
 }
 
-export default CellFactory;
+export default AnatomyCellFactory;

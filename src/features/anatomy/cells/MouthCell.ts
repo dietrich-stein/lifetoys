@@ -1,5 +1,5 @@
-import CellStates from '../CellStates';
-import Cell from '../Cell';
+import CellStates from '../../simulator/SimulatorCellStates';
+import AnatomyCell from '../AnatomyCell';
 import Organism from '../../organism/Organism';
 import SimulatorCell from '../../simulator/SimulatorCell';
 import SimulatorMap from '../../simulator/SimulatorMap';
@@ -7,14 +7,14 @@ import { HyperparamsState } from '../../world/WorldManagerSlice';
 import WorldRenderer from '../../world/WorldRenderer';
 import WorldSimulation from '../../world/WorldSimulation';
 
-class MouthCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
-    super(CellStates.mouth, org, loc_col, loc_row, hyperparams);
+class MouthCell extends AnatomyCell {
+  constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
+    super(x, y, CellStates.mouth, org, hyperparams);
   }
 
-  initInherit(parent: Cell) {
+  initInherited(parent: AnatomyCell) {
     // deep copy parent values
-    super.initInherit(parent);
+    super.initInherited(parent);
   }
 
   initRandom() {
@@ -30,8 +30,8 @@ class MouthCell extends Cell {
       return;
     }
 
-    var real_c = this.getRealCol();
-    var real_r = this.getRealRow();
+    var real_c = this.getRealX();
+    var real_r = this.getRealY();
 
     const edibleNeighbors = this.hyperparams.edibleNeighbors;
 
@@ -50,7 +50,7 @@ class MouthCell extends Cell {
     }
 
     if (cell.state === CellStates.food) {
-      const changed = map.changeCell(cell.col, cell.row, CellStates.empty);
+      const changed = map.changeCellState(cell.col, cell.row, CellStates.empty);
 
       if (changed !== null) {
         renderer.addToRender(changed);

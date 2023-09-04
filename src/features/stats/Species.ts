@@ -1,4 +1,4 @@
-import CellStates from '../anatomy/CellStates';
+import CellStates from '../simulator/SimulatorCellStates';
 import Anatomy from '../anatomy/Anatomy';
 
 interface CountArrayInterface {

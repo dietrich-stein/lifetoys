@@ -1,5 +1,3 @@
-import CellStates from '../anatomy/CellStates';
-import SimulatorCell from './SimulatorCell';
 
 interface SimulatorCellStateInterface {
   name: string;

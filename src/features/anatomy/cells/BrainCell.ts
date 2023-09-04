@@ -1,17 +1,17 @@
-import CellStates from '../CellStates';
-import Cell from '../Cell';
+import CellStates from '../../simulator/SimulatorCellStates';
+import AnatomyCell from '../AnatomyCell';
 import Organism from '../../organism/Organism';
 import { HyperparamsState } from '../../world/WorldManagerSlice';
 
-class BrainCell extends Cell {
-  constructor(org: Organism, loc_col: number, loc_row: number, hyperparams: HyperparamsState) {
-    super(CellStates.brain, org, loc_col, loc_row, hyperparams);
+class BrainCell extends AnatomyCell {
+  constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
+    super(x, y, CellStates.brain, org, hyperparams);
     this.org.anatomy.has_brain = true;
   }
 
-  initInherit(parent: Cell) {
+  initInherited(parent: AnatomyCell) {
     // deep copy parent values
-    super.initInherit(parent);
+    super.initInherited(parent);
   }
 
   initRandom() {

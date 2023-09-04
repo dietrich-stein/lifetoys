@@ -1,5 +1,5 @@
 import { store, RootState } from '../../app/store';
-import CellStates from '../anatomy/CellStates';
+import CellStates from '../simulator/SimulatorCellStates';
 import SimulatorCell from '../simulator/SimulatorCell';
 import WorldSimulation from './WorldSimulation';
 //import { useAppDispatch } from '../../../app/hooks';
@@ -94,7 +94,7 @@ class WorldRenderer implements WorldRendererInterface {
     this.gridRows = 0;
     this.gridWidth = 0;
     this.gridHeight = 0;
-    this.gridCellSize = 5; // this.storeState.world.gridCellSize
+    this.gridCellSize = 100; // this.storeState.world.gridCellSize // worldRendererCellSize
     this.gridBorderSize = 0;
     // Control
     this.running = false;
@@ -181,27 +181,28 @@ class WorldRenderer implements WorldRendererInterface {
     this.gridHeight = this.canvasContainerHeight;
     this.gridWidth = this.canvasContainerWidth;
 
-    //const minBorderSize = 0;
-    //const gridBorderSize = Math.max(minBorderSize, this.gridBorderSize);
-    // Adjust cell size in case too small
-    //const minCellSize = (gridBorderSize > 0) ? 2 : 1;
-    //let tempCellSize = Math.max(minCellSize, this.gridCellSize - 1);
+    this.gridCols = 5;
+    this.gridRows = 5;
 
-    // Adjust cell size in case too large
-    this.gridCellSize = Math.min(
-      Math.min(this.gridWidth - 1, this.gridHeight - 1),
-      this.gridCellSize, //tempCellSize,
-    );
+    /*
+    // This are auto-adjusted cols and rows that adapt to the container.
+    // We don't need them anymore (for now anyway) because we are decoupling the simulation.
 
     this.gridCols = Math.floor((this.gridWidth - this.gridBorderSize) / this.gridCellSize);
-    while (this.gridCols > 0 && ((this.gridCols * this.gridCellSize) + this.gridBorderSize) > this.gridWidth) {
+    while (
+      this.gridCols > 0 &&
+      ((this.gridCols * this.gridCellSize) + this.gridBorderSize) > this.gridWidth
+    ) {
       this.gridCols -= 1;
     }
 
     this.gridRows = Math.floor((this.gridHeight - this.gridBorderSize) / this.gridCellSize);
-    while (this.gridRows > 0 && (this.gridRows * this.gridCellSize) + this.gridBorderSize > this.gridHeight) {
+    while (
+      this.gridRows > 0 &&
+      (this.gridRows * this.gridCellSize) + this.gridBorderSize > this.gridHeight) {
       this.gridRows -= 1;
     }
+    */
 
     /*if (this.gridMap !== null) {
       this.gridMap.resize(this.gridCols, this.gridRows, this.gridCellSize);
