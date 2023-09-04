@@ -44,7 +44,7 @@ const initialState: WorldManagerState = {
   // Rendering
   worldRendererRunning: false,
   worldRendererTime: 0,
-  worldRendererCellSize: 50,
+  worldRendererCellSize: 100,
   // Simulation
   worldSimulationRunning: false,
   worldSimulationTicks: 0,
@@ -98,12 +98,12 @@ export const WorldManagerSlice = createSlice({
     resetWorldRenderer: (state, action: PayloadAction<WorldManagerState>) => {
       //console.log('WorldManagerSlice.resetWorldRenderer, payload:', action.payload);
       state.worldRendererRunning = action.payload.worldRendererRunning;
-      worldRenderer.reset();
+      worldRenderer.reset(action.payload);
     },
     setWorldRendererCellSize: (state, action: PayloadAction<WorldManagerState>) => {
-      console.log('WorldManagerSlice.setWorldRendererCellSize, payload:', action.payload, 'state:', state);
+      //console.log('WorldManagerSlice.setWorldRendererCellSize, payload:', action.payload, 'state:', state);
       state.worldRendererCellSize = action.payload.worldRendererCellSize;
-      worldRenderer.reset();
+      worldRenderer.reset(action.payload, false, worldSimulation.map);
     },
 
     // Simulation

@@ -96,7 +96,7 @@ export function WorldManager(props: WorldManagerProps) {
   const handleRenderingCellSizeChanged = (value: number) => {
     dispatch(setWorldRendererCellSize({
       ...worldManagerState,
-      worldSimulationTicksDelay: value,
+      worldRendererCellSize: value,
     }));
   };
 
@@ -158,21 +158,19 @@ export function WorldManager(props: WorldManagerProps) {
                 }
                 readOnly={ true }
             />
+            <dg.NumberWidget
+              label='Cell Size'
+              value={ useAppSelector(
+                (state: RootState) => state.worldManager.worldRendererCellSize,
+              ) }
+              min={ 5 }
+              max={ 100 }
+              step={ 1 }
+              onChange={ handleRenderingCellSizeChanged }
+            />
           </dg.FolderWidget>
         </dg.GUI>
       }
     </>
   );
-  /*
-            <dg.NumberWidget
-              label='Cell Size'
-              value={ useAppSelector(
-                (state: RootState) => state.world.cellSize,
-              ) }
-              min={ 5 }
-              max={ 10 }
-              step={ 1 }
-              onChange={ handleRenderingCellSizeChanged }
-            />
-  */
 }

@@ -1,12 +1,13 @@
 import { store, RootState } from '../../app/store';
 import CellStates from '../simulator/SimulatorCellStates';
 import SimulatorCell from '../simulator/SimulatorCell';
-import WorldSimulation from './WorldSimulation';
+//import WorldSimulation from './WorldSimulation';
 //import { useAppDispatch } from '../../../app/hooks';
 import {
   WorldManagerState,
   setWorldRendererStats,
 } from './WorldManagerSlice';
+import SimulatorMap from '../simulator/SimulatorMap';
 
 interface WorldRendererInterface {
   // State
@@ -38,14 +39,15 @@ interface WorldRendererInterface {
   init: (storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) => void;
   start: (state: WorldManagerState) => void;
   stop: () => void;
-  reset: () => void;
+  reset: (state: WorldManagerState, resetStats: boolean, map: SimulatorMap | null) => void;
   clear: () => void;
   // Cells
   addToRender: (cell: SimulatorCell) => void;
   renderCell: (cell: SimulatorCell) => void;
-  renderCells: () => void;
-  initGrid: (drawLines: boolean) => void;
+  renderChangedCells: () => void;
+  initGrid: () => void; // cellSize: number, numCols: number, numRows: number, drawLines: boolean
   resizeWindow: () => void;
+  resizeGrid: () => void; // cellSize: number, numCols: number, numRows: number
   //renderCellHighlight: (cell: SimulatorCell, color: string) => void;
   //renderHighlights: () => void;
   //highlightCell: (cell: SimulatorCell) => void;
@@ -53,13 +55,12 @@ interface WorldRendererInterface {
   //clearAllHighlights: (clear_to_highlight: boolean) => void; // = false
 }
 
+// Cannot because WorldSimulation does the same, circular loop
 //const worldSimulation = WorldSimulation.getInstance();
 
 class WorldRenderer implements WorldRendererInterface {
   // State
   storeState: RootState | null;
-  canvasContainerWidth: number;
-  canvasContainerHeight: number;
   gridCols: number;
   gridRows: number;
   gridWidth: number;
@@ -75,6 +76,8 @@ class WorldRenderer implements WorldRendererInterface {
   timeStoppedLast: number;
   // DOM
   canvasContainer: HTMLDivElement | null;
+  canvasContainerWidth: number;
+  canvasContainerHeight: number;
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | undefined;
   // Cells
@@ -88,13 +91,11 @@ class WorldRenderer implements WorldRendererInterface {
   private constructor() {
     // State
     this.storeState = null;
-    this.canvasContainerWidth = 0;
-    this.canvasContainerHeight = 0;
     this.gridCols = 0;
     this.gridRows = 0;
     this.gridWidth = 0;
     this.gridHeight = 0;
-    this.gridCellSize = 100; // this.storeState.world.gridCellSize // worldRendererCellSize
+    this.gridCellSize = 0;
     this.gridBorderSize = 0;
     // Control
     this.running = false;
@@ -105,6 +106,8 @@ class WorldRenderer implements WorldRendererInterface {
     this.timeStoppedLast = 0;
     // DOM
     this.canvasContainer = null;
+    this.canvasContainerWidth = 0;
+    this.canvasContainerHeight = 0;
     this.canvas = null;
     this.ctx = undefined;
     // Cells
@@ -122,7 +125,7 @@ class WorldRenderer implements WorldRendererInterface {
   }
 
   drawGridLines() {
-    if (/*this.gridBorderSize === 0 ||*/ this.ctx === undefined) {
+    if (this.gridBorderSize === 0 || this.ctx === undefined) {
       return;
     }
 
@@ -178,11 +181,17 @@ class WorldRenderer implements WorldRendererInterface {
   }
 
   resizeGrid() {
+    if (this.storeState === null) {
+      return;
+    }
+
     this.gridHeight = this.canvasContainerHeight;
     this.gridWidth = this.canvasContainerWidth;
 
-    this.gridCols = 5;
-    this.gridRows = 5;
+    this.gridCellSize = this.storeState.worldManager.worldRendererCellSize;
+
+    this.gridCols = this.storeState.world.numCols;
+    this.gridRows = this.storeState.world.numRows;
 
     /*
     // This are auto-adjusted cols and rows that adapt to the container.
@@ -209,19 +218,12 @@ class WorldRenderer implements WorldRendererInterface {
     }*/
   }
 
-  initGrid(drawLines: boolean = true) {
+  initGrid(drawLines: boolean = false) {
     this.resizeGrid();
 
-    /*this.gridMap = new GridMap(
-      this,
-      this.gridCols,
-      this.gridRows,
-      this.gridCellSize,
-    );*/
-
-    /*if (drawLines){
+    if (drawLines){
       this.drawGridLines();
-    }*/
+    }
   }
 
   public resizeWindow() {
@@ -272,11 +274,11 @@ class WorldRenderer implements WorldRendererInterface {
       return;
     }
 
-    this.renderCells();
+    this.renderChangedCells();
     //this.renderHighlights();
   }
 
-  renderCells() {
+  renderChangedCells() {
     //console.log('WorldRenderding, renderCells, cellsToRender.length =', this.cellsToRender.size);
     for (var cell of this.cellsToRender) {
       this.renderCell(cell);
@@ -290,11 +292,18 @@ class WorldRenderer implements WorldRendererInterface {
       return;
     }
 
-    // @TODO: What this needs is kind of a culling so that it doesn't render off-grid cells
+    const x = cell.col * this.gridCellSize;
+    const y = cell.row * this.gridCellSize;
+    const halfCell = Math.floor(this.gridCellSize / 2);
 
-    //this.ctx.fillStyle = Math.floor(Math.random()*16777215).toString(16);
     this.ctx.fillStyle = cell.state.color;
-    this.ctx.fillRect(cell.x, cell.y, this.gridCellSize, this.gridCellSize);
+    this.ctx.fillRect(x, y, this.gridCellSize, this.gridCellSize);
+
+    this.ctx.font = `${halfCell * 1.5}px serif`;
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText(cell.state.name.charAt(0).toUpperCase(), x + halfCell, y + halfCell);
 
     /*
     // Render the eye slit?
@@ -410,13 +419,37 @@ class WorldRenderer implements WorldRendererInterface {
     this.running = false;
   }
 
-  // Intended only for use in combination with WorldSimulation.reset()
-  public reset() {
+  public reset(state: WorldManagerState, resetStats: boolean = true, map: SimulatorMap | null = null) {
+    if (this.storeState === null) {
+      return;
+    }
+
+    const wasRunning = this.running;
+
     this.stop();
-    this.timeStartedElapsed = 0;
-    this.timeStartedLast = 0;
-    this.timeStoppedElapsed = 0;
-    this.timeStoppedLast = 0;
+
+    if (resetStats) {
+      this.timeStartedElapsed = 0;
+      this.timeStartedLast = 0;
+      this.timeStoppedElapsed = 0;
+      this.timeStoppedLast = 0;
+    }
+
+    this.clear();
+    this.storeState.worldManager = state;
+    this.resizeGrid();
+
+    if (map !== null) {
+      for (var col of map.grid) {
+        for (var cell of col) {
+          this.renderCell(cell);
+        }
+      }
+    }
+
+    if (wasRunning) {
+      this.start(state);
+    }
   }
 
   clear() {
