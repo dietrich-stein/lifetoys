@@ -49,7 +49,7 @@ class MouthCell extends AnatomyCell {
     }
 
     if (cell.state === CellStates.food) {
-      const changed = map.changeCellState(cell.col, cell.row, CellStates.empty);
+      const changed = map.changeCellStateAt(cell.col, cell.row, CellStates.empty);
 
       if (changed !== null) {
         renderer.addToRender(changed);

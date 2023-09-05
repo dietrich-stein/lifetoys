@@ -19,12 +19,12 @@ interface SimulatorMapInterface {
   grid: Array<Array<SimulatorCell>>;
   cols: number;
   rows: number;
-  changeCellState(c: number, r: number, state: SimulatorCellState): void;
-  changeCellOrganism: (col: number, row: number, organism: Organism) => void;
+  changeCellStateAt(col: number, row: number, state: SimulatorCellState, anatomyCellId: string): void;
+  changeCellOrganismAt: (col: number, row: number, organism: Organism | null) => void;
   resizeGrid: (cols: number, rows: number, cellSize: number) => void;
   //fillGrid: (state: SimulatorCellState, ignore_walls: boolean) => void;
   cellAt: (col: number, row: number) => SimulatorCell | null;
-  setCellState: (col: number, row: number, state: SimulatorCellState) => void;
+  setCellState: (col: number, row: number, state: SimulatorCellState, anatomyCellId: string) => void;
   isValidLoc: (col: number, row: number) => boolean;
   getCenter: () => Array<number>;
   xyToColRow: (x: number, y: number, cellSize: number) => Array<number>;
@@ -51,7 +51,7 @@ class SimulatorMap implements SimulatorMapInterface {
           SimulatorCellStates.empty,
           currentCol,
           currentRow,
-          `c${currentCol}-r${currentRow}`,
+          `(${currentCol},${currentRow})`,
         );
 
         newRow.push(newCell);
@@ -61,26 +61,29 @@ class SimulatorMap implements SimulatorMapInterface {
     }
   }
 
-  public changeCellState(c: number, r: number, state: SimulatorCellState) {
-    this.setCellState(c, r, state);
+  public changeCellStateAt(col: number, row: number, state: SimulatorCellState, anatomyCellId: string = '') {
+    this.setCellState(col, row, state, anatomyCellId);
 
-    return this.cellAt(c, r);
+    return this.cellAt(col, row);
   }
 
-  setCellState(col: number, row: number, state: SimulatorCellState) {
+  setCellState(col: number, row: number, state: SimulatorCellState, anatomyCellId: string = '') {
     if (!this.isValidLoc(col, row)) {
       return;
     }
 
+    let formattedId = (anatomyCellId.length > 0) ? `(${col},${row}) ${anatomyCellId}` : `(${col},${row})`;
+
+    this.grid[col][row].id = formattedId;
     this.grid[col][row].state = state;
   }
 
-  changeCellOrganism(col: number, row: number, ownerOrganism: Organism) {
+  public changeCellOrganismAt(col: number, row: number, organism: Organism | null) {
     if (!this.isValidLoc(col, row)) {
       return;
     }
 
-    this.grid[col][row].org = (ownerOrganism !== null) ? ownerOrganism : null;
+    this.grid[col][row].org = organism;
   }
 
   resizeGrid(cols: number, rows: number, cellSize: number) {

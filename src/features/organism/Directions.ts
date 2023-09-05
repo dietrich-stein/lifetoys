@@ -83,8 +83,8 @@ abstract class Directions {
     }
   }
 
-  public static rotateRight(dir: number, step: number = 1): number {
-    dir += step;
+  public static rotateRight(dir: number, isAnatomy: boolean = false): number {
+    dir = (isAnatomy) ? dir + 2: dir + 1;
 
     if (dir > MAX_DIR_INDEX) {
       dir = 0;
@@ -93,11 +93,11 @@ abstract class Directions {
     return dir;
   }
 
-  public static rotateLeft(dir: number, step: number = 1): number {
-    dir -= step;
+  public static rotateLeft(dir: number, isAnatomy: boolean = false): number {
+    dir = (isAnatomy) ? dir - 2: dir - 1;
 
     if (dir < 0) {
-      dir = MAX_DIR_INDEX;
+      dir = (isAnatomy) ? MAX_DIR_INDEX - 1 : MAX_DIR_INDEX;
     }
 
     return dir;

@@ -290,20 +290,30 @@ class WorldRenderer implements WorldRendererInterface {
     this.cellsToRender.clear();
   }
 
-  drawTriangle(direction: number, offsetX: number, offsetY: number) {
+  drawTriangle(
+    direction: number,
+    offsetX: number,
+    offsetY: number,
+    color: string = '#FFFFFF',
+    smaller: boolean = false,
+  ) {
     if (typeof this.ctx === 'undefined') {
       return;
     }
 
+    // Base sizes
     const halfCell = Math.floor(this.gridCellSize / 2);
-    const quarterCell = Math.floor(halfCell / 2);
-    //const eighthCell = Math.floor(quarterCell / 2);
+    const quarterCell = (smaller)
+      ? Math.floor(this.gridCellSize / 8)
+      : Math.floor(this.gridCellSize / 4);
+    //const eighthCell = Math.floor(this.gridCellSize / 8);
+    // Actual sizes
     const sizeLateralMinus = halfCell - quarterCell;//eighthCell;
     const sizeLateralPlus = halfCell + quarterCell;//eighthCell;
     const sizeFromSideMinus = this.gridCellSize - quarterCell;//eighthCell;
     const sizeFromSidePlus = quarterCell;//eighthCell;
-    const sizeFromCornerMinus = halfCell;//this.gridCellSize - quarterCell;
-    const sizeFromCornerPlus = halfCell;//quarterCell;
+    const sizeFromCorner = (smaller) ? quarterCell : halfCell;//this.gridCellSize - quarterCell;
+    //const sizeFromCornerPlus = halfCell;//quarterCell;
 
     let startX;
     let startY;
@@ -329,12 +339,12 @@ class WorldRenderer implements WorldRendererInterface {
         // top-right
         startX = this.gridCellSize;
         startY = 0;
-        // left
-        middleX = sizeFromCornerMinus;
+        //
+        middleX = this.gridCellSize - sizeFromCorner;
         middleY = 0;
         // bottom
         lastX = this.gridCellSize;
-        lastY = sizeFromCornerPlus;
+        lastY = sizeFromCorner;
         break;
 
       case Directions.cardinals.e:
@@ -355,9 +365,9 @@ class WorldRenderer implements WorldRendererInterface {
         startY = this.gridCellSize;
         // top
         middleX = this.gridCellSize;
-        middleY = sizeFromCornerMinus;
+        middleY = this.gridCellSize - sizeFromCorner;
         // left
-        lastX = sizeFromCornerMinus;
+        lastX = this.gridCellSize - sizeFromCorner;
         lastY = this.gridCellSize;
         break;
 
@@ -378,11 +388,11 @@ class WorldRenderer implements WorldRendererInterface {
         startX = 0;
         startY = this.gridCellSize;
         // right
-        middleX = sizeFromCornerPlus;
+        middleX = sizeFromCorner;
         middleY = this.gridCellSize;
         // top
         lastX = 0;
-        lastY = sizeFromCornerMinus;
+        lastY = this.gridCellSize - sizeFromCorner;
         break;
 
       case Directions.cardinals.w:
@@ -402,11 +412,11 @@ class WorldRenderer implements WorldRendererInterface {
         startX = 0;
         startY = 0;
         // right
-        middleX = sizeFromCornerPlus;
+        middleX = sizeFromCorner;
         middleY = 0;
         // bottom
         lastX = 0;
-        lastY = sizeFromCornerPlus;
+        lastY = sizeFromCorner;
         break;
     }
 
@@ -421,6 +431,7 @@ class WorldRenderer implements WorldRendererInterface {
       return;
     }
 
+    this.ctx.fillStyle = color;
     this.ctx.beginPath();
     this.ctx.moveTo(offsetX + startX, offsetY + startY);
     this.ctx.lineTo(offsetX + middleX, offsetY + middleY);
@@ -460,11 +471,15 @@ class WorldRenderer implements WorldRendererInterface {
           y + Math.floor(halfCell * 1.15) + 1,
         );
         this.ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-        this.ctx.fillText(cell.state.name.charAt(0).toUpperCase(), x + halfCell, y + Math.floor(halfCell * 1.15));
+        this.ctx.fillText(
+          cell.state.name.charAt(0).toUpperCase(),
+          x + halfCell,
+          y + Math.floor(halfCell * 1.15),
+        );
 
-        // ID Labels
+        // Print simulator grid cell col/row via cell.id
         if (cell.id.length > 0) {
-          this.ctx.font = `${this.gridCellSize * 0.2}px serif`; // 1/16th
+          this.ctx.font = `${this.gridCellSize * 0.15}px serif`; // 1/16th
           this.ctx.textAlign = 'left';
           this.ctx.textBaseline = 'bottom';
           this.ctx.fillStyle = 'rgba(255, 255, 255, 1)';
@@ -475,9 +490,15 @@ class WorldRenderer implements WorldRendererInterface {
           );
         }
 
-        // Draw the rotation direction triangle
         if (cell.org !== null) {
+          // Draw the rotation direction triangle
           this.drawTriangle(cell.org.anatomyDirection, x, y);
+
+          // Draw the movement direction triangle
+          this.drawTriangle(cell.org.movementDirection, x, y, '#FF0000', true);
+
+          // Draw the look direction triangle
+          this.drawTriangle(cell.org.lookDirection, x, y, '#FF00FF', true);
         }
       }
 

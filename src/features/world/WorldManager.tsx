@@ -102,11 +102,27 @@ export function WorldManager(props: WorldManagerProps) {
   };
 
   const handleRotateRightClick = () => {
-    worldSimulation.organisms[0].rotateDirectionRight(worldRenderer);
+    worldSimulation.organisms[0].rotateAnatomyRight(worldRenderer);
   };
 
   const handleRotateLeftClick = () => {
-    worldSimulation.organisms[0].rotateDirectionLeft(worldRenderer);
+    worldSimulation.organisms[0].rotateAnatomyLeft(worldRenderer);
+  };
+
+  const handleMovementRightClick = () => {
+    worldSimulation.organisms[0].rotateMovementRight(worldRenderer);
+  };
+
+  const handleMovementLeftClick = () => {
+    worldSimulation.organisms[0].rotateMovementLeft(worldRenderer);
+  };
+
+  const handleLookRightClick = () => {
+    worldSimulation.organisms[0].rotateLookRight(worldRenderer);
+  };
+
+  const handleLookLeftClick = () => {
+    worldSimulation.organisms[0].rotateLookLeft(worldRenderer);
   };
 
   return (
@@ -177,13 +193,33 @@ export function WorldManager(props: WorldManagerProps) {
               step={ 1 }
               onChange={ handleRenderingCellSizeChanged }
             />
+          </dg.FolderWidget>
+          <dg.FolderWidget label='Debug' expanded={ true }>
             <dg.ButtonWidget
-              label='Rotate Right'
-              onClick={ handleRotateRightClick }
+              label=' &laquo; Rotate Anatomy Left'
+              onClick={ handleRotateLeftClick }
             />
             <dg.ButtonWidget
-              label='Rotate Left'
-              onClick={ handleRotateLeftClick }
+              label='Rotate Anatomy Right &raquo;'
+              onClick={ handleRotateRightClick }
+            />
+            <br />
+            <dg.ButtonWidget
+              label=' &laquo; Rotate Movement Left'
+              onClick={ handleMovementLeftClick }
+            />
+            <dg.ButtonWidget
+              label='Rotate Movement Right &raquo;'
+              onClick={ handleMovementRightClick }
+            />
+            <br />
+            <dg.ButtonWidget
+              label=' &laquo; Rotate Look Left'
+              onClick={ handleLookLeftClick }
+            />
+            <dg.ButtonWidget
+              label='Rotate Look Right &raquo;'
+              onClick={ handleLookRightClick }
             />
           </dg.FolderWidget>
         </dg.GUI>

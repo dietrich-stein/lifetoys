@@ -272,7 +272,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
         var grid_cell = this.map.cellAt(c, r);
 
         if (grid_cell !== null && grid_cell.state === CellStates.empty) {
-          const changed = this.map.changeCellState(c, r, CellStates.food);
+          const changed = this.map.changeCellStateAt(c, r, CellStates.food);
 
           if (changed !== null) {
             worldRenderer.addToRender(changed);

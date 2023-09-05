@@ -23,6 +23,7 @@ interface AnatomyCellInterface {
 
 class AnatomyCell implements AnatomyCellInterface {
   //store: RootState;
+  id: string;
   hyperparams: HyperparamsState;
   state: AnatomyCellState;
   org: Organism;
@@ -37,6 +38,7 @@ class AnatomyCell implements AnatomyCellInterface {
     hyperparams: HyperparamsState,
   ) {
     //this.store = store.getState();
+    this.id = Math.random().toString(36).slice(2, 7); // TODO: Eliminate when rotation is done.
     this.hyperparams = hyperparams;
     this.state = state;
     this.org = org;
@@ -70,79 +72,42 @@ class AnatomyCell implements AnatomyCellInterface {
     // default behavior: none
   }
 
-  // @TODO: Consolidate as "getRealColRow()"
   getRotatedSimulatorColRow() {
     var rotatedXY = this.getRotatedAnatomyXY(this.org.anatomyDirection);
 
     return [
-      this.org.col + rotatedXY[0],
-      this.org.row + rotatedXY[1],
+      this.org.startCellCol + rotatedXY[0],
+      this.org.startCellRow + rotatedXY[1],
     ];
   }
 
   // We can't allow diagonal rotation because it has too much of an effect on anatomical utility.
-
-  // ??? Instead, east-having directions will use east coords.
-  // ??? And, west-having directions will use west-coords.
-  // ??? However, eyes will still show the actual direction in the editor.
-
   // For the current cell, gets the X and Y after rotation.
   getRotatedAnatomyXY(dir: number) {
     let x = this.x;
     let y = this.y;
 
     switch (dir) {
-      // No rotation for north because default
       case Directions.cardinals.n:
-        x = this.x;
-        y = this.y;
         break;
 
-      //case Directions.cardinals.ne:
-        //c = this.row * -1;
-        //r = this.row;
-        //break;
-
-      //case Directions.cardinals.ne:
-      case Directions.cardinals.se:
       case Directions.cardinals.e:
-        //x = this.row * -1;
-        //r = this.col * -1;
-        x = this.y * -1;
-        y = this.x * -1;
+        x = x * -1;
         break;
-
-      //case Directions.cardinals.se:
-        //c = Math.abs(this.y);
-        //r = Math.abs(this.y);
-        //break;
 
       case Directions.cardinals.s:
-        x = this.x * -1;
-        y = this.y * -1;
+        x = x * -1;
+        y = y * -1;
         break;
 
-      //case Directions.cardinals.sw:
-        //x = this.y;
-        //r = this.y * -1;
-        //break;
-
-      case Directions.cardinals.sw:
-      case Directions.cardinals.nw:
       case Directions.cardinals.w:
-        x = this.y;
-        y = this.x;
+        y = y * -1;
         break;
-
-      //case Directions.cardinals.nw:
-        //x = this.y;
-        //y = this.y;
-        //break;
     }
 
-    if (this.org.environment === 'editor') {
+    /*if (this.org.environment === 'editor') {
       console.log('rotatedXY', [x, y]);
-    }
+    }*/
 
     return [x, y];
   }

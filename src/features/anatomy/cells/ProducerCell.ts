@@ -53,7 +53,7 @@ class ProducerCell extends AnatomyCell {
       var cell = simulation.map.cellAt(colrow[0] + col, colrow[1] + row);
 
       if (cell !== null && cell.state === WorldCellStates.empty) {
-        const changed = simulation.map.changeCellState(colrow[0] + col, colrow[1] + row, WorldCellStates.food);
+        const changed = simulation.map.changeCellStateAt(colrow[0] + col, colrow[1] + row, WorldCellStates.food);
 
         if (changed !== null) {
           renderer.addToRender(changed);
