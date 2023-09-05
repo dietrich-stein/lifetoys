@@ -42,8 +42,7 @@ class ProducerCell extends AnatomyCell {
     }
 
     var prob = foodProdProb;
-    var real_c = this.getRealX();
-    var real_r = this.getRealY();
+    var colrow = this.getRotatedSimulatorColRow();
 
     if (Math.random() * 100 <= prob) {
       var loc = growableNeighbors[
@@ -51,10 +50,10 @@ class ProducerCell extends AnatomyCell {
       ];
       var col = loc[0];
       var row = loc[1];
-      var cell = simulation.map.cellAt(real_c + col, real_r + row);
+      var cell = simulation.map.cellAt(colrow[0] + col, colrow[1] + row);
 
       if (cell !== null && cell.state === WorldCellStates.empty) {
-        const changed = simulation.map.changeCellState(real_c + col, real_r + row, WorldCellStates.food);
+        const changed = simulation.map.changeCellState(colrow[0] + col, colrow[1] + row, WorldCellStates.food);
 
         if (changed !== null) {
           renderer.addToRender(changed);

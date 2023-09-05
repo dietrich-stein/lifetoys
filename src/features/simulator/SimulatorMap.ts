@@ -51,7 +51,7 @@ class SimulatorMap implements SimulatorMapInterface {
           SimulatorCellStates.empty,
           currentCol,
           currentRow,
-          `c-${currentCol}-${currentRow}`,
+          `c${currentCol}-r${currentRow}`,
         );
 
         newRow.push(newCell);

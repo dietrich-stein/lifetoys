@@ -477,7 +477,7 @@ class WorldRenderer implements WorldRendererInterface {
 
         // Draw the rotation direction triangle
         if (cell.org !== null) {
-          this.drawTriangle(cell.org.rotationDirection, x, y);
+          this.drawTriangle(cell.org.anatomyDirection, x, y);
         }
       }
 

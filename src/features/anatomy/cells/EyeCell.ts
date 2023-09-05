@@ -55,7 +55,7 @@ class EyeCell extends AnatomyCell {
       return null;
     }
 
-    var lookDirection = this.org.rotationDirection;//this.org.getAbsoluteDirection();
+    var lookDirection = this.org.anatomyDirection;//this.org.getAbsoluteDirection();
     var addCol = 0;
     var addRow = 0;
 
@@ -97,10 +97,9 @@ class EyeCell extends AnatomyCell {
         break;
     }
 
-    var start_col = this.getRealX();
-    var start_row = this.getRealY();
-    var col = start_col;
-    var row = start_row;
+    var start_colrow = this.getRotatedSimulatorColRow();
+    var col = start_colrow[0];
+    var row = start_colrow[1];
     var simulatorCell = null;
 
     const {
@@ -125,7 +124,7 @@ class EyeCell extends AnatomyCell {
       }
 
       if (simulatorCell.state !== CellStates.empty) {
-        var distance = Math.abs(start_col - col) + Math.abs(start_row - row);
+        var distance = Math.abs(start_colrow[0] - col) + Math.abs(start_colrow[1] - row);
 
         return new Observation(simulatorCell, distance, lookDirection);
       }

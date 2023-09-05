@@ -67,7 +67,7 @@ class BrainController implements BrainControllerInterface {
     this.observations.push(observation);
   }
 
-  decide(renderer: WorldRenderer, map: SimulatorMap) {
+  decide(renderer: WorldRenderer) {
     const lookRange = this.store.worldManager.hyperparams.lookRange;
 
     var decision = Decision.neutral;
@@ -89,11 +89,13 @@ class BrainController implements BrainControllerInterface {
     this.observations = [];
 
     if (decision === Decision.chase) {
-      this.org.changeRotationDirection(renderer, map, move_direction);
+      debugger;
+      this.org.rotateAnatomyCells(renderer, move_direction);
 
       return true;
     } else if (decision === Decision.retreat) {
-      this.org.changeRotationDirection(renderer, map, Directions.getOppositeDirection(move_direction));
+      debugger;
+      this.org.rotateAnatomyCells(renderer, Directions.getOppositeDirection(move_direction));
 
       return true;
     }

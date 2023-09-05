@@ -30,13 +30,12 @@ class MouthCell extends AnatomyCell {
       return;
     }
 
-    var real_c = this.getRealX();
-    var real_r = this.getRealY();
+    var colrow = this.getRotatedSimulatorColRow();
 
     const edibleNeighbors = this.hyperparams.edibleNeighbors;
 
     for (var loc of edibleNeighbors) {
-      var cell = simulation.map.cellAt(real_c + loc[0], real_r + loc[1]);
+      var cell = simulation.map.cellAt(colrow[0] + loc[0], colrow[1] + loc[1]);
 
       if (cell !== null) {
         this.eatNeighbor(renderer, simulation.map, cell);

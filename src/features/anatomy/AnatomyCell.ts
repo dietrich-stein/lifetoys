@@ -17,13 +17,8 @@ interface AnatomyCellInterface {
   initInherited: (parent: AnatomyCell) => void;
   initRandom: () => void;
   performFunction: (renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) => void;
-  getRealX: () => void;
-  getRealY: () => void;
-  getRotatedXY: (dir: number) => number[];
-
-  //getRealCell: () => GridCell | null;
-  //rotatedCol: (dir: number) => number;
-  //rotatedRow: (dir: number) => number;
+  getRotatedSimulatorColRow: () => void;
+  getRotatedAnatomyXY: (dir: number) => number[];
 }
 
 class AnatomyCell implements AnatomyCellInterface {
@@ -76,38 +71,28 @@ class AnatomyCell implements AnatomyCellInterface {
   }
 
   // @TODO: Consolidate as "getRealColRow()"
-  getRealX() {
-    var real_colrow = this.getRotatedXY(this.org.rotationDirection);
+  getRotatedSimulatorColRow() {
+    var rotatedXY = this.getRotatedAnatomyXY(this.org.anatomyDirection);
 
-    return this.org.col + real_colrow[0]; //this.rotatedCol(this.org.rotationDirection);
+    return [
+      this.org.col + rotatedXY[0],
+      this.org.row + rotatedXY[1],
+    ];
   }
 
-  getRealY() {
-    var real_colrow = this.getRotatedXY(this.org.rotationDirection);
+  // We can't allow diagonal rotation because it has too much of an effect on anatomical utility.
 
-    return this.org.row + real_colrow[1]; //this.rotatedRow(this.org.rotationDirection);
-  }
+  // ??? Instead, east-having directions will use east coords.
+  // ??? And, west-having directions will use west-coords.
+  // ??? However, eyes will still show the actual direction in the editor.
 
-  /*getRealCell() {
-    var real_c = this.getRealCol();
-    var real_r = this.getRealRow();
-    if (this.org !== null && this.org.environment !== null) {
-      return this.org.env.grid_map.cellAt(real_c, real_r);
-    } else {
-      return null;
-    }
-  }*/
-
-  // We can't allow diagonal rotation.
-  // It has too much of an affect on anatomy.
-  // Instead, east-having directions will use east coords.
-  // And, west-having directions will use west-coords.
-  // However, eyes will still show the actual direction in the editor.
-  getRotatedXY(dir: number) {
+  // For the current cell, gets the X and Y after rotation.
+  getRotatedAnatomyXY(dir: number) {
     let x = this.x;
     let y = this.y;
 
     switch (dir) {
+      // No rotation for north because default
       case Directions.cardinals.n:
         x = this.x;
         y = this.y;
@@ -118,7 +103,7 @@ class AnatomyCell implements AnatomyCellInterface {
         //r = this.row;
         //break;
 
-      case Directions.cardinals.ne:
+      //case Directions.cardinals.ne:
       case Directions.cardinals.se:
       case Directions.cardinals.e:
         //x = this.row * -1;

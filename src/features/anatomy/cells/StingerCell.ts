@@ -24,26 +24,26 @@ class StingerCell extends AnatomyCell {
     // initialize to default values
   }
 
-  executeSpecialty(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
+  performFunction(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number) {
     if (this.org.environment !== 'world' || simulation.map === null) {
       return;
     }
 
-    var c = this.getRealX();
-    var r = this.getRealY();
+    const ticksElapsed = simulation.ticksElapsed;
+
+    var colrow = this.getRotatedSimulatorColRow();
 
     for (var loc of this.hyperparams.vulnerableNeighbors) {
-      var cell = simulation.map.cellAt(c + loc[0], r + loc[1]);
+      var neighborCell = simulation.map.cellAt(colrow[0] + loc[0], colrow[1] + loc[1]);
 
-      if (cell !== null) {
-        this.checkCell(renderer, simulation, ticks, cell);
+      if (neighborCell !== null) {
+        this.checkCell(neighborCell, renderer, ticksElapsed);
       }
     }
   }
 
-  checkCell(renderer: WorldRenderer, simulation: WorldSimulation, ticks: number, neighborCell: SimulatorCell) {
+  checkCell(neighborCell: SimulatorCell, renderer: WorldRenderer, ticksElapsed: number) {
     if (
-      simulation.map === null ||
       neighborCell === null ||
       neighborCell.org === null ||
       neighborCell.org === this.org ||
@@ -53,7 +53,7 @@ class StingerCell extends AnatomyCell {
       return;
     }
 
-    neighborCell.org.harm(renderer, simulation, ticks);
+    neighborCell.org.harm(renderer, ticksElapsed);
 
     // Original codebase would only do this self-harm for isHarmDeadly when true
     // The original logic thereby ensured mutual death on stinger-to-stinger contact.
@@ -62,7 +62,7 @@ class StingerCell extends AnatomyCell {
     // It gives space to optimize the stinger cell parameters with things like speed levels or a poison cell.
     // So, we keep this disabled for now and may bring it back with an option later like "isDeadlyHarmMutual".
     /*if (this.hyperparams.isHarmDeadly && neighborCell.state === CellStates.stinger) {
-      this.org.harm(renderer, simulation, ticks);
+      this.org.harm(renderer, ticksElapsed);
     }*/
   }
 }

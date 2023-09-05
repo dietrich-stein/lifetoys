@@ -96,7 +96,7 @@ type CardinalDirectionLabel =
 
 type CardinalLabelsType = Array<CardinalDirectionLabel>;
 
-type CardinalDirectionsType = {
+type AllCardinalDirectionsType = {
   n: number;
   ne: number;
   e: number;

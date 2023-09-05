@@ -15,7 +15,7 @@ abstract class Directions {
 
   public static noDirection: number = -1;
 
-  public static cardinals: CardinalDirectionsType = {
+  public static cardinals: AllCardinalDirectionsType = {
     n: 0,
     ne: 1,
     e: 2,
@@ -37,8 +37,15 @@ abstract class Directions {
     [-1, -1], // nw
   ];
 
-  public static getRandomDirection(): number {
-    return Math.floor(Math.random() * Directions.scalars.length);
+  public static getRandomDirection(restrictToAnatomy: boolean = false): number {
+    let dir = Math.floor(Math.random() * Directions.scalars.length);
+
+    if (restrictToAnatomy && dir % 2 !== 0) {
+      debugger;
+      dir--;
+    }
+
+    return dir;
   }
 
   public static getRandomScalar(): Array<number> {
@@ -76,8 +83,8 @@ abstract class Directions {
     }
   }
 
-  public static rotateRight(dir: number): number {
-    dir++;
+  public static rotateRight(dir: number, step: number = 1): number {
+    dir += step;
 
     if (dir > MAX_DIR_INDEX) {
       dir = 0;
@@ -86,8 +93,8 @@ abstract class Directions {
     return dir;
   }
 
-  public static rotateLeft(dir: number): number {
-    dir--;
+  public static rotateLeft(dir: number, step: number = 1): number {
+    dir -= step;
 
     if (dir < 0) {
       dir = MAX_DIR_INDEX;

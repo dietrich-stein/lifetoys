@@ -15,6 +15,8 @@ import {
 import { formatTime } from '../../utils/FormatTime';
 import { DEFAULT_TICKS_DELAY } from './WorldSimulation';
 import * as dg from '@dietrich-stein/dis-gui-lifetoys';
+import WorldSimulation from './WorldSimulation';
+import WorldRenderer from './WorldRenderer';
 
 type WorldManagerProps = {
   children?: React.ReactNode
@@ -31,16 +33,15 @@ export function WorldManager(props: WorldManagerProps) {
     worldSimulationRunning,
   } = worldManagerState;
   const { avgFps, maxFps, nowFps } = useStats();
-
   /*
    * NOTE: We use non-react classes for `setInterval()` and
    * `requestAnimationFrame()` because this gets better performance with less
    * complexity than hooks or useEffect/useReducer approaches.
    */
   // Simulation
-  //const worldSimulation = WorldSimulation.getInstance();
+  const worldSimulation = WorldSimulation.getInstance();
   // Rendering
-  //const worldRenderer = WorldRenderer.getInstance();
+  const worldRenderer = WorldRenderer.getInstance();
 
   const handleStartSimulationClick = () => {
     dispatch(startWorldSimulation({
@@ -100,8 +101,12 @@ export function WorldManager(props: WorldManagerProps) {
     }));
   };
 
-  const handleRotateClick = () => {
-    debugger;
+  const handleRotateRightClick = () => {
+    worldSimulation.organisms[0].rotateDirectionRight(worldRenderer);
+  };
+
+  const handleRotateLeftClick = () => {
+    worldSimulation.organisms[0].rotateDirectionLeft(worldRenderer);
   };
 
   return (
@@ -173,8 +178,12 @@ export function WorldManager(props: WorldManagerProps) {
               onChange={ handleRenderingCellSizeChanged }
             />
             <dg.ButtonWidget
-              label='Rotate'
-              onClick={ handleRotateClick }
+              label='Rotate Right'
+              onClick={ handleRotateRightClick }
+            />
+            <dg.ButtonWidget
+              label='Rotate Left'
+              onClick={ handleRotateLeftClick }
             />
           </dg.FolderWidget>
         </dg.GUI>
