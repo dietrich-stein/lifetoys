@@ -1,3 +1,4 @@
+import { store, RootState } from '../../app/store';
 import SimulatorCellStates from '../simulator/SimulatorCellStates';
 import SimulatorNeighbors from '../simulator/SimulatorNeighbors';
 import Directions from './Directions';
@@ -8,16 +9,15 @@ import Species from '../stats/Species';
 import BrainController from './perception/BrainController';
 import AnatomyCell from '../anatomy/AnatomyCell';
 import SimulatorCell from '../simulator/SimulatorCell';
-import SimulatorMap from '../simulator/SimulatorMap';
-import { HyperparamsState } from '../world/WorldManagerSlice';
 import WorldSimulation from '../world/WorldSimulation';
 import WorldRenderer from '../world/WorldRenderer';
+import { HyperparamsState } from '../world/WorldManagerSlice';
 
 type Environment = 'editor' | 'world';
 
 interface OrganismInterface {
   simulation: WorldSimulation;
-  hyperparams: HyperparamsState;
+  //hyperparams: HyperparamsState;
   startCellCol: number; // these track our origin coordinates in the simulator
   startCellRow: number;
   environment: Environment | null;
@@ -37,7 +37,7 @@ interface OrganismInterface {
   damage: number;
   species: Species | null;
   brain: BrainController | null;
-  inheritFromParent: (parent: Organism) => void;
+  inheritFromParent: (parent: Organism, hyperparams: HyperparamsState) => void;
   //getAbsoluteDirection: () => number;
   foodNeeded: () => number;
   lifespan: () => number;
@@ -75,7 +75,7 @@ interface OrganismInterface {
 
 class Organism implements OrganismInterface {
   simulation: WorldSimulation;
-  hyperparams: HyperparamsState;
+  //hyperparams: HyperparamsState;
   startCellCol: number;
   startCellRow: number;
   environment: Environment;
@@ -100,13 +100,11 @@ class Organism implements OrganismInterface {
     centerCol: number,
     centerRow: number,
     environment: Environment,
-    hyperparams: HyperparamsState,
     simulation: WorldSimulation,
+    hyperparams: HyperparamsState,
     parent?: Organism,
   ) {
-    //this.store = store.getState();
     this.simulation = simulation;
-    this.hyperparams = hyperparams;
     this.startCellCol = centerCol;
     this.startCellRow = centerRow;
     this.environment = environment;
@@ -118,9 +116,7 @@ class Organism implements OrganismInterface {
     this.movementDirection = Directions.cardinals.s;
     this.lookDirection = Directions.cardinals.e;
     this.rotationCount = 0;
-    this.can_rotate = (this.environment === 'world')
-      ? this.hyperparams.rotationEnabled //this.store.worldManager.
-      : false;
+    this.can_rotate = (this.environment === 'world') ? hyperparams.rotationEnabled : false;
     this.move_count = 0;
     this.move_range = 4;
     this.ignore_brain_for = 0;
@@ -130,11 +126,11 @@ class Organism implements OrganismInterface {
     this.species = null;
 
     if (typeof parent !== 'undefined') {
-      this.inheritFromParent(parent);
+      this.inheritFromParent(parent, hyperparams);
     }
   }
 
-  inheritFromParent(parent: Organism) {
+  inheritFromParent(parent: Organism, hyperparams: HyperparamsState) {
     // Copy evolved properties
     this.move_range = parent.move_range;
     this.mutability = parent.mutability;
@@ -143,10 +139,10 @@ class Organism implements OrganismInterface {
     // Copy anatomy plan and cell without executing growth plan
     this.anatomy.plan = parent.anatomy.plan;
     for (var cell of parent.anatomy.cells) {
-      this.anatomy.addInheritedCell(cell, false, this.hyperparams);
+      this.anatomy.addInheritedCell(cell, false, hyperparams);
     }
 
-    this.anatomy.checkChangedCells();
+    this.anatomy.updateStats();
 
     // previously needed "parent.anatomy.has_mover && parent.anatomy.has_eye"
     if (parent.brain !== null) {
@@ -165,7 +161,7 @@ class Organism implements OrganismInterface {
 
   // amount of food required before it can reproduce
   foodNeeded() {
-    const extraMoverFoodCost = this.hyperparams.extraMoverFoodCost;
+    const extraMoverFoodCost = store.getState().worldManager.hyperparams.extraMoverFoodCost;
 
     return this.anatomy.hasMover
       ? this.anatomy.cells.length + (extraMoverFoodCost * 1)// this.anatomy.mover_count
@@ -173,7 +169,7 @@ class Organism implements OrganismInterface {
   }
 
   lifespan() {
-    const lifespanMultiplier = this.hyperparams.lifespanMultiplier;
+    const lifespanMultiplier = store.getState().worldManager.hyperparams.lifespanMultiplier;
 
     return this.anatomy.cells.length * lifespanMultiplier;
   }
@@ -280,7 +276,7 @@ class Organism implements OrganismInterface {
       addProb,
       changeProb,
       removeProb,
-    } = this.hyperparams;
+    } = store.getState().worldManager.hyperparams;
 
     let added = false;
     let changed = false;
@@ -305,7 +301,7 @@ class Organism implements OrganismInterface {
 
         if (this.anatomy.canAddCellAt(x, y)) {
           added = true;
-          this.anatomy.addRandomCell(x, y, randomState, false, this.hyperparams);
+          this.anatomy.addRandomCell(x, y, randomState, false, store.getState().worldManager.hyperparams);
         }
       }
     }
@@ -318,7 +314,14 @@ class Organism implements OrganismInterface {
       if (cellToReplace !== null) {
         let randomState = SimulatorCellStates.getRandomAnatomyCellState();
 
-        this.anatomy.replaceCell(cellToReplace.x, cellToReplace.y, randomState, false, true, this.hyperparams);
+        this.anatomy.replaceCell(
+          cellToReplace.x,
+          cellToReplace.y,
+          randomState,
+          false,
+          true,
+          store.getState().worldManager.hyperparams,
+        );
         changed = true;
       }
     }
@@ -607,7 +610,7 @@ class Organism implements OrganismInterface {
       return false;
     }
 
-    const foodBlocksReproduction = this.hyperparams.foodBlocksReproduction;
+    const foodBlocksReproduction = store.getState().worldManager.hyperparams.foodBlocksReproduction;
 
     // Check all anatomy cells
     for (var loccell of this.anatomy.cells) {
@@ -641,18 +644,17 @@ class Organism implements OrganismInterface {
   harm(renderer: WorldRenderer, ticksElapsed: number) {
     this.damage++;
 
-    if (this.damage >= this.maxHealth() || this.hyperparams.isHarmDeadly) {
+    if (this.damage >= this.maxHealth() || store.getState().worldManager.hyperparams.isHarmDeadly) {
       this.die(renderer, ticksElapsed);
     }
   }
 
   die(renderer: WorldRenderer, ticksElapsed: number) {
-    if (this.environment === null || this.simulation === null || this.simulation.map === null) {
-      return;
-    }
-    //debugger;
-
-    if (this.environment === null || this.environment === 'world' || this.simulation.map === null) {
+    if (
+      this.environment === null ||
+      this.simulation === null ||
+      this.simulation.map === null
+    ) {
       return;
     }
 
@@ -663,7 +665,7 @@ class Organism implements OrganismInterface {
       var changed = this.simulation.map.changeCellStateAt(rotatedCol, rotatedRow, SimulatorCellStates.food);
 
       if (changed !== null) {
-        //this.simulation.map.changeCellOrganismAt(rotatedCol, rotatedRow, cell.org);
+        this.simulation.map.changeCellOrganismAt(rotatedCol, rotatedRow, null/*cell.org*/);
         renderer.addToRender(changed);
       }
     }
@@ -845,7 +847,7 @@ class Organism implements OrganismInterface {
 
   loadRaw(org: Organism) {
     SerializeHelper.overwriteNonObjects(org, this);
-    this.anatomy.loadRaw(org.anatomy, this.hyperparams);
+    this.anatomy.loadRaw(org.anatomy, store.getState().worldManager.hyperparams);
 
     if (org.brain && org.brain !== null) {
       if (this.brain === null) {

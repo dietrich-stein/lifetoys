@@ -1,10 +1,11 @@
+import { store, RootState } from '../../app/store';
 import AnatomyCell from './AnatomyCell';
 import AnatomyCellFactory from './AnatomyCellFactory';
 import SimulatorCellStates from '../simulator/SimulatorCellStates';
 import SerializeHelper from '../../utils/SerializeHelper';
 import Organism from '../organism/Organism';
-import { HyperparamsState } from '../world/WorldManagerSlice';
 import Directions from '../organism/Directions';
+import { HyperparamsState } from '../world/WorldManagerSlice';
 
 type SerializedAnatomy = {};
 
@@ -56,7 +57,7 @@ interface AnatomyInterface {
   ) => AnatomyCell;
   removeCell: (x: number, y: number, allow_center_removal: boolean, check_types: boolean) => boolean;
   getLocalCell: (x: number, y: number) => AnatomyCell | null;
-  checkChangedCells: () => void;
+  updateStats: () => void;
   getRandomCell: () => AnatomyCell | null;
   getNeighborsOfCell: (x: number, y: number) => Array<AnatomyCell>;
   //isEqual: (anatomy: Anatomy) => boolean;
@@ -144,11 +145,12 @@ class Anatomy implements AnatomyInterface {
     hyperparams: HyperparamsState,
   ) {
     var new_cell = AnatomyCellFactory.createRegular(x, y, this.org, state, hyperparams);
+    //store.getState().worldManager.hyperparams);
 
     this.cells.push(new_cell);
 
     if (check_types) {
-      this.checkChangedCells();
+      this.updateStats();
     }
 
     return new_cell;
@@ -162,23 +164,29 @@ class Anatomy implements AnatomyInterface {
     hyperparams: HyperparamsState,
   ) {
     var new_cell = AnatomyCellFactory.createRandom(x, y, this.org, state, hyperparams);
+    //store.getState().worldManager.hyperparams);
 
     this.cells.push(new_cell);
 
     if (check_types) {
-      this.checkChangedCells();
+      this.updateStats();
     }
 
     return new_cell;
   }
 
-  addInheritedCell(parent: AnatomyCell, check_types: boolean = false, hyperparams: HyperparamsState) {
+  addInheritedCell(
+    parent: AnatomyCell,
+    check_types: boolean = false,
+    hyperparams: HyperparamsState,
+  ) {
     var new_cell = AnatomyCellFactory.createInherited(this.org, parent, hyperparams);
+    //store.getState().worldManager.hyperparams);
 
     this.cells.push(new_cell);
 
     if (check_types) {
-      this.checkChangedCells();
+      this.updateStats();
     }
 
     return new_cell;
@@ -217,7 +225,7 @@ class Anatomy implements AnatomyInterface {
     }
 
     if (check_types) {
-      this.checkChangedCells();
+      this.updateStats();
     }
 
     return true;
@@ -233,7 +241,7 @@ class Anatomy implements AnatomyInterface {
     return null;
   }
 
-  checkChangedCells() {
+  updateStats() {
     this.hasMouth = false;
     this.hasMover = false;
     this.hasEye = false;
@@ -447,7 +455,7 @@ class Anatomy implements AnatomyInterface {
       this.addInheritedCell(cell, false, hyperparams);
     }
 
-    this.checkChangedCells();
+    this.updateStats();
   }
 }
 

@@ -36,6 +36,7 @@ export interface WorldManagerState {
   worldSimulationTicks: number;
   worldSimulationTicksDelay: number;
   worldSimulationTime: number;
+  worldSimulationTotalLivingOrganisms: number;
   // Other
   hyperparams: HyperparamsState;
 }
@@ -50,6 +51,7 @@ const initialState: WorldManagerState = {
   worldSimulationTicks: 0,
   worldSimulationTicksDelay: DEFAULT_TICKS_DELAY,
   worldSimulationTime: 0,
+  worldSimulationTotalLivingOrganisms: 0,
   // Other
   hyperparams: {
     lifespanMultiplier: 100,
@@ -124,9 +126,14 @@ export const WorldManagerSlice = createSlice({
       worldSimulation.reset();
     },
     setWorldSimulationStats: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice.setWorldSimulationStats, payload:', action.payload);
+      /*console.log(
+        'WorldManagerSlice.setWorldSimulationStats',
+        'living:', action.payload.worldSimulationTotalLivingOrganisms,
+      );*/
+
       state.worldSimulationTime = action.payload.worldSimulationTime;
       state.worldSimulationTicks = action.payload.worldSimulationTicks;
+      state.worldSimulationTotalLivingOrganisms = action.payload.worldSimulationTotalLivingOrganisms;
     },
     setWorldSimulationTicksDelay: (state, action: PayloadAction<WorldManagerState>) => {
       //console.log('WorldManagerSlice.setWorldSimulationTicksDelay, payload:', action.payload);

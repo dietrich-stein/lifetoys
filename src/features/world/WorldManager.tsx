@@ -31,6 +31,7 @@ export function WorldManager(props: WorldManagerProps) {
   const {
     worldRendererRunning,
     worldSimulationRunning,
+    worldSimulationTotalLivingOrganisms,
   } = worldManagerState;
   const { avgFps, maxFps, nowFps } = useStats();
   /*
@@ -195,29 +196,52 @@ export function WorldManager(props: WorldManagerProps) {
             />
           </dg.FolderWidget>
           <dg.FolderWidget label='Debug' expanded={ true }>
+            <dg.TextWidget
+              label='Living Organisms'
+              value={ worldSimulationTotalLivingOrganisms.toString() }
+              readOnly={ true }
+            />
             <dg.ButtonWidget
+              disabled={
+                (!worldSimulationRunning || worldSimulationTotalLivingOrganisms < 1)
+              }
               label=' &laquo; Rotate Anatomy Left'
               onClick={ handleRotateLeftClick }
             />
             <dg.ButtonWidget
+              disabled={
+                (!worldSimulationRunning || worldSimulationTotalLivingOrganisms < 1)
+              }
               label='Rotate Anatomy Right &raquo;'
               onClick={ handleRotateRightClick }
             />
             <br />
             <dg.ButtonWidget
+              disabled={
+                (!worldSimulationRunning || worldSimulationTotalLivingOrganisms < 1)
+              }
               label=' &laquo; Rotate Movement Left'
               onClick={ handleMovementLeftClick }
             />
             <dg.ButtonWidget
+              disabled={
+                (!worldSimulationRunning || worldSimulationTotalLivingOrganisms < 1)
+              }
               label='Rotate Movement Right &raquo;'
               onClick={ handleMovementRightClick }
             />
             <br />
             <dg.ButtonWidget
+              disabled={
+                (!worldSimulationRunning || worldSimulationTotalLivingOrganisms < 1)
+              }
               label=' &laquo; Rotate Look Left'
               onClick={ handleLookLeftClick }
             />
             <dg.ButtonWidget
+              disabled={
+                (!worldSimulationRunning || worldSimulationTotalLivingOrganisms < 1)
+              }
               label='Rotate Look Right &raquo;'
               onClick={ handleLookRightClick }
             />

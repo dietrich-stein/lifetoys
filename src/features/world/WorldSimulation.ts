@@ -9,30 +9,14 @@ import {
 } from './WorldManagerSlice';
 import WorldRenderer from './WorldRenderer';
 import FossilRecord from '../stats/FossilRecord';
-import Anatomy from '../anatomy/Anatomy';
 import Directions from '../organism/Directions';
-
-/*
-interface WorldSimulationInterface {
-  running: boolean;
-  intervalId: ReturnType<typeof setInterval> | null;
-  timeElapsed: number;
-  ticksDelay: number;
-  ticksElapsed: number;
-  map: SimulatorMap | null,
-  storeState: RootState | null,
-  setTicksDelay: (state: WorldManagerState, value: number) => void;
-  start: (state: WorldManagerState) => void;
-  stop: () => void;
-  reset: () => void;
-}
-*/
+import { HyperparamsState } from './WorldManagerSlice';
 
 export const DEFAULT_TICKS_DELAY = 16.67;
 
 const worldRenderer = WorldRenderer.getInstance();
 
-class WorldSimulation /*implements WorldSimulationInterface*/ {
+class WorldSimulation {
   // Control
   running: boolean;
   intervalId: ReturnType<typeof setInterval> | null;
@@ -41,7 +25,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   ticksElapsed: number;
   //
   map: SimulatorMap | null;
-  storeState: RootState | null;
+  //storeState: RootState | null;
   fossilRecord: FossilRecord | null;
   fossilRecordRate: number;
   //
@@ -62,7 +46,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     this.ticksElapsed = 0;
     //
     this.map = null;
-    this.storeState = null;
+    //this.storeState = null;
     this.fossilRecord = null;
     this.fossilRecordRate = 100;
     //
@@ -80,21 +64,21 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     return WorldSimulation.instance;
   }
 
-  public setTicksDelay(state: WorldManagerState, value: number) {
+  public setTicksDelay(worldManagerState: WorldManagerState, value: number) {
     this.ticksDelay = value;
 
     if (this.running) {
       // Stop and start again for setInterval() to use the new value
       this.stop();
-      this.start(state);
+      this.start(worldManagerState); //state);
     }
   }
 
-  public init(storeState: RootState) {
-    this.storeState = storeState;
+  public init(/*storeState: RootState*/) {
+    //this.storeState = storeState;
 
     this.map = new SimulatorMap(
-      worldRenderer.gridCols, // use like 100, not the grid
+      worldRenderer.gridCols,
       worldRenderer.gridRows,
       worldRenderer.gridCellSize,
     );
@@ -108,7 +92,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     );*/
   }
 
-  public start(state: WorldManagerState) {
+  public start(worldManagerState: WorldManagerState) {
     if (this.running || this.map === null) {
       return;
     }
@@ -122,11 +106,12 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
 
       this.timeElapsed += this.ticksDelay;
       this.ticksElapsed += 1;
-      this.simulate();
+      this.simulate(worldManagerState);
       store.dispatch(setWorldSimulationStats({
-        ...state,
+        ...worldManagerState,
         worldSimulationTime: this.timeElapsed,
         worldSimulationTicks: this.ticksElapsed,
+        worldSimulationTotalLivingOrganisms: this.organisms.length,
       }));
     }, this.ticksDelay);
 
@@ -147,7 +132,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
         state: CellStates.mouth,
         direction: Directions.cardinals.nw,
       },
-    ]);
+    ], worldManagerState.hyperparams);
 
     this.running = true;
   }
@@ -172,25 +157,33 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     this.ticksElapsed = 0;
   }
 
-  private simulate() {
-    if (this.map === null || this.fossilRecord === null || this.storeState === null) {
+  private simulate(worldManagerState: WorldManagerState) {
+    if (this.map === null || this.fossilRecord === null /*|| this.storeState === null*/) {
       return;
     }
     //console.log('WorldSimulation, SIMULATE', this.ticksDelay);
 
-    var to_remove: Array<string> = [];
+    var orgsToRemove: Array<string> = [];
 
     for (var i in this.organisms) {
       var org = this.organisms[i];
 
       if (!org.living || !org.handleSimulationUpdate(worldRenderer, this.ticksElapsed)) {
-        to_remove.push(i);
+        orgsToRemove.push(i);
       }
     }
 
-    this.removeOrganisms(to_remove);
+    if (orgsToRemove.length > 0) {
+      this.removeOrganisms(orgsToRemove);
+    }
 
-    if (this.storeState.worldManager.hyperparams.foodDropProb > 0) {
+    // Right after removal all are living
+    store.dispatch(setWorldSimulationStats({
+      ...worldManagerState, //...selectWorldManager(store.getState()),
+      worldSimulationTotalLivingOrganisms: this.organisms.length,
+    }));
+
+    if (worldManagerState.hyperparams.foodDropProb > 0) {
       this.generateFood();
     }
 
@@ -199,8 +192,8 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     }
   }
 
-  private addCenteredOrganismByPlan(plan: GrowthPlan) {
-    if (this.map === null || this.storeState === null) {
+  private addCenteredOrganismByPlan(plan: GrowthPlan, hyperparams: HyperparamsState) {
+    if (this.map === null /*|| this.storeState === null*/) {
       return;
     }
 
@@ -209,11 +202,11 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       center[0],
       center[1],
       'world',
-      this.storeState.worldManager.hyperparams,
       WorldSimulation.instance,
+      hyperparams,
     );
 
-    organism.anatomy.executeGrowthPlan(plan, this.storeState.worldManager.hyperparams);
+    organism.anatomy.executeGrowthPlan(plan, hyperparams);
     this.addOrganism(organism);
 
     //fossil_record.addSpecies(org, null);
@@ -254,16 +247,13 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private generateFood(): void {
-    if (this.map === null || this.storeState === null) {
+    if (this.map === null /*|| this.storeState === null*/) {
       return;
     }
 
-    var num_food = Math.max(Math.floor((
-      this.map.cols *
-      this.map.rows *
-      this.storeState.worldManager.hyperparams.foodDropProb
-    ) / 50000), 1);
-    var prob = this.storeState.worldManager.hyperparams.foodDropProb;
+    const prob = store.getState().worldManager.hyperparams.foodDropProb;
+
+    var num_food = Math.max(Math.floor((this.map.cols * this.map.rows * prob) / 50000), 1);
 
     for (var i = 0; i < num_food; i++) {
       if (Math.random() <= prob) {
@@ -283,12 +273,12 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
   }
 
   private averageMutability(): number {
-    if (this.organisms.length < 1 || this.storeState === null) {
+    if (this.organisms.length < 1 /*|| this.storeState === null*/) {
       return 0;
     }
 
-    if (this.storeState.worldManager.hyperparams.useGlobalMutability) {
-      return this.storeState.worldManager.hyperparams.globalMutability;
+    if (store.getState().worldManager.hyperparams.useGlobalMutability) {
+      return store.getState().worldManager.hyperparams.globalMutability;
     }
 
     return this.total_mutability / this.organisms.length;

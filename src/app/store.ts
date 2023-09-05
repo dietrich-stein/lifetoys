@@ -10,8 +10,6 @@ import worldReducer, {
   initWorld,
   //setWorldNumCols,
   //setWorldNumRows,
-  //setWorldCanvasWidth,
-  //setWorldCanvasHeight,
 } from '../features/world/WorldSlice';
 import worldManagerReducer, {
   startWorldSimulation,
@@ -86,14 +84,13 @@ startAppListening({
                 worldRendererRunning: true,
               }));
 
-              worldSimulation.init(state);
+              worldSimulation.init();
               listenerApi.dispatch(startWorldSimulation({
                 ...state.worldManager,
                 worldSimulationRunning: true,
               }));
+
               // Dispatch setter actions for canvasHeight, canvasWidth, numCols, numRows values
-              //listenerApi.dispatch(setWorldCanvasWidth(worldRenderer.canvasWidth));
-              //listenerApi.dispatch(setWorldCanvasHeight(worldRenderer.canvasHeight));
               //listenerApi.dispatch(setWorldNumCols(worldRenderer.numCols));
               //listenerApi.dispatch(setWorldNumRows(worldRenderer.numRows));
             }
