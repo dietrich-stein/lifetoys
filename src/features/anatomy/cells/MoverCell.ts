@@ -6,7 +6,7 @@ import { HyperparamsState } from '../../world/WorldManagerSlice';
 class MoverCell extends AnatomyCell {
   constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
     super(x, y, CellStates.mover, org, hyperparams);
-    this.org.anatomy.has_mover = true;
+    this.org.anatomy.hasMover = true;
   }
 
   initInherited(parent: AnatomyCell) {

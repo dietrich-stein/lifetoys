@@ -1,60 +1,60 @@
-import WorldCellState from './SimulatorCellState';
+import SimulatorCellState from './SimulatorCellState';
 
-export class EmptyState extends WorldCellState {
+export class EmptyState extends SimulatorCellState {
   constructor() {
     super('empty');
   }
 }
 
-export class FoodState extends WorldCellState {
+export class FoodState extends SimulatorCellState {
   constructor() {
     super('food');
   }
 }
 
-export class WallState extends WorldCellState {
+export class WallState extends SimulatorCellState {
   constructor() {
     super('wall');
   }
 }
 
-export class BrainState extends WorldCellState {
+export class BrainState extends SimulatorCellState {
   constructor() {
     super('brain');
   }
 }
 
-export class MouthState extends WorldCellState {
+export class MouthState extends SimulatorCellState {
   constructor() {
     super('mouth');
   }
 }
 
-export class ProducerState extends WorldCellState {
+export class ProducerState extends SimulatorCellState {
   constructor() {
     super('producer');
   }
 }
 
-export class MoverState extends WorldCellState {
+export class MoverState extends SimulatorCellState {
   constructor() {
     super('mover');
   }
 }
 
-export class StingerState extends WorldCellState {
+export class StingerState extends SimulatorCellState {
   constructor() {
     super('stinger');
   }
 }
 
-export class ArmorState extends WorldCellState {
+export class ArmorState extends SimulatorCellState {
   constructor() {
     super('armor');
   }
 }
 
-export class EyeState extends WorldCellState {
+export class EyeState extends SimulatorCellState {
   slit_color: string;
   constructor() {
     super('eye');
@@ -74,7 +74,7 @@ abstract class SimulatorCellStates {
   public static armor: ArmorState = new ArmorState();
   public static eye: EyeState = new EyeState();
 
-  public static all: Array<WorldCellState> = [
+  public static all: Array<SimulatorCellState> = [
     SimulatorCellStates.empty,
     SimulatorCellStates.food,
     SimulatorCellStates.wall,
@@ -97,12 +97,23 @@ abstract class SimulatorCellStates {
     SimulatorCellStates.eye,
   ];
 
+  public static anatomyExceptBrain: Array<AnatomyCellState> = [
+    SimulatorCellStates.mouth,
+    SimulatorCellStates.producer,
+    SimulatorCellStates.mover,
+    SimulatorCellStates.stinger,
+    SimulatorCellStates.armor,
+    SimulatorCellStates.eye,
+  ];
+
   public static getRandomName(): string {
     return SimulatorCellStates.all[Math.floor(Math.random() * SimulatorCellStates.all.length)].name;
   }
 
   public static getRandomAnatomyCellState(): AnatomyCellState {
-    return SimulatorCellStates.anatomy[Math.floor(Math.random() * SimulatorCellStates.anatomy.length)];
+    return SimulatorCellStates.anatomyExceptBrain[
+      Math.floor(Math.random() * SimulatorCellStates.anatomy.length)
+    ];
   }
 
   public static getAllCellStates(): Array<SimulatorCellStates> {

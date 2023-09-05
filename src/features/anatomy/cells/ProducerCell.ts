@@ -9,7 +9,7 @@ class ProducerCell extends AnatomyCell {
   constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
     super(x, y, WorldCellStates.producer, org, hyperparams);
     this.hyperparams = hyperparams;
-    this.org.anatomy.has_producer = true;
+    this.org.anatomy.hasProducer = true;
   }
 
   initInherited(parent: AnatomyCell) {
@@ -37,7 +37,7 @@ class ProducerCell extends AnatomyCell {
     } = this.hyperparams;
 
     if (
-      this.org.anatomy.has_mover && !moversCanProduce) {
+      this.org.anatomy.hasMover && !moversCanProduce) {
       return;
     }
 

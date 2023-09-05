@@ -13,12 +13,11 @@ class EyeCell extends AnatomyCell {
 
   constructor(x: number, y: number, org: Organism, hyperparams: HyperparamsState) {
     super(x, y, CellStates.eye, org, hyperparams);
-    this.org.anatomy.has_eye = true;
+    this.org.anatomy.hasEye = true;
     this.direction = Directions.cardinals.n;
   }
 
   initInherited(parent: any) {
-    // deep copy parent values
     super.initInherited(parent);
     this.direction = parent.direction;
   }
@@ -39,7 +38,7 @@ class EyeCell extends AnatomyCell {
     }
 
     // @todo: decide if there should be some eye-benefit without a brain
-    if (this.org.anatomy.has_brain && this.org.brain !== null) {
+    if (this.org.brain !== null) {
       var obs = this.look(simulation.map);
 
       if (obs !== null) {

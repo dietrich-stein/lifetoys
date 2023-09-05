@@ -9,7 +9,6 @@ class ArmorCell extends AnatomyCell {
   }
 
   initInherited(parent: AnatomyCell) {
-    // deep copy parent values
     super.initInherited(parent);
   }
 

@@ -1,4 +1,4 @@
-abstract class Neighbors {
+abstract class SimulatorNeighbors {
   //all       ...
   //          .x.
   //          ...
@@ -61,4 +61,4 @@ abstract class Neighbors {
   }
 };
 
-export default Neighbors;
+export default SimulatorNeighbors;

@@ -132,7 +132,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
 
     this.addCenteredOrganismByPlan([
       {
-        state: CellStates.mouth,
+        state: CellStates.brain,
         direction: Directions.noDirection, // -1
       },
       {
@@ -144,7 +144,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
         direction: Directions.cardinals.nw,
       },
       {
-        state: CellStates.producer,
+        state: CellStates.mouth,
         direction: Directions.cardinals.nw,
       },
     ]);

@@ -1,5 +1,5 @@
-import CellStates from '../simulator/SimulatorCellStates';
-import Neighbors from '../simulator/SimulatorNeighbors';
+import SimulatorCellStates from '../simulator/SimulatorCellStates';
+import SimulatorNeighbors from '../simulator/SimulatorNeighbors';
 import Directions from './Directions';
 import Anatomy from '../anatomy/Anatomy';
 import Brain from './perception/BrainController';
@@ -146,10 +146,10 @@ class Organism implements OrganismInterface {
       this.anatomy.addInheritedCell(cell, false, this.hyperparams);
     }
 
-    this.anatomy.checkTypeChange();
+    this.anatomy.checkChangedCells();
 
     // previously needed "parent.anatomy.has_mover && parent.anatomy.has_eye"
-    if (parent.anatomy.has_brain && parent.brain !== null) {
+    if (parent.brain !== null) {
       this.brain = new BrainController(this);
       this.brain.copy(parent.brain);
     }
@@ -167,9 +167,8 @@ class Organism implements OrganismInterface {
   foodNeeded() {
     const extraMoverFoodCost = this.hyperparams.extraMoverFoodCost;
 
-    return this.anatomy.has_mover
-      ? this.anatomy.cells.length +
-          extraMoverFoodCost * this.anatomy.mover_count
+    return this.anatomy.hasMover
+      ? this.anatomy.cells.length + (extraMoverFoodCost * 1)// this.anatomy.mover_count
       : this.anatomy.cells.length;
   }
 
@@ -297,9 +296,9 @@ class Organism implements OrganismInterface {
       let cellToBranch = this.anatomy.getRandomCell();
 
       if (cellToBranch !== null) {
-        let randomState = CellStates.getRandomAnatomyCellState();
-        let growth_direction = Neighbors.all[
-          Math.floor(Math.random() * Neighbors.all.length)
+        let randomState = SimulatorCellStates.getRandomAnatomyCellState();
+        let growth_direction = SimulatorNeighbors.all[
+          Math.floor(Math.random() * SimulatorNeighbors.all.length)
         ];
         let x = cellToBranch.x + growth_direction[0];
         let y = cellToBranch.y + growth_direction[1];
@@ -317,7 +316,7 @@ class Organism implements OrganismInterface {
       let cellToReplace = this.anatomy.getRandomCell();
 
       if (cellToReplace !== null) {
-        let randomState = CellStates.getRandomAnatomyCellState();
+        let randomState = SimulatorCellStates.getRandomAnatomyCellState();
 
         this.anatomy.replaceCell(cellToReplace.x, cellToReplace.y, randomState, false, true, this.hyperparams);
         changed = true;
@@ -363,7 +362,7 @@ class Organism implements OrganismInterface {
         var rotatedXY = cell.getRotatedAnatomyXY(this.anatomyDirection);
         var rotatedCol = this.startCellCol + rotatedXY[0];
         var rotatedRow = this.startCellRow + rotatedXY[1];
-        var changed = this.simulation.map.changeCellStateAt(rotatedCol, rotatedRow, CellStates.empty);
+        var changed = this.simulation.map.changeCellStateAt(rotatedCol, rotatedRow, SimulatorCellStates.empty);
 
         if (changed !== null) {
           renderer.addToRender(changed);
@@ -400,7 +399,7 @@ class Organism implements OrganismInterface {
         var rotatedXY = cell.getRotatedAnatomyXY(this.anatomyDirection);
         var rotatedCol = this.startCellCol + rotatedXY[0];
         var rotatedRow = this.startCellRow + rotatedXY[1];
-        var changedCell = this.simulation.map.changeCellStateAt(rotatedCol, rotatedRow, CellStates.empty);
+        var changedCell = this.simulation.map.changeCellStateAt(rotatedCol, rotatedRow, SimulatorCellStates.empty);
 
         if (changedCell !== null) {
           renderer.addToRender(changedCell);
@@ -527,7 +526,7 @@ class Organism implements OrganismInterface {
         oldRotatedCol !== newRotatedCol ||
         oldRotatedRow !== newRotatedRow
       ) {
-        emptiedCell = this.simulation.map.changeCellStateAt(oldRotatedCol, oldRotatedRow, CellStates.empty);
+        emptiedCell = this.simulation.map.changeCellStateAt(oldRotatedCol, oldRotatedRow, SimulatorCellStates.empty);
 
         if (emptiedCell !== null) {
           this.simulation.map.changeCellOrganismAt(oldRotatedCol, oldRotatedRow, null);
@@ -596,10 +595,10 @@ class Organism implements OrganismInterface {
   isPassableCell(cell: SimulatorCell, parent: Organism) {
     return (
       cell !== null &&
-      (cell.state === CellStates.empty ||
+      (cell.state === SimulatorCellStates.empty ||
         cell.org === this ||
         cell.org === parent ||
-        cell.state === CellStates.food)
+        cell.state === SimulatorCellStates.food)
     );
   }
 
@@ -623,11 +622,11 @@ class Organism implements OrganismInterface {
         // Same organism
         cell.org === this ||
         // Empty
-        cell.state === CellStates.empty ||
+        cell.state === SimulatorCellStates.empty ||
         // Elligible food
         (
           !foodBlocksReproduction &&
-          cell.state === CellStates.food
+          cell.state === SimulatorCellStates.food
         )
       ) {
         continue;
@@ -661,7 +660,7 @@ class Organism implements OrganismInterface {
       var rotatedXY = cell.getRotatedAnatomyXY(this.anatomyDirection);
       var rotatedCol = this.startCellCol + rotatedXY[0];
       var rotatedRow = this.startCellRow + rotatedXY[1];
-      var changed = this.simulation.map.changeCellStateAt(rotatedCol, rotatedRow, CellStates.food);
+      var changed = this.simulation.map.changeCellStateAt(rotatedCol, rotatedRow, SimulatorCellStates.food);
 
       if (changed !== null) {
         //this.simulation.map.changeCellOrganismAt(rotatedCol, rotatedRow, cell.org);
