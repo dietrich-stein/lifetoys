@@ -1,3 +1,4 @@
+import { cp } from 'fs';
 import SimulatorCell from './SimulatorCell';
 import SimulatorCellState from './SimulatorCellState';
 import SimulatorCellStates from './SimulatorCellStates';
@@ -42,16 +43,21 @@ class SimulatorMap implements SimulatorMapInterface {
     this.cols = cols;
     this.rows = rows;
 
-    for (var c = 0; c < cols; c++) {
-      var row = [];
+    for (var currentCol = 0; currentCol < this.cols; currentCol++) {
+      var newRow = [];
 
-      for (var r = 0; r < rows; r++) {
-        var simulatorCell = new SimulatorCell(SimulatorCellStates.empty, c, r);
+      for (var currentRow = 0; currentRow < rows; currentRow++) {
+        var newCell = new SimulatorCell(
+          SimulatorCellStates.empty,
+          currentCol,
+          currentRow,
+          `c-${currentCol}-${currentRow}`,
+        );
 
-        row.push(simulatorCell);
+        newRow.push(newCell);
       }
 
-      this.grid.push(row);
+      this.grid.push(newRow);
     }
   }
 

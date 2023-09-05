@@ -77,15 +77,15 @@ class AnatomyCell implements AnatomyCellInterface {
 
   // @TODO: Consolidate as "getRealColRow()"
   getRealX() {
-    var real_colrow = this.getRotatedXY(this.org.rotation_direction);
+    var real_colrow = this.getRotatedXY(this.org.rotationDirection);
 
-    return this.org.c + real_colrow[0]; //this.rotatedCol(this.org.rotation_direction);
+    return this.org.col + real_colrow[0]; //this.rotatedCol(this.org.rotationDirection);
   }
 
   getRealY() {
-    var real_colrow = this.getRotatedXY(this.org.rotation_direction);
+    var real_colrow = this.getRotatedXY(this.org.rotationDirection);
 
-    return this.org.r + real_colrow[1]; //this.rotatedRow(this.org.rotation_direction);
+    return this.org.row + real_colrow[1]; //this.rotatedRow(this.org.rotationDirection);
   }
 
   /*getRealCell() {

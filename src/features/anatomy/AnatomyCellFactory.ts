@@ -3,7 +3,7 @@ import MouthCell from './cells/MouthCell';
 import BrainCell from './cells/BrainCell';
 import ProducerCell from './cells/ProducerCell';
 import MoverCell from './cells/MoverCell';
-import KillerCell from './cells/KillerCell';
+import StingerCell from './cells/StingerCell';
 import ArmorCell from './cells/ArmorCell';
 import EyeCell from './cells/EyeCell';
 import { HyperparamsState } from '../world/WorldManagerSlice';
@@ -15,7 +15,7 @@ interface AnatomyCellClassesInterface {
     | typeof BrainCell
     | typeof ProducerCell
     | typeof MoverCell
-    | typeof KillerCell
+    | typeof StingerCell
     | typeof ArmorCell
     | typeof EyeCell;
 }
@@ -26,7 +26,7 @@ abstract class AnatomyCellFactory {
     'brain': BrainCell,
     'producer': ProducerCell,
     'mover': MoverCell,
-    'killer': KillerCell,
+    'stinger': StingerCell,
     'armor': ArmorCell,
     'eye': EyeCell,
   };

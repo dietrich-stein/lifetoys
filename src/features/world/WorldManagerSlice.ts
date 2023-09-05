@@ -7,9 +7,9 @@ import { RootState } from '../../app/store';
 export type HyperparamsState = {
   lifespanMultiplier: number;
   foodProdProb: number;
-  killableNeighbors: number[][];
-  edibleNeighbors: number[][];
-  growableNeighbors: number[][];
+  vulnerableNeighbors: DirectionCoordinates;
+  edibleNeighbors: DirectionCoordinates;
+  growableNeighbors: DirectionCoordinates;
   useGlobalMutability: boolean;
   globalMutability: number;
   addProb: number;
@@ -18,7 +18,7 @@ export type HyperparamsState = {
   rotationEnabled: boolean;
   foodBlocksReproduction: boolean;
   moversCanProduce: boolean;
-  instaKill: boolean;
+  isHarmDeadly: boolean;
   lookRange: number;
   seeThroughSelf: boolean;
   foodDropProb: number;
@@ -54,7 +54,7 @@ const initialState: WorldManagerState = {
   hyperparams: {
     lifespanMultiplier: 100,
     foodProdProb: 5,
-    killableNeighbors: Neighbors.adjacent,
+    vulnerableNeighbors: Neighbors.adjacent,
     edibleNeighbors: Neighbors.adjacent,
     growableNeighbors: Neighbors.adjacent,
     useGlobalMutability: true, // false
@@ -65,7 +65,7 @@ const initialState: WorldManagerState = {
     rotationEnabled: true,
     foodBlocksReproduction: true,
     moversCanProduce: false,
-    instaKill: false,
+    isHarmDeadly: false,
     lookRange: 20,
     seeThroughSelf: false,
     foodDropProb: 0,

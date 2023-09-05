@@ -183,7 +183,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
     for (var i in this.organisms) {
       var org = this.organisms[i];
 
-      if (!org.living || !org.update(worldRenderer, this, this.ticksElapsed)) {
+      if (!org.living || !org.handleSimulationUpdate(worldRenderer, this, this.ticksElapsed)) {
         to_remove.push(i);
       }
     }
@@ -224,7 +224,7 @@ class WorldSimulation /*implements WorldSimulationInterface*/ {
       return;
     }
 
-    organism.updateMap(worldRenderer, this.map);
+    organism.updateSimulatorMap(worldRenderer, this.map);
 
     this.total_mutability += organism.mutability;
     this.organisms.push(organism);

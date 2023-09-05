@@ -24,7 +24,7 @@ type MouthStateClass = import('./src/features/simulator/SimulatorCellStates').Mo
 type BrainStateClass = import('./src/features/simulator/SimulatorCellStates').BrainState;
 type ProducerStateClass = import('./src/features/simulator/SimulatorCellStates').ProducerState;
 type MoverStateClass = import('./src/features/simulator/SimulatorCellStates').MoverState;
-type KillerStateClass = import('./src/features/simulator/SimulatorCellStates').KillerState;
+type StingerStateClass = import('./src/features/simulator/SimulatorCellStates').StingerState;
 type ArmorStateClass = import('./src/features/simulator/SimulatorCellStates').ArmorState;
 type EyeStateClass = import('./src/features/simulator/SimulatorCellStates').EyeState;
 
@@ -36,7 +36,7 @@ type WorldCellState =
   | BrainStateClass
   | ProducerStateClass
   | MoverStateClass
-  | KillerStateClass
+  | StingerStateClass
   | ArmorStateClass
   | EyeStateClass;
 
@@ -45,7 +45,7 @@ type AnatomyCellState =
   | BrainStateClass
   | ProducerStateClass
   | MoverStateClass
-  | KillerStateClass
+  | StingerStateClass
   | ArmorStateClass
   | EyeStateClass;
 
@@ -55,7 +55,7 @@ type MouthCellClass = import('./src/features/anatomy/cells/MouthCell').default;
 type BrainCellClass = import('./src/features/anatomy/cells/BrainCell').default;
 type ProducerCellClass = import('./src/features/anatomy/cells/ProducerCell').default;
 type MoverCellClass = import('./src/features/anatomy/cells/MoverCell').default;
-type KillerCellClass = import('./src/features/anatomy/cells/KillerCell').default;
+type StingerCellClass = import('./src/features/anatomy/cells/StingerCell').default;
 type ArmorCellClass = import('./src/features/anatomy/cells/ArmorCell').default;
 type EyeCellClass = import('./src/features/anatomy/cells/EyeCell').default;
 
@@ -64,7 +64,7 @@ type AnatomyCellClass =
   | BrainCellClass
   | ProducerCellClass
   | MoverCellClass
-  | KillerCellClass
+  | StingerCellClass
   | ArmorCellClass
   | EyeCellClass;
 
@@ -75,12 +75,14 @@ type CellCountsType = {
   brain: number,
   producer: number,
   mover: number,
-  killer: number,
+  stinger: number,
   armor: number,
   eye: number,
 }
 
 type AverageCellCountsType = Array<CellCountsType>;
+
+type DirectionCoordinates = number[][]
 
 type CardinalDirectionLabel =
   | 'n'

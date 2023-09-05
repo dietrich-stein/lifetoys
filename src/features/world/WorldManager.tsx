@@ -100,6 +100,10 @@ export function WorldManager(props: WorldManagerProps) {
     }));
   };
 
+  const handleRotateClick = () => {
+    debugger;
+  };
+
   return (
     <>
       { children }
@@ -167,6 +171,10 @@ export function WorldManager(props: WorldManagerProps) {
               max={ 100 }
               step={ 1 }
               onChange={ handleRenderingCellSizeChanged }
+            />
+            <dg.ButtonWidget
+              label='Rotate'
+              onClick={ handleRotateClick }
             />
           </dg.FolderWidget>
         </dg.GUI>

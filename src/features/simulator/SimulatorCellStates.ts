@@ -42,9 +42,9 @@ export class MoverState extends WorldCellState {
   }
 }
 
-export class KillerState extends WorldCellState {
+export class StingerState extends WorldCellState {
   constructor() {
-    super('killer');
+    super('stinger');
   }
 }
 
@@ -70,7 +70,7 @@ abstract class SimulatorCellStates {
   public static brain: BrainState = new BrainState();
   public static producer: ProducerState = new ProducerState();
   public static mover: MoverState = new MoverState();
-  public static killer: KillerState = new KillerState();
+  public static stinger: StingerState = new StingerState();
   public static armor: ArmorState = new ArmorState();
   public static eye: EyeState = new EyeState();
 
@@ -82,7 +82,7 @@ abstract class SimulatorCellStates {
     SimulatorCellStates.brain,
     SimulatorCellStates.producer,
     SimulatorCellStates.mover,
-    SimulatorCellStates.killer,
+    SimulatorCellStates.stinger,
     SimulatorCellStates.armor,
     SimulatorCellStates.eye,
   ];
@@ -92,7 +92,7 @@ abstract class SimulatorCellStates {
     SimulatorCellStates.brain,
     SimulatorCellStates.producer,
     SimulatorCellStates.mover,
-    SimulatorCellStates.killer,
+    SimulatorCellStates.stinger,
     SimulatorCellStates.armor,
     SimulatorCellStates.eye,
   ];

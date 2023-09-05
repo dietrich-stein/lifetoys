@@ -81,8 +81,8 @@ Organism Cells are only found in organisms, and cannot exist on their own in the
 - Mouth - Orange, eats food in directly adjacent cells.
 - Producer - Green, randomly generates food in directly adjacent empty cells.
 - Mover - Light blue, allows the organism to move and rotate randomly.
-- Killer - Red, harms organisms in directly adjacent cells (besides itself).
-- Armor - Purple, negates the effects of killer cells.
+- Stinger - Red, harms organisms in directly adjacent cells (besides itself).
+- Armor - Purple, negates the effects of stinger cells.
 - Eye - Light purple with a slit, allows the organism to see and move intelligently. See further description below.
 
 ### Organisms
@@ -90,7 +90,7 @@ Organism Cells are only found in organisms, and cannot exist on their own in the
 Organisms are structures of cells that eat food, reproduce, and die.
 When an organism dies, every cell in the grid that was occupied by a cell in its body will be changed to food.
 Their lifespan is calculated by multiplying the number of cells they have by the hyperparameter `Lifespan Multiplier`. They will survive for that many ticks unless killed by another organism.
-When touched by a killer cell, an organism will take damage. Once it has taken as much damage as it has cells in its body, it will die. If the hyperparameter `One touch kill` is on, an organism will immediatly die when touched by a killer cell.
+When touched by a stinger cell, an organism will take damage. Once it has taken as much damage as it has cells in its body, it will die. If the hyperparameter `One touch kill` is on, an organism will immediatly die when touched by a stinger cell.
 
 ### Reproduction
 
@@ -115,4 +115,4 @@ Organisms can also rotate around a central pivot cell. This cell can never be re
 
 ### Eyes and Brains
 
-Any organism can evolve eyes, but when an organism has both eyes and mover cells it is given a brain. The eye, unlike other cells, has a direction, which is denoted by the direction of the slit in the cell. It "looks" forward in this direction and "sees" the first non-empty cell within a certain range. It checks the type of the cell and informs the brain, which then decides how to move. The brain can either ignore (keep moving in whatever direction), chase (move towards the observed cell), or retreat (move in the opposite direction of the observed cell). The brain maps different observed cell types to different actions. For instance, the brain will chase when it sees food and retreat when it sees a killer cell. These behaviors can mutate over time.
+Any organism can evolve eyes, but when an organism has both eyes and mover cells it is given a brain. The eye, unlike other cells, has a direction, which is denoted by the direction of the slit in the cell. It "looks" forward in this direction and "sees" the first non-empty cell within a certain range. It checks the type of the cell and informs the brain, which then decides how to move. The brain can either ignore (keep moving in whatever direction), chase (move towards the observed cell), or retreat (move in the opposite direction of the observed cell). The brain maps different observed cell types to different actions. For instance, the brain will chase when it sees food and retreat when it sees a stinger cell. These behaviors can mutate over time.

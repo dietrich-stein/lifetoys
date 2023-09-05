@@ -8,6 +8,7 @@ import {
   setWorldRendererStats,
 } from './WorldManagerSlice';
 import SimulatorMap from '../simulator/SimulatorMap';
+import Directions from '../organism/Directions';
 
 interface WorldRendererInterface {
   // State
@@ -61,6 +62,7 @@ interface WorldRendererInterface {
 class WorldRenderer implements WorldRendererInterface {
   // State
   storeState: RootState | null;
+  // Grid
   gridCols: number;
   gridRows: number;
   gridWidth: number;
@@ -91,6 +93,7 @@ class WorldRenderer implements WorldRendererInterface {
   private constructor() {
     // State
     this.storeState = null;
+    // Grid
     this.gridCols = 0;
     this.gridRows = 0;
     this.gridWidth = 0;
@@ -124,7 +127,7 @@ class WorldRenderer implements WorldRendererInterface {
     return WorldRenderer.instance;
   }
 
-  drawGridLines() {
+  /*drawGridLines() {
     if (this.gridBorderSize === 0 || this.ctx === undefined) {
       return;
     }
@@ -178,7 +181,7 @@ class WorldRenderer implements WorldRendererInterface {
 
     this.ctx.stroke();
     this.ctx.translate(-0.5, -0.5); // part 2 of 2, see above
-  }
+  }*/
 
   resizeGrid() {
     if (this.storeState === null) {
@@ -218,12 +221,12 @@ class WorldRenderer implements WorldRendererInterface {
     }*/
   }
 
-  initGrid(drawLines: boolean = false) {
+  initGrid(/*drawLines: boolean = false*/) {
     this.resizeGrid();
 
-    if (drawLines){
+    /*if (drawLines){
       this.drawGridLines();
-    }
+    }*/
   }
 
   public resizeWindow() {
@@ -287,6 +290,144 @@ class WorldRenderer implements WorldRendererInterface {
     this.cellsToRender.clear();
   }
 
+  drawTriangle(direction: number, offsetX: number, offsetY: number) {
+    if (typeof this.ctx === 'undefined') {
+      return;
+    }
+
+    const halfCell = Math.floor(this.gridCellSize / 2);
+    const quarterCell = Math.floor(halfCell / 2);
+    //const eighthCell = Math.floor(quarterCell / 2);
+    const sizeLateralMinus = halfCell - quarterCell;//eighthCell;
+    const sizeLateralPlus = halfCell + quarterCell;//eighthCell;
+    const sizeFromSideMinus = this.gridCellSize - quarterCell;//eighthCell;
+    const sizeFromSidePlus = quarterCell;//eighthCell;
+    const sizeFromCornerMinus = halfCell;//this.gridCellSize - quarterCell;
+    const sizeFromCornerPlus = halfCell;//quarterCell;
+
+    let startX;
+    let startY;
+    let middleX;
+    let middleY;
+    let lastX;
+    let lastY;
+
+    switch (direction) {
+      case Directions.cardinals.n:
+        // left
+        startX = sizeLateralMinus;
+        startY = sizeFromSidePlus;
+        // top
+        middleX = halfCell;
+        middleY = 0;
+        // right
+        lastX = sizeLateralPlus;
+        lastY = sizeFromSidePlus;
+        break;
+
+      case Directions.cardinals.ne:
+        // top-right
+        startX = this.gridCellSize;
+        startY = 0;
+        // left
+        middleX = sizeFromCornerMinus;
+        middleY = 0;
+        // bottom
+        lastX = this.gridCellSize;
+        lastY = sizeFromCornerPlus;
+        break;
+
+      case Directions.cardinals.e:
+        // right
+        startX = this.gridCellSize;
+        startY = halfCell;
+        // top
+        middleX = sizeFromSideMinus;
+        middleY = sizeLateralMinus;
+        // bottom
+        lastX = sizeFromSideMinus;
+        lastY = sizeLateralPlus;
+        break;
+
+      case Directions.cardinals.se:
+        // bottom-right
+        startX = this.gridCellSize;
+        startY = this.gridCellSize;
+        // top
+        middleX = this.gridCellSize;
+        middleY = sizeFromCornerMinus;
+        // left
+        lastX = sizeFromCornerMinus;
+        lastY = this.gridCellSize;
+        break;
+
+      case Directions.cardinals.s:
+        // left
+        startX = sizeLateralMinus;
+        startY = sizeFromSideMinus;
+        // bottom
+        middleX = halfCell;
+        middleY = this.gridCellSize;
+        // right
+        lastX = sizeLateralPlus;
+        lastY = sizeFromSideMinus;
+        break;
+
+      case Directions.cardinals.sw:
+        // bottom-left
+        startX = 0;
+        startY = this.gridCellSize;
+        // right
+        middleX = sizeFromCornerPlus;
+        middleY = this.gridCellSize;
+        // top
+        lastX = 0;
+        lastY = sizeFromCornerMinus;
+        break;
+
+      case Directions.cardinals.w:
+        // left
+        startX = 0;
+        startY = halfCell;
+        // top
+        middleX = sizeFromSidePlus;
+        middleY = sizeLateralMinus;
+        // bottom
+        lastX = sizeFromSidePlus;
+        lastY = sizeLateralPlus;
+        break;
+
+      case Directions.cardinals.nw:
+        // top-left
+        startX = 0;
+        startY = 0;
+        // right
+        middleX = sizeFromCornerPlus;
+        middleY = 0;
+        // bottom
+        lastX = 0;
+        lastY = sizeFromCornerPlus;
+        break;
+    }
+
+    if (
+      startX === undefined ||
+      startY === undefined ||
+      middleX === undefined ||
+      middleY === undefined ||
+      lastX === undefined ||
+      lastY === undefined
+    ) {
+      return;
+    }
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(offsetX + startX, offsetY + startY);
+    this.ctx.lineTo(offsetX + middleX, offsetY + middleY);
+    this.ctx.lineTo(offsetX + lastX, offsetY + lastY);
+    this.ctx.fill();
+  }
+
   renderCell(cell: SimulatorCell) {
     if (typeof this.ctx === 'undefined' || this.storeState === null) {
       return;
@@ -296,7 +437,9 @@ class WorldRenderer implements WorldRendererInterface {
     const y = cell.row * this.gridCellSize;
     const halfCell = Math.floor(this.gridCellSize / 2);
 
-    this.ctx.beginPath();
+    //this.ctx.beginPath(); // only use when lifting with moveTo()
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
     this.ctx.strokeStyle = '#000000';
     this.ctx.fillStyle = cell.state.color;
     this.ctx.fillRect(x, y, this.gridCellSize, this.gridCellSize);
@@ -308,25 +451,40 @@ class WorldRenderer implements WorldRendererInterface {
       this.ctx.strokeRect(x, y, this.gridCellSize, this.gridCellSize);
 
       if (this.gridCellSize >= 12) {
+        // Big first-letter of cell centered inside
         this.ctx.font = `${halfCell * 1.5}px serif`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-
         this.ctx.fillStyle = 'rgba(0, 0, 0, 1)';
         this.ctx.fillText(
           cell.state.name.charAt(0).toUpperCase(),
           x + halfCell + 1,
           y + Math.floor(halfCell * 1.15) + 1,
         );
-
         this.ctx.fillStyle = 'rgba(255, 255, 255, 1)';
         this.ctx.fillText(cell.state.name.charAt(0).toUpperCase(), x + halfCell, y + Math.floor(halfCell * 1.15));
+
+        // ID Labels
+        if (cell.id.length > 0) {
+          this.ctx.font = `${this.gridCellSize * 0.2}px serif`; // 1/16th
+          this.ctx.textAlign = 'left';
+          this.ctx.textBaseline = 'bottom';
+          this.ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+          this.ctx.fillText(
+            cell.id,
+            x + 0,
+            y + this.gridCellSize,
+          );
+        }
+
+        // Draw the rotation direction triangle
+        if (cell.org !== null) {
+          this.drawTriangle(cell.org.rotationDirection, x, y);
+        }
       }
 
       this.ctx.translate(-0.5, -0.5); // part 1 of 2, a fix for CSS causing blurry lines
     }
 
-    this.ctx.closePath();
+    //this.ctx.closePath(); // only use when need to draw line from end to start for stroke
     /*
     // Render the eye slit?
     if (
@@ -352,7 +510,7 @@ class WorldRenderer implements WorldRendererInterface {
     var w = size / 4;
 
     ctx.translate(cell.x + half, cell.y + half);
-    var abs_dir = cell.owner_cell.org.rotation_direction; //cell.owner_cell.org.getAbsoluteDirection();
+    var abs_dir = cell.owner_cell.org.rotationDirection; //cell.owner_cell.org.getAbsoluteDirection();
 
     if (cell.owner_cell.org.environment === 'editor') {
       console.log('SimulatorCellState.render: abs_dir = ', abs_dir);
@@ -389,7 +547,6 @@ class WorldRenderer implements WorldRendererInterface {
       );
       */
     //}
-
     for (var col of cells) {
       for (var cell of col) {
         this.renderCell(cell);

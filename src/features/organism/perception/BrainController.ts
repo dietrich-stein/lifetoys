@@ -35,7 +35,7 @@ class BrainController implements BrainControllerInterface {
     }
 
     this.decisions[CellStates.food.name] = Decision.chase;
-    this.decisions[CellStates.killer.name] = Decision.retreat;
+    this.decisions[CellStates.stinger.name] = Decision.retreat;
   }
 
   copy(brain: BrainController) {
@@ -52,7 +52,7 @@ class BrainController implements BrainControllerInterface {
     // randomize the non obvious decisions
     if (randomize_all) {
       this.decisions[CellStates.food.name] = Decision.getRandom();
-      this.decisions[CellStates.killer.name] = Decision.getRandom();
+      this.decisions[CellStates.stinger.name] = Decision.getRandom();
       this.decisions[CellStates.brain.name] = Decision.getRandom();
     }
 

@@ -44,7 +44,7 @@ const initialState: WorldState = {
       mouth: '#FFAA00',
       producer: '#0000FF',
       mover: '#00FFFF',
-      killer: '#FF0000',
+      stinger: '#FF0000',
       armor: '#6600CC',
       eye: '#EEEEEE',
       'eye-slit': '#000000',

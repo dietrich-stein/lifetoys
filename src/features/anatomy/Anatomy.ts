@@ -17,14 +17,14 @@ interface AnatomyInterface {
   has_brain: boolean;
   has_mover: boolean;
   has_eye: boolean;
-  has_killer: boolean;
+  has_stinger: boolean;
   has_producer: boolean;
   has_armor: boolean;
   mouth_count: number;
   brain_count: number;
   mover_count: number;
   eye_count: number;
-  killer_count: number;
+  stinger_count: number;
   producer_count: number;
   armor_count: number;
   clear: () => void;
@@ -77,14 +77,14 @@ class Anatomy implements AnatomyInterface {
   has_brain: boolean;
   has_mover: boolean;
   has_eye: boolean;
-  has_killer: boolean;
+  has_stinger: boolean;
   has_producer: boolean;
   has_armor: boolean;
   mouth_count: number;
   brain_count: number;
   mover_count: number;
   eye_count: number;
-  killer_count: number;
+  stinger_count: number;
   producer_count: number;
   armor_count: number;
 
@@ -98,7 +98,7 @@ class Anatomy implements AnatomyInterface {
     this.has_brain = false;
     this.has_mover = false;
     this.has_eye = false;
-    this.has_killer = false;
+    this.has_stinger = false;
     this.has_producer = false;
     this.has_armor = false;
 
@@ -106,7 +106,7 @@ class Anatomy implements AnatomyInterface {
     this.brain_count = 0;
     this.mover_count = 0;
     this.eye_count = 0;
-    this.killer_count = 0;
+    this.stinger_count = 0;
     this.producer_count = 0;
     this.armor_count = 0;
   }
@@ -118,7 +118,7 @@ class Anatomy implements AnatomyInterface {
     this.has_brain = false;
     this.has_mover = false;
     this.has_eye = false;
-    this.has_killer = false;
+    this.has_stinger = false;
     this.has_producer = false;
     this.has_armor = false;
 
@@ -126,7 +126,7 @@ class Anatomy implements AnatomyInterface {
     this.brain_count = 0;
     this.mover_count = 0;
     this.eye_count = 0;
-    this.killer_count = 0;
+    this.stinger_count = 0;
     this.producer_count = 0;
     this.armor_count = 0;
   }
@@ -252,7 +252,7 @@ class Anatomy implements AnatomyInterface {
     this.has_brain = false;
     this.has_mover = false;
     this.has_eye = false;
-    this.has_killer = false;
+    this.has_stinger = false;
     this.has_producer = false;
     this.has_armor = false;
     for (var cell of this.cells) {
@@ -277,9 +277,9 @@ class Anatomy implements AnatomyInterface {
         this.eye_count++;
       }
 
-      if (cell.state === SimulatorCellStates.killer) {
-        this.has_killer = true;
-        this.killer_count++;
+      if (cell.state === SimulatorCellStates.stinger) {
+        this.has_stinger = true;
+        this.stinger_count++;
       }
 
       if (cell.state === SimulatorCellStates.producer) {

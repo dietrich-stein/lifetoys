@@ -2,7 +2,7 @@ abstract class Neighbors {
   //all       ...
   //          .x.
   //          ...
-  public static all: number[][] = [
+  public static all: DirectionCoordinates = [
     [0, 1],
     [0, -1],
     [1, 0],
@@ -16,7 +16,7 @@ abstract class Neighbors {
   //adjacent   .
   //          .x.
   //           .
-  public static adjacent: number[][] = [
+  public static adjacent: DirectionCoordinates = [
     [0, 1],
     [0, -1],
     [1, 0],
@@ -26,7 +26,7 @@ abstract class Neighbors {
   //corners   . .
   //           x
   //          . .
-  public static corners: number[][] = [
+  public static corners: DirectionCoordinates = [
     [-1, -1],
     [1, 1],
     [-1, 1],
@@ -36,7 +36,7 @@ abstract class Neighbors {
   //allSelf   ...
   //          ...
   //          ...
-  public static allSelf: number[][] = [
+  public static allSelf: DirectionCoordinates = [
     [0, 0],
     [0, 1],
     [0, -1],

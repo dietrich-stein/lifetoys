@@ -55,7 +55,7 @@ class EyeCell extends AnatomyCell {
       return null;
     }
 
-    var lookDirection = this.org.rotation_direction;//this.org.getAbsoluteDirection();
+    var lookDirection = this.org.rotationDirection;//this.org.getAbsoluteDirection();
     var addCol = 0;
     var addRow = 0;
 
