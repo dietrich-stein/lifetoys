@@ -47,6 +47,8 @@ export interface WorldManagerState {
   worldRendererRunning: boolean;
   worldRendererTime: number;
   worldRendererCellSize: number;
+  worldRendererCols: number;
+  worldRendererRows: number;
   // Simulation
   worldSimulationRunning: boolean;
   worldSimulationTicks: number;
@@ -101,6 +103,8 @@ const initialState: WorldManagerState = {
   worldRendererRunning: false,
   worldRendererTime: 0,
   worldRendererCellSize: 100,
+  worldRendererCols: 5,
+  worldRendererRows: 5,
   // Simulation
   worldSimulationRunning: false,
   worldSimulationTicks: 0,
@@ -117,29 +121,58 @@ export const WorldManagerSlice = createSlice({
   reducers: {
     // Rendering
     startWorldRenderer: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice, startWorldRenderer, payload:', action.payload);
+      console.log('WorldManagerSlice, startWorldRenderer(), payload:', action.payload);
       state.worldRendererRunning = action.payload.worldRendererRunning;
-      worldRenderer.start(action.payload);
+
+      if (worldSimulation.map !== null) {
+        worldRenderer.start(action.payload, worldSimulation.map.grid);
+      }
     },
     stopWorldRenderer: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice.stopWorldRenderer, payload:', action.payload);
+      //console.log('WorldManagerSlice.stopWorldRenderer(), payload:', action.payload);
       state.worldRendererRunning = action.payload.worldRendererRunning;
 
       worldRenderer.stop();
     },
     setWorldRendererStats: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice.setWorldRendererStats, payload:', action.payload);
+      //console.log('WorldManagerSlice.setWorldRendererStats(), payload:', action.payload);
       state.worldRendererTime = action.payload.worldRendererTime;
     },
     resetWorldRenderer: (state, action: PayloadAction<WorldManagerState>) => {
-      //console.log('WorldManagerSlice.resetWorldRenderer, payload:', action.payload);
+      //console.log('WorldManagerSlice.resetWorldRenderer(), payload:', action.payload);
       state.worldRendererRunning = action.payload.worldRendererRunning;
-      worldRenderer.reset(action.payload);
+
+      if (worldSimulation.map !== null) {
+        worldRenderer.reset(
+          state.worldRendererCols,
+          state.worldRendererRows,
+          state.worldRendererCellSize,
+          action.payload,
+          worldSimulation.map.grid,
+          false,
+        );
+      }
     },
     setWorldRendererCellSize: (state, action: PayloadAction<WorldManagerState>) => {
       //console.log('WorldManagerSlice.setWorldRendererCellSize, payload:', action.payload, 'state:', state);
       state.worldRendererCellSize = action.payload.worldRendererCellSize;
-      worldRenderer.reset(action.payload, false, worldSimulation.map);
+
+      if (worldSimulation.map !== null) {
+        worldRenderer.reset(
+          state.worldRendererCols,
+          state.worldRendererRows,
+          state.worldRendererCellSize,
+          action.payload,
+          worldSimulation.map.grid,
+          false,
+        );
+      }
+    },
+    setWorldRendererCols: (state, action: PayloadAction<number>) => {
+      state.worldRendererCols = action.payload;
+    },
+    setWorldRendererRows: (state, action: PayloadAction<number>) => {
+      state.worldRendererRows = action.payload;
     },
 
     // Simulation
@@ -186,6 +219,8 @@ export const {
   resetWorldRenderer,
   setWorldRendererStats,
   setWorldRendererCellSize,
+  setWorldRendererCols,
+  setWorldRendererRows,
   // Simulation
   startWorldSimulation,
   stopWorldSimulation,

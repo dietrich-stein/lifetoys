@@ -1,21 +1,16 @@
-import { store, RootState } from '../../app/store';
+import { store } from '../../app/store';
 import SimulatorCellStates from '../simulator/SimulatorCellStates';
 import SimulatorCell from '../simulator/SimulatorCell';
-//import WorldSimulation from './WorldSimulation';
-//import { useAppDispatch } from '../../../app/hooks';
 import {
   ColorSchemeInterface,
   WorldManagerState,
   setWorldRendererStats,
 } from './WorldManagerSlice';
-import SimulatorMap, { SimulatorMapGrid } from '../simulator/SimulatorMap';
+import { SimulatorMapGrid } from '../simulator/SimulatorMap';
 import Directions from '../organism/Directions';
 
 interface WorldRendererInterface {
-  // State
-  storeState: RootState | null;
-  canvasContainerWidth: number;
-  canvasContainerHeight: number;
+  // Grid
   gridCols: number;
   gridRows: number;
   gridWidth: number;
@@ -31,6 +26,8 @@ interface WorldRendererInterface {
   timeStoppedLast: number;
   // DOM
   canvasContainer: HTMLDivElement | null;
+  canvasContainerWidth: number;
+  canvasContainerHeight: number;
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | undefined;
   // Cells
@@ -38,18 +35,30 @@ interface WorldRendererInterface {
   cellsToHighlight: Set<SimulatorCell> | null;
   cellsHighlighted: Set<SimulatorCell> | null;
   // Control
-  init: (storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) => void;
-  start: (state: WorldManagerState) => void;
+  init: (
+    cols: number,
+    rows: number,
+    cellSize: number,
+    canvasContainer: HTMLDivElement,
+    canvas: HTMLCanvasElement,
+    colorScheme: ColorSchemeInterface,
+  ) => void;
+  start: (worldManagerState: WorldManagerState, grid: SimulatorMapGrid) => void;
   stop: () => void;
-  reset: (state: WorldManagerState, resetStats: boolean, map: SimulatorMap | null) => void;
-  clear: () => void;
-  // Cells
+  reset: (
+    cols: number,
+    rows: number,
+    cellSize: number,
+    worldManagerState: WorldManagerState,
+    grid: SimulatorMapGrid, resetStats: boolean
+  ) => void;
+  // Cells, Grid, Rendering
   addToRender: (cell: SimulatorCell) => void;
   renderCell: (cell: SimulatorCell) => void;
   renderChangedCells: () => void;
-  initGrid: () => void; // cellSize: number, numCols: number, numRows: number, drawLines: boolean
+  renderSolidColor: () => void;
   resizeWindow: () => void;
-  resizeGrid: () => void; // cellSize: number, numCols: number, numRows: number
+
   //renderCellHighlight: (cell: SimulatorCell, color: string) => void;
   //renderHighlights: () => void;
   //highlightCell: (cell: SimulatorCell) => void;
@@ -61,8 +70,6 @@ interface WorldRendererInterface {
 //const worldSimulation = WorldSimulation.getInstance();
 
 class WorldRenderer implements WorldRendererInterface {
-  // State
-  storeState: RootState | null;
   // Grid
   gridCols: number;
   gridRows: number;
@@ -92,8 +99,6 @@ class WorldRenderer implements WorldRendererInterface {
 
   // Private prevents direct construction calls with the `new` operator.
   private constructor() {
-    // State
-    this.storeState = null;
     // Grid
     this.gridCols = 0;
     this.gridRows = 0;
@@ -128,19 +133,17 @@ class WorldRenderer implements WorldRendererInterface {
     return WorldRenderer.instance;
   }
 
-  resizeGrid() {
-    if (this.storeState === null) {
-      return;
-    }
-
+  /*resizeGrid(cols: number, rows: number, cellSize: number) {
     this.gridHeight = this.canvasContainerHeight;
     this.gridWidth = this.canvasContainerWidth;
 
-    this.gridCellSize = this.storeState.worldManager.worldRendererCellSize;
+    this.gridCols = cols;
+    this.gridRows = rows;
+    this.gridCellSize = cellSize;
 
-    this.gridCols = this.storeState.world.numCols;
-    this.gridRows = this.storeState.world.numRows;
-
+    if (this.gridMap !== null) {
+      this.gridMap.resize(this.gridCols, this.gridRows, this.gridCellSize);
+    }*/
     /*
     // This are auto-adjusted cols and rows that adapt to the container.
     // We don't need them anymore (for now anyway) because we are decoupling the simulation.
@@ -159,20 +162,17 @@ class WorldRenderer implements WorldRendererInterface {
       (this.gridRows * this.gridCellSize) + this.gridBorderSize > this.gridHeight) {
       this.gridRows -= 1;
     }
-    */
+  }*/
 
-    /*if (this.gridMap !== null) {
-      this.gridMap.resize(this.gridCols, this.gridRows, this.gridCellSize);
-    }*/
-  }
+  /*initGrid(cols: number, rows: number, cellSize: number) {
+    //this.resizeGrid(cols, rows, cellSize);
+    this.gridHeight = this.canvasContainerHeight;
+    this.gridWidth = this.canvasContainerWidth;
 
-  initGrid(/*drawLines: boolean = false*/) {
-    this.resizeGrid();
-
-    /*if (drawLines){
-      this.drawGridLines();
-    }*/
-  }
+    this.gridCols = cols;
+    this.gridRows = rows;
+    this.gridCellSize = cellSize;
+  }*/
 
   public resizeWindow() {
     if (this.canvasContainer === null || this.canvas === null) {
@@ -189,29 +189,42 @@ class WorldRenderer implements WorldRendererInterface {
   handleResize() {
     console.log('handleResize');
     this.resizeWindow();
-    this.resizeGrid();
+    this.gridHeight = this.canvasContainerHeight;
+    this.gridWidth = this.canvasContainerWidth;
   }
 
-  public init(storeState: RootState, canvasContainer: HTMLDivElement, canvas: HTMLCanvasElement) {
+  public init(
+    cols: number,
+    rows: number,
+    cellSize: number,
+    canvasContainer: HTMLDivElement,
+    canvas: HTMLCanvasElement,
+    colorScheme: ColorSchemeInterface,
+  ) {
     //console.log('WorldRenderer, init');
-    this.storeState = storeState;
-
+    this.gridCols = cols;
+    this.gridRows = rows;
+    this.gridCellSize = cellSize;
     this.canvasContainer = canvasContainer;
     this.canvasContainerWidth = this.canvasContainer.clientWidth;
     this.canvasContainerHeight = this.canvasContainer.clientHeight;
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d', {
+        this.ctx = canvas.getContext('2d', {
       willReadFrequently: true,
     }) as CanvasRenderingContext2D;
 
+    // Calling resizeWindow() here updates the "canvasContainerHeight" and
+    // "canvasContainerWidth" vars based on the container size. Then, it
+    // sets the canvas.width and canvas.height attributes to match.
     this.resizeWindow();
-    this.initGrid();
 
-    if (this.canvasContainer === null) {
-      return;
-    }
+    // We can now sync the local convenience vars to the container
+    this.gridHeight = this.canvasContainerHeight;
+    this.gridWidth = this.canvasContainerWidth;
 
     window.addEventListener('resize', this.handleResize.bind(this), false);
+
+    this.applyColorScheme(colorScheme);
   }
 
   private render() {
@@ -393,7 +406,7 @@ class WorldRenderer implements WorldRendererInterface {
   }
 
   renderCell(cell: SimulatorCell) {
-    if (typeof this.ctx === 'undefined' || this.storeState === null) {
+    if (typeof this.ctx === 'undefined') {
       return;
     }
 
@@ -471,6 +484,7 @@ class WorldRenderer implements WorldRendererInterface {
     }
 
     this.ctx.closePath(); // only use when need to draw line from end to start for stroke
+
     /*
     // Render the eye slit?
     if (
@@ -509,6 +523,15 @@ class WorldRenderer implements WorldRendererInterface {
     */
   }
 
+  renderSolidColor(color: string = 'rgba(255,255,255,1)') {
+    if (this.ctx === undefined) {
+      return;
+    }
+
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(0, 0, this.canvasContainerWidth, this.canvasContainerHeight);
+  }
+
   applyColorScheme(colorScheme: ColorSchemeInterface) {
     for (var state of SimulatorCellStates.all) {
       state.color = colorScheme[state.name];
@@ -531,18 +554,19 @@ class WorldRenderer implements WorldRendererInterface {
     //}
   }
 
-  public start(state: WorldManagerState) {
+  public start(worldManagerState: WorldManagerState, grid: SimulatorMapGrid) {
     if (this.running) {
       return;
     }
 
     //console.log('WorldRenderer, start, state:', state);
+    this.renderCellsByMapGrid(grid);
 
     const animate = (nowTime: DOMHighResTimeStamp) => {
       this.timeStartedElapsed = nowTime - this.timeStoppedElapsed;
       this.render();
       store.dispatch(setWorldRendererStats({
-        ...state,
+        ...worldManagerState,
         worldRendererTime: this.timeStartedElapsed,
       }));
       this.animateId = requestAnimationFrame(animate);
@@ -575,12 +599,15 @@ class WorldRenderer implements WorldRendererInterface {
     this.running = false;
   }
 
-  public reset(state: WorldManagerState, resetStats: boolean = true, map: SimulatorMap | null = null) {
-    if (this.storeState === null) {
-      return;
-    }
-
-    debugger;
+  // In addition to manual control, also called in event handler for GUI widget inputs
+  public reset(
+    cols: number,
+    rows: number,
+    cellSize: number,
+    worldManagerState: WorldManagerState,
+    grid: SimulatorMapGrid,
+    resetStats: boolean = true,
+  ) {
     const wasRunning = this.running;
 
     this.stop();
@@ -592,28 +619,16 @@ class WorldRenderer implements WorldRendererInterface {
       this.timeStoppedLast = 0;
     }
 
-    this.clear();
-    this.storeState.worldManager = state;
-    this.resizeGrid();
+    this.gridCols = cols;
+    this.gridRows = rows;
+    this.gridCellSize = cellSize;
 
-    if (map !== null) {
-      this.renderCellsByMapGrid(map.grid);
-    }
+    this.renderSolidColor();
+    this.renderCellsByMapGrid(grid);
 
     if (wasRunning) {
-      this.start(state);
+      this.start(worldManagerState, grid);
     }
-  }
-
-  clear() {
-    if (this.ctx === undefined) {
-      return;
-    }
-
-    debugger;
-
-    this.ctx.fillStyle = 'rgba(255,255,255,1)'; //'#0000FF';
-    this.ctx.fillRect(0, 0, this.canvasContainerWidth, this.canvasContainerHeight);
   }
 
   addToRender(cell: SimulatorCell) {

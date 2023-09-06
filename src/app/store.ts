@@ -78,13 +78,24 @@ startAppListening({
               isHTMLCanvasElement(worldCanvasEl) &&
               isHTMLDivElement(worldCanvasContainerEl)
             ) {
-              worldRenderer.init(state, worldCanvasContainerEl, worldCanvasEl);
+              // First so that WorldSimulation.init() uses correct .gridCols and .gridRows from WorldRenderer
+              worldRenderer.init(
+                state.worldManager.worldRendererCols,
+                state.worldManager.worldRendererRows,
+                state.worldManager.worldRendererCellSize,
+                worldCanvasContainerEl,
+                worldCanvasEl,
+                state.worldManager.config.color_scheme,
+              );
+
+              // Needs to happen before startWorldRenderer() later
+              worldSimulation.init(state.worldManager);
+
               listenerApi.dispatch(startWorldRenderer({
                 ...state.worldManager,
                 worldRendererRunning: true,
               }));
 
-              worldSimulation.init();
               listenerApi.dispatch(startWorldSimulation({
                 ...state.worldManager,
                 worldSimulationRunning: true,

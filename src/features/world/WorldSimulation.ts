@@ -72,45 +72,12 @@ class WorldSimulation {
     }
   }
 
-  public init() {
+  public init(worldManagerState: WorldManagerState) {
     this.map = new SimulatorMap(
       worldRenderer.gridCols,
       worldRenderer.gridRows,
       worldRenderer.gridCellSize,
     );
-
-    this.fossilRecord = new FossilRecord();
-
-    /*console.log(
-      'WorldSimulation, init',
-      'fossilRecord:', this.fossilRecord,
-    );*/
-  }
-
-  public start(worldManagerState: WorldManagerState) {
-    if (this.running || this.map === null) {
-      return;
-    }
-
-    worldRenderer.renderCellsByMapGrid(this.map.grid);
-
-    worldRenderer.applyColorScheme(worldManagerState.config.color_scheme);
-
-    this.intervalId = setInterval(() => {
-      if (!this.running) { // not needed, but let's be certain
-        return;
-      }
-
-      this.timeElapsed += this.ticksDelay;
-      this.ticksElapsed += 1;
-      this.simulate(worldManagerState);
-      store.dispatch(setWorldSimulationStats({
-        ...worldManagerState,
-        worldSimulationTime: this.timeElapsed,
-        worldSimulationTicks: this.ticksElapsed,
-        worldSimulationTotalLivingOrganisms: this.organisms.length,
-      }));
-    }, this.ticksDelay);
 
     this.addCenteredOrganismByPlan([
       {
@@ -130,6 +97,35 @@ class WorldSimulation {
         direction: Directions.cardinals.nw,
       },
     ], worldManagerState.hyperparams);
+
+    this.fossilRecord = new FossilRecord();
+
+    /*console.log(
+      'WorldSimulation, init',
+      'fossilRecord:', this.fossilRecord,
+    );*/
+  }
+
+  public start(worldManagerState: WorldManagerState) {
+    if (this.running || this.map === null) {
+      return;
+    }
+
+    this.intervalId = setInterval(() => {
+      if (!this.running) { // not needed, but let's be certain
+        return;
+      }
+
+      this.timeElapsed += this.ticksDelay;
+      this.ticksElapsed += 1;
+      this.simulate(worldManagerState);
+      store.dispatch(setWorldSimulationStats({
+        ...worldManagerState,
+        worldSimulationTime: this.timeElapsed,
+        worldSimulationTicks: this.ticksElapsed,
+        worldSimulationTotalLivingOrganisms: this.organisms.length,
+      }));
+    }, this.ticksDelay);
 
     this.running = true;
   }

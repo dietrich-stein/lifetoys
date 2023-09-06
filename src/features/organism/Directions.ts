@@ -41,7 +41,6 @@ abstract class Directions {
     let dir = Math.floor(Math.random() * Directions.scalars.length);
 
     if (restrictToAnatomy && dir % 2 !== 0) {
-      debugger;
       dir--;
     }
 
