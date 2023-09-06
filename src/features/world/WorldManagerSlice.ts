@@ -25,8 +25,24 @@ export type HyperparamsState = {
   extraMoverFoodCost: number;
 };
 
+export interface ColorSchemeInterface {
+  [key: string]: string;
+}
+
+export interface WorldManagerConfigState {
+  fill_window: boolean;
+  num_random_orgs: number;
+  clear_walls_on_reset: boolean;
+  auto_reset: boolean;
+  brush_size: number;
+  color_scheme: ColorSchemeInterface;
+}
+
 // Optionality enables dispatch without including elements
 export interface WorldManagerState {
+  // Other
+  config: WorldManagerConfigState;
+  hyperparams: HyperparamsState;
   // Rendering
   worldRendererRunning: boolean;
   worldRendererTime: number;
@@ -37,22 +53,30 @@ export interface WorldManagerState {
   worldSimulationTicksDelay: number;
   worldSimulationTime: number;
   worldSimulationTotalLivingOrganisms: number;
-  // Other
-  hyperparams: HyperparamsState;
 }
 
 const initialState: WorldManagerState = {
-  // Rendering
-  worldRendererRunning: false,
-  worldRendererTime: 0,
-  worldRendererCellSize: 100,
-  // Simulation
-  worldSimulationRunning: false,
-  worldSimulationTicks: 0,
-  worldSimulationTicksDelay: DEFAULT_TICKS_DELAY,
-  worldSimulationTime: 0,
-  worldSimulationTotalLivingOrganisms: 0,
   // Other
+  config: {
+    fill_window: true,
+    num_random_orgs: 100,
+    clear_walls_on_reset: false,
+    auto_reset: false,
+    brush_size: 2,
+    color_scheme: {
+      empty: 'rgb(0, 0, 128)',
+      food: '#15DE59',
+      wall: '#808080',
+      brain: '#FF00FF',
+      mouth: '#FFAA00',
+      producer: '#0000FF',
+      mover: '#00FFFF',
+      stinger: '#FF0000',
+      armor: '#6600CC',
+      eye: '#EEEEEE',
+      'eye-slit': '#000000',
+    },
+  },
   hyperparams: {
     lifespanMultiplier: 100,
     foodProdProb: 5,
@@ -73,6 +97,16 @@ const initialState: WorldManagerState = {
     foodDropProb: 0,
     extraMoverFoodCost: 0,
   },
+  // Rendering
+  worldRendererRunning: false,
+  worldRendererTime: 0,
+  worldRendererCellSize: 100,
+  // Simulation
+  worldSimulationRunning: false,
+  worldSimulationTicks: 0,
+  worldSimulationTicksDelay: DEFAULT_TICKS_DELAY,
+  worldSimulationTime: 0,
+  worldSimulationTotalLivingOrganisms: 0,
 };
 const worldRenderer = WorldRenderer.getInstance();
 const worldSimulation = WorldSimulation.getInstance();

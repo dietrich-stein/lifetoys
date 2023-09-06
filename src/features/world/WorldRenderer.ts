@@ -1,13 +1,14 @@
 import { store, RootState } from '../../app/store';
-import CellStates from '../simulator/SimulatorCellStates';
+import SimulatorCellStates from '../simulator/SimulatorCellStates';
 import SimulatorCell from '../simulator/SimulatorCell';
 //import WorldSimulation from './WorldSimulation';
 //import { useAppDispatch } from '../../../app/hooks';
 import {
+  ColorSchemeInterface,
   WorldManagerState,
   setWorldRendererStats,
 } from './WorldManagerSlice';
-import SimulatorMap from '../simulator/SimulatorMap';
+import SimulatorMap, { SimulatorMapGrid } from '../simulator/SimulatorMap';
 import Directions from '../organism/Directions';
 
 interface WorldRendererInterface {
@@ -126,62 +127,6 @@ class WorldRenderer implements WorldRendererInterface {
 
     return WorldRenderer.instance;
   }
-
-  /*drawGridLines() {
-    if (this.gridBorderSize === 0 || this.ctx === undefined) {
-      return;
-    }
-
-    const gridCellsWidth = this.gridCellSize * this.gridCols;
-    const gridCellsHeight = this.gridCellSize * this.gridRows;
-    const xRemain = this.gridWidth - (gridCellsWidth + 1);
-    const yRemain = this.gridHeight - (gridCellsHeight + 1);
-    const xShift = Math.floor(xRemain / 2);
-    const yShift = Math.floor(yRemain / 2);
-
-    this.clear();
-    this.ctx.lineWidth = 1;
-    this.ctx.fillStyle = '#FFFF00';
-    this.ctx.translate(0.5, 0.5); // part 1 of 2, a fix for CSS causing blurry lines
-    this.ctx.beginPath();
-
-    let i, xLine, yLine, x1, x2, y1, y2;
-
-    // Draw vertical lines in the top row of each grid cell
-    for (i = 0; i < this.gridCols; i++) {
-      xLine = i * this.gridCellSize;
-      x1 = xShift + xLine;
-      y1 = yShift + 0;
-      x2 = xShift + xLine;
-      y2 = yShift + gridCellsHeight;
-
-      this.ctx.moveTo(x1, y1);
-      this.ctx.lineTo(x2, y2);
-    }
-
-    // Draw horizontal lines in the left column of each grid cell
-    for (i = 0; i < this.gridRows; i++) {
-      yLine = i * this.gridCellSize;
-      x1 = xShift + 0;
-      y1 = yShift + yLine;
-      x2 = xShift + gridCellsWidth;
-      y2 = yShift + yLine;
-
-      this.ctx.moveTo(x1, y1);
-      this.ctx.lineTo(x2, y2);
-    }
-
-    // Draw a right-side border
-    this.ctx.moveTo(xShift + gridCellsWidth, yShift + 0);
-    this.ctx.lineTo(xShift + gridCellsWidth, yShift + gridCellsHeight);
-
-    // Draw a bottom-side border
-    this.ctx.moveTo(xShift + 0, yShift + gridCellsHeight);
-    this.ctx.lineTo(xShift + gridCellsWidth, yShift + gridCellsHeight);
-
-    this.ctx.stroke();
-    this.ctx.translate(-0.5, -0.5); // part 2 of 2, see above
-  }*/
 
   resizeGrid() {
     if (this.storeState === null) {
@@ -439,6 +384,14 @@ class WorldRenderer implements WorldRendererInterface {
     this.ctx.fill();
   }
 
+  renderCellsByMapGrid(grid: SimulatorMapGrid) {
+    for (var col of grid) {
+      for (var cell of col) {
+        this.renderCell(cell);
+      }
+    }
+  }
+
   renderCell(cell: SimulatorCell) {
     if (typeof this.ctx === 'undefined' || this.storeState === null) {
       return;
@@ -448,12 +401,24 @@ class WorldRenderer implements WorldRendererInterface {
     const y = cell.row * this.gridCellSize;
     const halfCell = Math.floor(this.gridCellSize / 2);
 
-    //this.ctx.beginPath(); // only use when lifting with moveTo()
+    this.ctx.beginPath(); // only use when lifting with moveTo()
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
     this.ctx.strokeStyle = '#000000';
-    this.ctx.fillStyle = cell.state.color;
-    this.ctx.fillRect(x, y, this.gridCellSize, this.gridCellSize);
+
+    if (cell.state.name === 'food') {
+      //this.ctx.beginPath();
+      this.ctx.fillStyle = SimulatorCellStates.empty.color;
+      this.ctx.fillRect(x, y, this.gridCellSize, this.gridCellSize);
+
+      //this.ctx.beginPath();
+      this.ctx.fillStyle = cell.state.color;
+      this.ctx.arc(x + halfCell, y + halfCell, Math.floor(halfCell * 0.75), 0, 2 * Math.PI);
+      this.ctx.fill();
+    } else {
+      this.ctx.fillStyle = cell.state.color;
+      this.ctx.fillRect(x, y, this.gridCellSize, this.gridCellSize);
+    }
 
     if (this.gridCellSize >= 5) {
       this.ctx.translate(0.5, 0.5); // part 1 of 2, a fix for CSS causing blurry lines
@@ -505,14 +470,14 @@ class WorldRenderer implements WorldRendererInterface {
       this.ctx.translate(-0.5, -0.5); // part 1 of 2, a fix for CSS causing blurry lines
     }
 
-    //this.ctx.closePath(); // only use when need to draw line from end to start for stroke
+    this.ctx.closePath(); // only use when need to draw line from end to start for stroke
     /*
     // Render the eye slit?
     if (
       cell.owner_cell === null ||
       (
-        cell.owner_cell.state !== CellStates.eye //&&
-        //cell.owner_cell.state !== CellStates.mouth
+        cell.owner_cell.state !== SimulatorCellStates.eye //&&
+        //cell.owner_cell.state !== SimulatorCellStates.mouth
       )
     ) {
       return;
@@ -538,22 +503,18 @@ class WorldRenderer implements WorldRendererInterface {
     }
 
     ctx.rotate((abs_dir * 45 * Math.PI) / 180);
-    ctx.fillStyle = CellStates.eye.slit_color;
+    ctx.fillStyle = SimulatorCellStates.eye.slit_color;
     ctx.fillRect(x, y, w, h);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     */
   }
 
-  renderColorScheme(cells: SimulatorCell[][]) {
-    if (this.storeState === null) {
-      return;
+  applyColorScheme(colorScheme: ColorSchemeInterface) {
+    for (var state of SimulatorCellStates.all) {
+      state.color = colorScheme[state.name];
     }
 
-    for (var state of CellStates.all) {
-      state.color = this.storeState.world.config.color_scheme[state.name];
-    }
-
-    CellStates.eye.slit_color = this.storeState.world.config.color_scheme['eye-slit'];
+    SimulatorCellStates.eye.slit_color = colorScheme['eye-slit'];
 
     // Update any legends or editor palettes
     //for (var cell_type in this.storeState.world.config.color_scheme) {
@@ -568,11 +529,6 @@ class WorldRenderer implements WorldRendererInterface {
       );
       */
     //}
-    for (var col of cells) {
-      for (var cell of col) {
-        this.renderCell(cell);
-      }
-    }
   }
 
   public start(state: WorldManagerState) {
@@ -624,6 +580,7 @@ class WorldRenderer implements WorldRendererInterface {
       return;
     }
 
+    debugger;
     const wasRunning = this.running;
 
     this.stop();
@@ -640,11 +597,7 @@ class WorldRenderer implements WorldRendererInterface {
     this.resizeGrid();
 
     if (map !== null) {
-      for (var col of map.grid) {
-        for (var cell of col) {
-          this.renderCell(cell);
-        }
-      }
+      this.renderCellsByMapGrid(map.grid);
     }
 
     if (wasRunning) {
@@ -657,7 +610,9 @@ class WorldRenderer implements WorldRendererInterface {
       return;
     }
 
-    this.ctx.fillStyle = '#0000FF';
+    debugger;
+
+    this.ctx.fillStyle = 'rgba(255,255,255,1)'; //'#0000FF';
     this.ctx.fillRect(0, 0, this.canvasContainerWidth, this.canvasContainerHeight);
   }
 

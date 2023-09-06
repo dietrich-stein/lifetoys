@@ -1,4 +1,4 @@
-import { store, RootState } from '../../app/store';
+import { store } from '../../app/store';
 import SimulatorCellStates from '../simulator/SimulatorCellStates';
 import SimulatorNeighbors from '../simulator/SimulatorNeighbors';
 import Directions from './Directions';

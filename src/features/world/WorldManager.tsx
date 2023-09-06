@@ -61,6 +61,7 @@ export function WorldManager(props: WorldManagerProps) {
   };
 
   const handleResetSimulationClick = () => {
+    debugger; // this does do things like clear existing food
     dispatch(resetWorldRenderer({
       ...worldManagerState,
       worldRendererRunning: false,

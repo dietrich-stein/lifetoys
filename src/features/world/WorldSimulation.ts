@@ -1,4 +1,4 @@
-import { store, RootState } from '../../app/store';
+import { store } from '../../app/store';
 import CellStates from '../simulator/SimulatorCellStates';
 import SimulatorCell from '../simulator/SimulatorCell';
 import SimulatorMap from '../simulator/SimulatorMap';
@@ -25,7 +25,6 @@ class WorldSimulation {
   ticksElapsed: number;
   //
   map: SimulatorMap | null;
-  //storeState: RootState | null;
   fossilRecord: FossilRecord | null;
   fossilRecordRate: number;
   //
@@ -46,7 +45,6 @@ class WorldSimulation {
     this.ticksElapsed = 0;
     //
     this.map = null;
-    //this.storeState = null;
     this.fossilRecord = null;
     this.fossilRecordRate = 100;
     //
@@ -74,9 +72,7 @@ class WorldSimulation {
     }
   }
 
-  public init(/*storeState: RootState*/) {
-    //this.storeState = storeState;
-
+  public init() {
     this.map = new SimulatorMap(
       worldRenderer.gridCols,
       worldRenderer.gridRows,
@@ -87,7 +83,6 @@ class WorldSimulation {
 
     /*console.log(
       'WorldSimulation, init',
-      'storeState:', this.storeState,
       'fossilRecord:', this.fossilRecord,
     );*/
   }
@@ -97,7 +92,9 @@ class WorldSimulation {
       return;
     }
 
-    worldRenderer.renderColorScheme(this.map.grid);
+    worldRenderer.renderCellsByMapGrid(this.map.grid);
+
+    worldRenderer.applyColorScheme(worldManagerState.config.color_scheme);
 
     this.intervalId = setInterval(() => {
       if (!this.running) { // not needed, but let's be certain

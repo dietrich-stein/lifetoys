@@ -1,4 +1,3 @@
-import { store, RootState } from '../../app/store';
 import AnatomyCell from './AnatomyCell';
 import AnatomyCellFactory from './AnatomyCellFactory';
 import SimulatorCellStates from '../simulator/SimulatorCellStates';

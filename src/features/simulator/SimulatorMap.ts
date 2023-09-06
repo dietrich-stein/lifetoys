@@ -15,8 +15,10 @@ type SerializedSimulatorMap = {
   walls: Array<SerializedSimulatorCell>;
 };
 
+export type SimulatorMapGrid = SimulatorCell[][]; // Array<Array<SimulatorCell>>
+
 interface SimulatorMapInterface {
-  grid: Array<Array<SimulatorCell>>;
+  grid: SimulatorMapGrid;
   cols: number;
   rows: number;
   changeCellStateAt(col: number, row: number, state: SimulatorCellState, anatomyCellId: string): void;
@@ -33,7 +35,7 @@ interface SimulatorMapInterface {
 }
 
 class SimulatorMap implements SimulatorMapInterface {
-  grid: Array<Array<SimulatorCell>>;
+  grid: SimulatorMapGrid;
   cols: number;
   rows: number;
 
